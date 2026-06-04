@@ -1,0 +1,24 @@
+# Digital Rock 6주 코스 — 학생용 통합 패키지 요구사항
+# 모든 학생 (1조 + 2조) 공통
+
+# === 기본 (W1, W2, W4 평가, W6) — CPU만으로 충분 ===
+numpy>=1.21
+matplotlib>=3.5
+scipy>=1.10
+jupyter>=1.0
+notebook>=6.5
+Pillow>=9.5
+scikit-image>=0.20      # W4 형태 메트릭 (porosity, surface area)
+
+# === 딥러닝 (W3 학습, W4 손실, W5 inference) — CPU 또는 GPU ===
+torch>=2.0.0            # CPU 버전도 충분. GPU 있으면 자동 활용.
+torchvision>=0.15
+pytorch-msssim>=1.0     # SSIM 손실 (W4)
+
+# === 유틸리티 ===
+tqdm>=4.65              # 진행 표시줄
+pandas>=2.0             # 결과 표 정리 (W6)
+ipywidgets>=8.0         # 인터랙티브 슬라이더 (1조용 파라미터 sweep)
+
+# === 선택 (있으면 좋음) ===
+# tifffile>=2023.4      # TIFF 저장/로드가 필요할 때만

@@ -1,0 +1,59 @@
+# ─── Claude design 의뢰용 (repo에 들어가지 않음) ────────────
+_for_claude_design/
+digital_rock_design_brief.zip
+*.zip
+
+# ─── Python ─────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ─── Jupyter ────────────────────────────────────────────────
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+**/_test*.ipynb
+**/_t.ipynb
+
+# ─── 가상환경 ───────────────────────────────────────────────
+.venv/
+venv/
+env/
+.env
+.env.local
+
+# ─── 큰 데이터 / 모델 (혹시 실수로 add 방지) ────────────────
+*.pth
+*.ckpt
+*.h5
+# 본 코스용 .bin 데이터는 작아서 commit OK (16MB sub-volume).
+# 1000³ 원본 등 큰 파일을 실수로 add 하면 reject 되도록:
+# (git LFS 도입 시 이 줄을 풀고 별도 관리)
+# *.bin
+
+# ─── Web 프로젝트 (Claude 디자인 결과물이 들어오면) ─────────
+node_modules/
+.next/
+.vercel/
+.svelte-kit/
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# ─── IDE / OS ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── 사용자 reference PPT (저작권/개인용) ────────────────────
+테마연구회 수업자료_*.pptx
+EMP 시뮬레이션_*.pptx
+Micro-CT interpolation_*.pptx
