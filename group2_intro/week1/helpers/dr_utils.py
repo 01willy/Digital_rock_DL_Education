@@ -28,7 +28,7 @@ def setup_plot_style():
     import os
     import matplotlib.font_manager as fm
 
-    font_search_dirs = ['/home/willy010313/.fonts', '/usr/share/fonts',
+    font_search_dirs = [os.path.expanduser('~/.fonts'), '/usr/share/fonts',
                         os.path.expanduser('~/Library/Fonts'), 'C:\\Windows\\Fonts']
     candidates = ['Pretendard', 'NanumGothic', 'AppleGothic', 'Malgun Gothic']
     chosen = 'sans-serif'
