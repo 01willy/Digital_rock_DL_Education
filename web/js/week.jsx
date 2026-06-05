@@ -117,8 +117,8 @@ function WeekFull({ w, group, onGroup, onNav }) {
   const C = window.COURSE;
   const gd = C.w1.groups[group];
   const grp = C.groups[group];
-  const repo = 'https://github.com/01willy/Digital_rock_DL_Education';
-  const base = `${repo}/tree/main/${group === 'g1' ? 'group1_advanced' : 'group2_intro'}/week1`;
+  // 자료는 같은 도메인의 /downloads/ 정적 경로에 호스팅 (GitHub 노출 X)
+  const dl = `downloads/w1/${group}`;
 
   return (
     <div className="page page-wide">
@@ -151,14 +151,19 @@ function WeekFull({ w, group, onGroup, onNav }) {
       {/* resources */}
       <section style={{ marginTop: 36 }}>
         <div className="res-grid">
-          <ResourceCard icon="slides" kind="강의 슬라이드" name={`W1_${group === 'g1' ? 'group1' : 'group2'}.pptx`}
-            meta={`${gd.slides}장 · PPTX`} href={group === 'g1' ? 'W1_deck.html' : 'W1_deck_group2.html'} primary />
-          <ResourceCard icon="notebook" kind="실습 노트북" name={gd.notebook}
-            meta={`${gd.cells} 셀 · ${gd.tryits} Try-it!`} href={`${base}/notebooks`} />
-          <ResourceCard icon="terminal" kind="유틸리티" name="dr_utils.py"
-            meta="8개 함수 · 인자 가이드 ↓" href={`${base}/helpers`} />
-          <ResourceCard icon="book" kind="핸드아웃" name="W1_handout.md"
-            meta="자기 점검 · 탐구 과제" href={`${base}/handout`} />
+          <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name={`W1_${group === 'g1' ? 'group1' : 'group2'} deck`}
+            meta={`${gd.slides}장 · 웹에서 바로 보기`} href={group === 'g1' ? 'W1_deck.html' : 'W1_deck_group2.html'} primary />
+          <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name={gd.notebook}
+            meta={`${gd.cells} 셀 · 클릭 시 .ipynb 다운로드`} href={`${dl}/W1_load_and_explore.ipynb`} />
+          <ResourceCard icon="terminal" kind="유틸리티 (다운로드)" name="dr_utils.py"
+            meta="8개 함수 · 클릭 시 .py 다운로드" href={`${dl}/dr_utils.py`} />
+          <ResourceCard icon="book" kind="핸드아웃 (다운로드)" name="W1_handout.md"
+            meta="자기 점검 · 탐구 과제" href={`${dl}/W1_handout.md`} />
+        </div>
+        <div className="ctl-hint" style={{ marginTop: 14 }}>
+          모두 한 번에 받기 — <a href={`downloads/w1/w1_${group}_code.zip`}>w1_{group}_code.zip</a>
+          {' · '}
+          데이터 (.bin 256³) — <a href={`downloads/data_w1_${group}.zip`}>data_w1_{group}.zip</a>
         </div>
       </section>
 

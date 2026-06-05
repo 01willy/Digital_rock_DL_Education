@@ -141,7 +141,7 @@ function SiteFooter() {
           </div>
         </div>
         <div className="muted font-mono" style={{ fontSize:11.5 }}>
-          repo: Digital_rock_DL_Education · deployed on Vercel / GitHub Pages
+          학생 학습용 · 자료 다운로드는 각 주차 페이지에서
         </div>
       </div>
     </footer>

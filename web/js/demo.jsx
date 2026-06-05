@@ -45,7 +45,7 @@ function DemoPage({ group }) {
     <div className="page page-wide">
       <SectionHead eyebrow="HANDS-ON DEMO"
         title="Sparse 측정 & 선형 보간 플레이그라운드"
-        sub="합성 256³-축소 공극 부피로, sparse 간격 k·측정 축·이진화 임계값을 바꾸면 복원 결과와 공극률 오차 |Δφ|가 어떻게 변하는지 실시간으로 확인합니다." />
+        sub="하나의 합성 64³ 공극 부피를 ground truth로 고정하고, 그 위에서 sparse 간격 k·측정 축·이진화 임계값만 바꿔 보간 정확도를 비교합니다. 실제 micro-CT는 매번 다른 측정 데이터를 얻지만, 본 데모는 변수 통제를 통한 직관 형성이 목적입니다." />
 
       <div className="demo-grid">
         {/* LEFT: controls + pattern + stats */}
@@ -160,30 +160,32 @@ function DemoPage({ group }) {
           {/* error curve */}
           <div className="card card-pad" style={{ marginTop: 16 }}>
             <div className="row between center" style={{ marginBottom: 10 }}>
-              <div className="eyebrow muted">k vs |Δφ| · {AX[axis].k}축</div>
-              <span className="muted" style={{ fontSize: 12 }}>현재 <b className="font-mono" style={{ color: 'var(--orange-600)' }}>k={k}</b></span>
+              <div className="eyebrow muted">동일 부피 / k 1–10 시뮬레이션 · {AX[axis].k}축</div>
+              <span className="muted" style={{ fontSize: 12 }}>현재 <b className="font-mono" style={{ color: 'var(--orange-600)' }}>k={k} · |Δφ|={(recon.absDphi*100).toFixed(2)}%p</b></span>
             </div>
             <ErrorCurve curve={curve} k={k} onPick={setK} />
             <div className="ctl-hint" style={{ marginTop: 10 }}>
-              오차가 급격히 커지기 시작하는 k가 <b>실용 한계 k</b> — 이 지점부터 선형 보간만으로는 부족하고 <b style={{ color: 'var(--orange-600)' }}>딥러닝</b>이 필요해집니다.
+              x축 = sparse 간격 k · y축 = 같은 부피를 k 간격으로 sampling 후 선형 보간했을 때의 |Δφ|.
+              <br/>곡선은 한 번 계산되어 정적이지만, <b>k 슬라이더로 좌측 4-up 슬라이스 비교는 매번 다시 계산</b>됩니다.
+              곡선이 급격히 꺾이는 k가 선형 보간의 실용 한계로, 그 이후로는 더 정교한 방법(deep learning)이 필요해집니다.
             </div>
           </div>
         </div>
       </div>
 
-      {/* insight callouts */}
+      {/* insight callouts — open-ended exploration */}
       <div className="insight-grid">
         <div className="insight">
           <div className="ins-icon"><Icon name="target" size={18} /></div>
-          <div><b>Try-it ③ · k를 키워보기</b><p>k를 1→10으로 올리면 측정량은 줄지만 |Δφ|는 어디서부터 급증하나요?</p></div>
+          <div><b>탐구 · 측정량과 정확도의 관계</b><p>k를 1에서 10까지 움직이며 측정 슬라이스 수와 |Δφ| 변화를 관찰하세요. 선형 보간의 한계가 어디서 드러나는지, 그 한계가 실제 sparse imaging 연구의 어떤 문제와 닿는지 본인 언어로 정리해보세요.</p></div>
         </div>
         <div className="insight">
           <div className="ins-icon"><Icon name="layers" size={18} /></div>
-          <div><b>탐구 · 축별 비교</b><p>z·y·x 축을 바꿔도 |Δφ|가 비슷한가요? 본 부피의 등방성을 확인하세요.</p></div>
+          <div><b>탐구 · 축별 비교와 등방성</b><p>z·y·x 축을 바꾸며 |Δφ| 추이를 비교하세요. 본 합성 부피의 등방성 가정이 어느 축에서 약해지는지 — 그리고 실제 micro-CT 데이터에서 이 가정이 깨지면 어떤 분석 전략이 필요할지 토론거리로.</p></div>
         </div>
         <div className="insight">
           <div className="ins-icon"><Icon name="sliders" size={18} /></div>
-          <div><b>탐구 · 임계값 sensitivity</b><p>thr를 0.3↔0.7로 바꾸면 복원 공극률이 어떻게 움직이나요? |Δφ|=0이 곧 정확한 복원일까요?</p></div>
+          <div><b>탐구 · 임계값과 평가 metric</b><p>임계값을 0.3↔0.7로 sweep하면 복원 공극률이 단조 변화합니다. |Δφ|를 임의로 0에 가깝게 만들 수 있다면 그것을 \"좋은 복원\"이라 부를 수 있을까요? 다른 metric이 왜 필요한가요?</p></div>
         </div>
       </div>
     </div>
