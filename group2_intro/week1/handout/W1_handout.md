@@ -1,18 +1,17 @@
-# Week 1 Handout — 2조 (Intro)
+# Week 1 Handout — 2조 Intro (재정비판 2026-06-05)
 
-> **Digital Rock — Sparse Slice Interpolation 6주 코스 · 1주차**
-> 학생용 배포자료 — 노트북 옆에 띄워두고 함께 진행하세요.
+> **Digital Rock 6주 코스 · 1주차 — 데이터 탐색 + Classical Baseline 통합판**
+> 구 W1 + W2 합쳐서 W1으로. 이제 W2는 \"Deep Learning 입문\" 부터 시작합니다.
 
 ---
 
-## 0. 시작 전 체크리스트
+## 0. 체크리스트
 
-- [ ] `COMMON/environment_setup_guide.md` 의 설치 가이드 완료
-- [ ] 가상환경 `rock` 활성화 (`conda activate rock`)
-- [ ] `group2_intro/week1/` 폴더 전체 (data 포함 ~32 MB) 확보
-- [ ] 동작 확인: `python3 -c "import numpy, matplotlib; print('OK')"`
+- [ ] `COMMON/environment_setup_guide.md` 설치 완료
+- [ ] 가상환경 `rock` 활성화
+- [ ] `pip install scipy scikit-image` (W1 추가)
+- [ ] data 폴더에 3개 .bin 파일 (BB, CastleGate, Parker)
 
-실행:
 ```bash
 cd group2_intro/week1/notebooks/
 jupyter notebook W1_load_and_explore.ipynb
@@ -20,128 +19,123 @@ jupyter notebook W1_load_and_explore.ipynb
 
 ---
 
-## 1. 학습 흐름 (권장 90분 세션)
+## 1. 학습 흐름 (90분)
 
-| 시간 | 활동 | 자료 |
-|------|------|------|
-| 0~30분 | 강의 + 개념 (천천히) | `slides/W1_group2.pptx` 슬라이드 1~12 |
-| 30~65분 | 노트북 실행 + [Try-it!] 박스 실험 | `notebooks/W1_load_and_explore.ipynb` |
-| 65~80분 | 슬라이드 13~21 강의 + 노트북 후반 | (sparse + 보간) |
-| 80~88분 | 자기 점검 + 탐구 과제 시작 | 본 handout 4번 |
-| 88~90분 | Q&A + W2 예고 | 슬라이드 22 |
-
----
-
-## 2. 핵심 용어 사전 (꼭 외워두세요)
-
-| 용어 | 정의 | 예시 |
-|------|------|------|
-| **Voxel** | 3D 픽셀. 한 voxel = 한 작은 정육면체 | `volume[z, y, x]` 한 칸 |
-| **Pixel** | 2D 픽셀 | `image[y, x]` 한 칸 |
-| **Slice** | 3D 부피를 한 평면으로 자른 2D 이미지 | `volume[100, :, :]` |
-| **Porosity (φ)** | 전체 voxel 중 공극(빈 공간)이 차지하는 비율 | 0.22 = 22% |
-| **Pore / Solid** | 공극(빈 공간) / 고체(암석) | 본 데이터: 1 / 0 |
-| **Micro-CT** | 마이크로미터 해상도의 컴퓨터 단층촬영 | 본 데이터의 출처 |
-| **Slab** | 부피를 한 방향으로 자른 두꺼운 덩어리 | z축 8슬랩 = 각 두께 32 |
-| **Sparse imaging** | 일부 슬라이스만 측정하는 전략 | k=3 → 3장 중 1장 |
-| **k (sparse 간격)** | 슬라이스 측정 간격 | k=5 → 5장 중 1장 |
-| **Interpolation** | 누락 슬라이스를 측정된 슬라이스로부터 복원 | "linear", "cubic" 등 |
-| **Tri-axis aggregation** | 세 방향(z/y/x) 보간 결과를 통합 | W5에서 자세히 |
+| 시간 | 활동 |
+|------|------|
+| 0~25분 | 강의 개념 + 데이터·전처리 |
+| 25~55분 | 노트북 §0~§4 (로드·정규화·Otsu·시각화) + [Try-it! ①~②] |
+| 55~75분 | 노트북 §5~§7 (Sparse·B1·B2·도메인 sweep) + [Try-it! ③~④] |
+| 75~85분 | 자기 점검 + 탐구 과제 시작 |
+| 85~90분 | Q&A + W2 예고 |
 
 ---
 
-## 3. 노트북 [Try-it!] 박스 정리
+## 2. 핵심 용어 사전
 
-본 노트북에는 다음 4개 [Try-it!] 박스가 있습니다. **모두 직접 수행** 해주세요:
+| 용어 | 정의 |
+|------|------|
+| **Voxel** | 3D pixel. `vol[z,y,x]` 의 한 칸 |
+| **Slice** | 3D 부피를 한 평면으로 자른 2D 이미지 |
+| **Porosity (φ)** | 공극(pore)의 비율. 본 데이터 평균 = mean |
+| **Normalization** | uint8 → float [0,1] 변환. DL 학습 안정성 |
+| **Otsu threshold** | 자동 임계값 알고리즘 — \"두 봉우리 사이 골짜기 찾기\" |
+| **B1, B2** | Baseline. B1=Linear, B2=Cubic spline |
+| **\|Δφ\|** | 공극률 오차 \|복원 − 원본\| |
+| **\|ΔSA\|** | 표면적 오차 (per Mvoxel) |
+| **SSIM** | 구조 유사도. 0~1, 1=완벽 |
+| **Sparse k** | k=3 → 3장 중 1장만 측정 |
+| **Tri-axis aggregation** | (W5) 세 방향 보간 결과 통합 |
 
-| # | 위치 (함수) | 무엇을 바꾸나 | 어떤 차이를 관찰하나 |
-|---|------|------|------|
-| ① | `show_slice` | axis, idx, cmap | 방향/위치/색상에 따른 보기 차이 |
-| ② | `porosity_profile` | n_slabs, axis | 슬랩 수와 축 변화의 효과 |
-| ③ | `k_values` 리스트 | k 값 | 측정 슬라이스 수와 시간 절감 |
-| ④ | `linear_interpolate_slice` | z_before, z_after 간격 | 간격이 클수록 흐려짐 |
+---
+
+## 3. 노트북 [Try-it!] 정리
+
+| # | 함수 | 변수 | 관찰 포인트 |
+|---|------|------|-------------|
+| ① | `otsu_threshold` (인공 grayscale) | noise σ ∈ {0.05, 0.2, 0.4} | 노이즈 클수록 Otsu가 어디서 망가지나 |
+| ② | `porosity_profile` | n_slabs, axis | 슬랩 수와 축의 효과 |
+| ③ | `reconstruct_sparse_linear/cubic` | k ∈ {3,5,7} | 두 baseline 차이 |
+| ④ | `linear_interpolate_slice` (탐구과제) | 두 슬라이스 간격 | 간격 클수록 흐려짐 |
 
 ---
 
 ## 4. 탐구 과제 (W2 시작 전까지)
 
-### 과제 1 — [Try-it!] 4종 수행 (필수)
+### 과제 1 — 9개 조합 baseline 표 (필수)
 
-본 노트북의 [Try-it! ①~④] 박스를 모두 직접 수행하고, **각각에 대해 한 문장씩** 관찰 결과를 적어보세요.
+3 도메인 × {B1, B2} × k ∈ {2, 3, 5} = 9 조합 + 빈 칸:
 
-**예시 답안 (참고용)**:
-> [Try-it! ①] cmap='viridis' 가 'gray' 보다 pore가 더 또렷하게 보였다.
+| 도메인 | k | B1 \|Δφ\| | B1 SSIM | B2 \|Δφ\| | B2 SSIM |
+|---|---|---|---|---|---|
+| BB | 2 | | | | |
+| BB | 3 | | | | |
+| BB | 5 | | | | |
+| CastleGate | 2 | | | | |
+| CastleGate | 3 | | | | |
+| CastleGate | 5 | | | | |
+| Parker | 2 | | | | |
+| Parker | 3 | | | | |
+| Parker | 5 | | | | |
 
-| # | 본인의 관찰 (한 문장) |
-|---|----------------------|
-| ① | |
-| ② | |
-| ③ | |
-| ④ | |
+**보고**:
+- 어느 조합이 가장 정확한가? (= 가장 작은 |Δφ| + 가장 큰 SSIM)
+- B2가 B1보다 항상 좋은가, 아니면 경우에 따라 다른가?
 
-### 과제 2 — 두 도메인 슬랩 비교 (필수)
+### 과제 2 — Otsu noise sweep (필수)
 
-BB와 CastleGate 두 도메인에 대해 `porosity_profile(vol, axis=0, n_slabs=16)` 를 각각 실행하고, **두 곡선을 한 plot에 겹쳐** 그려보세요.
+[Try-it! ①] 의 노이즈 σ ∈ {0.05, 0.1, 0.2, 0.3, 0.5} 로 sweep.
+각 σ에서 Otsu binarize 결과의 공극률 φ을 측정하여 한 plot에 plot.
 
-**보고할 내용:**
-- 두 사암 중 어느 쪽이 더 \"균일한 부피\"를 가지는가? (= 곡선이 더 평평한 쪽)
-- std (표준편차) 가 더 작은 쪽이 \"균일\" 하다고 볼 수 있습니다. 직접 계산해 비교하세요.
+**보고**:
+- σ가 클수록 φ가 어떻게 변하나? (높아지나 / 낮아지나 / 임의?)
+- Otsu가 \"신뢰할 수 없게 되는\" 노이즈 수준은 대략?
 
-코드 힌트:
-```python
-prof_bb = porosity_profile(bb, axis=0, n_slabs=16)
-prof_cg = porosity_profile(cg, axis=0, n_slabs=16)
-print(f'BB std={prof_bb.std():.4f}, CastleGate std={prof_cg.std():.4f}')
-```
+### 과제 3 — 세 축 sparse 비교 (선택)
 
-### 과제 3 — α와 공극률 관계 (선택)
+`reconstruct_sparse_linear(bb, k=3, axis=0)` 의 `axis` 인자를 0, 1, 2로 바꿔서 세 축 sparse 보간 결과의 |Δφ| 비교.
 
-`linear_interpolate_slice` 의 α 를 `np.linspace(0, 1, 11)` 로 sweep 하면서, 각 α에서 \"보간 결과의 공극률\" 을 계산해보세요.
+**보고**:
+- 세 결과가 \"거의 같은가\"? 다르다면 어느 축이 가장 어려운가?
+- 본 연구의 \"세 방향 통합\" 이 합리적인 이유를 자신의 말로.
 
-**보고할 내용:**
-- α와 공극률의 관계는 어떤 형태인가요? (직선? 곡선? 단조 증가/감소?)
-- α=0.5 일 때 공극률은 \"앞과 뒤 슬라이스의 공극률 평균\" 과 같은가요? 다른가요?
+### 과제 4 — 슬라이스 간격에 따른 \"흐려짐\" (선택, 도전)
 
-### 과제 4 — 세 축 sparse 비교 (선택, 도전)
+`linear_interpolate_slice(bb[a], bb[b], 0.5)` 에서 두 슬라이스 간격 `b-a` ∈ {1, 3, 7, 15, 30} 으로 sweep. 5장의 α=0.5 결과를 한 줄로 시각화.
 
-`make_sparse` 의 `axis` 인자를 0(z), 1(y), 2(x) 로 바꿔보세요. 같은 k=3이라도 어느 축으로 자르는지에 따라 \"측정 슬라이스 패턴\" 이 달라집니다.
-
-**할 일**: 세 축 각각 k=3 으로 sparse 시뮬레이션을 한 뒤, **시각화 (각 축 첫 3장의 측정 슬라이스)** 를 비교하세요.
-
-**보고할 내용:**
-- 세 축의 시각화가 비슷한가요, 다른가요?
-- 만약 부피가 완벽히 등방성이라면 결과가 \"통계적으로 같아야\" 합니다. 본 데이터는 어떤가요?
+**보고**:
+- 간격이 클수록 \"흐려짐\" 이 어떻게 보이나? (구조? 경계? 공극 크기?)
+- 이 흐려짐이 본 연구가 \"deep learning\" 으로 해결하려는 핵심 문제와 어떤 관계?
 
 ---
 
-## 5. 자기 점검 (handout에 직접 답 적어보기)
+## 5. 자기 점검
 
-**Q1.** Voxel과 pixel의 차이를 한 문장으로 답하세요.
+**Q1.** 본 데이터의 \"1\"은 무엇? \"0\"은?
 ```
 
 
 ```
 
-**Q2.** 본 데이터에서 \"1\" 은 무엇을 의미하나요? \"0\" 은?
+**Q2.** `normalize_to_float` 가 deep learning에 필요한 이유를 한 문장으로.
 ```
 
 
 ```
 
-**Q3.** 공극률을 numpy 한 줄로 어떻게 계산하나요? 왜 그것이 가능한가요?
+**Q3.** k=5 시간 절감률 + BB의 B1·B2 |Δφ|.
 ```
 
 
 ```
 
-**Q4.** k=3 sparse imaging에서 시간이 얼마나 절약되나요? 수식과 함께.
+**Q4.** \"단순 평균 보간\" 의 단점 + 왜 deep learning이 필요한가.
 ```
 
 
 ```
 
-**Q5.** 단순 평균 보간(linear interpolation) 의 단점은 무엇이라 생각하나요?
-이 단점을 해결하기 위해 deep learning이 어떻게 도움이 될 수 있을지 자신의 생각을 적어보세요.
+**Q5.** 세 축 슬라이스 패턴이 비슷한 것이 본 연구 어떤 가정과 연결?
 ```
 
 
@@ -149,18 +143,10 @@ print(f'BB std={prof_bb.std():.4f}, CastleGate std={prof_cg.std():.4f}')
 
 ---
 
-## 6. 다음 주 (W2) 예고
+## 6. W2 (Deep Learning 입문) 진입 전
 
-**주제: Classical Baseline — scipy 보간**
-
-- scipy의 보간 함수 사용법 (`scipy.interpolate`)
-- 선형 / Cubic 보간을 정식으로 구현
-- 복원 후 공극률 오차 |Δφ| 직접 측정
-- 본 연구의 B1, B2, B3 baseline 만들기
-
-**W2 진입 전 준비:**
-- `pip install scipy` 확인
-- W1 자기 점검 Q1~Q5 답안 준비
+- `pip install torch torchvision pytorch-msssim` (CPU 버전 OK)
+- W1 baseline 결과 (특히 BB k=5에서의 |Δφ|·SSIM) 메모
 
 ---
 
@@ -168,12 +154,11 @@ print(f'BB std={prof_bb.std():.4f}, CastleGate std={prof_cg.std():.4f}')
 
 | 증상 | 해결 |
 |------|------|
-| `FileNotFoundError: BB_256.bin` | notebook 실행 위치가 `notebooks/` 안인지 확인 |
-| `ValueError: 파일 크기 불일치` | `load_volume` 의 shape/dtype 인자 확인 |
-| `ModuleNotFoundError: dr_utils` | 첫 셀의 `sys.path.insert(0, ...)` 실행 여부 확인 |
-| matplotlib 한글 깨짐 | 첫 셀 `setup_plot_style()` 실행 — 자동으로 Pretendard 등록 |
-| 그래프가 안 보임 | 첫 셀 위에 `%matplotlib inline` 한 줄 추가 |
+| `scipy not found` | `pip install scipy` |
+| Cubic spline 계산 느림 | 정상. 30초 정도 소요 |
+| matplotlib 한글 깨짐 | 첫 셀 `setup_plot_style()` 호출 확인 |
+| `FileNotFoundError: Parker_256.bin` | data/ 폴더에 있는지 확인 |
 
 ---
 
-*W1 handout · 2조 Intro · 2026-06-02*
+*W1 handout · 2조 Intro · 2026-06-05 (재정비판)*

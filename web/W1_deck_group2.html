@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>W1 · 데이터 탐색 & 문제 정의 (2조 · Core) — Digital Rock</title>
+<link rel="stylesheet" href="deck/deck.css" />
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+  <!-- ============ 1 · COVER ============ -->
+  <section class="cover" data-label="Cover">
+    <div class="cover-grid">
+      <div class="cover-l">
+        <div class="mark">
+          <svg width="46" height="46" viewBox="0 0 40 40"><path d="M6 30.8 L20 24.8 L34 30.8 L20 36.8 Z" fill="#EA851B"/><path d="M6 22.4 L20 16.4 L34 22.4 L20 28.4 Z" fill="#C9CCD2"/><path d="M6 14 L20 8 L34 14 L20 20 Z" fill="#C9CCD2"/><path d="M6 5.6 L20 -0.4 L34 5.6 L20 11.6 Z" fill="#1F3A5F"/></svg>
+          <div><div class="m-name">Digital Rock</div><div class="m-sub">Sparse Slice Interpolation</div></div>
+        </div>
+        <div style="margin-top:54px;display:flex;gap:12px"><span class="chip orange"><span class="dot"></span>WEEK 01 · 90분 세션</span><span class="chip navy"><span class="dot"></span>2조 · Core 트랙</span></div>
+        <h1 class="cover-title anim">데이터 탐색 &<br/><span class="ac">문제 정의</span></h1>
+        <p class="ko-en anim d1" style="font-size:28px;margin-top:24px">Load &amp; Explore — Micro-CT 부피, 공극률, sparse, 선형 보간 베이스라인</p>
+        <div class="cover-meta anim d2">
+          <div><div class="m-n">256³</div><div class="m-l">voxel 부피</div></div>
+          <div><div class="m-n">20</div><div class="m-l">노트북 셀</div></div>
+          <div><div class="m-n">4</div><div class="m-l">[Try-it!] 박스</div></div>
+          <div><div class="m-n">non-DL</div><div class="m-l">베이스라인 주차</div></div>
+        </div>
+      </div>
+      <div class="cover-r">
+        <div class="cover-strip">
+          <div class="cs"><img src="assets/slices/BB_raw.png" alt=""><div class="cover-cap">BB · raw</div></div>
+          <div class="cs"><img src="assets/slices/CastleGate_bin.png" alt=""><div class="cover-cap">CastleGate · binarized</div></div>
+          <div class="cs"><img src="assets/slices/Bentheimer_raw.png" alt=""><div class="cover-cap">Bentheimer · raw</div></div>
+        </div>
+        <div class="cover-fade"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 · ROADMAP ============ -->
+  <section data-label="Roadmap">
+    <div class="s-pad">
+      <div class="eyebrow">6-WEEK COURSE</div>
+      <h2 class="s-title sm">오늘은 6주 여정의 첫걸음</h2>
+      <p class="s-sub">non-DL 베이스라인으로 문제를 충분히 이해한 뒤, 딥러닝으로 넘어갑니다.</p>
+      <div class="body vcenter">
+        <div class="mroad">
+          <div class="mr-c now"><div class="mr-n">W1</div><div class="mr-t">데이터 탐색</div><div class="mr-e">Load &amp; Explore</div></div>
+          <div class="mr-c"><div class="mr-n">W2</div><div class="mr-t">Classical Baseline</div><div class="mr-e">scipy</div></div>
+          <div class="mr-c"><div class="mr-n">W3</div><div class="mr-t">DL 입문</div><div class="mr-e">UNet · pix2pix</div></div>
+          <div class="mr-c"><div class="mr-n">W4</div><div class="mr-t">Multi-Domain</div><div class="mr-e">증강 · HPO</div></div>
+          <div class="mr-c"><div class="mr-n">W5</div><div class="mr-t">Tri-Axis</div><div class="mr-e">2.5-D fusion</div></div>
+          <div class="mr-c"><div class="mr-n">W6</div><div class="mr-t">Physics-Informed</div><div class="mr-e">평가 · 마무리</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>02</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 3 · BIG QUESTION ============ -->
+  <section class="divider dark" data-label="문제 제기">
+    <div class="s-pad">
+      <div class="div-kick">The Problem</div>
+      <h2 class="div-title">Micro-CT는 느립니다.<br/>모든 슬라이스를 다 찍어야 할까요?</h2>
+      <p class="div-sub">고해상도 + 좁은 슬라이스 간격을 동시에 만족하려면 촬영 시간이 급격히 늘어납니다.
+        오늘은 <b style="color:#F6C994">일부만 측정하고 나머지를 복원</b>하는 아이디어를 직접 확인합니다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>03</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 4 · OBJECTIVES ============ -->
+  <section data-label="학습 목표">
+    <div class="s-pad">
+      <div class="eyebrow">TODAY'S GOALS</div>
+      <h2 class="s-title sm">W1이 끝나면 할 수 있는 것</h2>
+      <div class="body vcenter">
+        <div class="two" style="gap:48px">
+          <div class="blist">
+            <div class="bitem anim"><div class="bi-ic navy">1</div><div><div class="bi-t">Voxel 부피를 직접 열고 본다</div><div class="bi-d">binary 파일을 256³ 배열로 로드하고 세 축으로 슬라이스</div></div></div>
+            <div class="bitem anim d1"><div class="bi-ic navy">2</div><div><div class="bi-t">공극률 φ를 계산한다</div><div class="bi-d">numpy 한 줄로 φ를 구하고 도메인별로 비교</div></div></div>
+          </div>
+          <div class="blist">
+            <div class="bitem anim d2"><div class="bi-ic">3</div><div><div class="bi-t">Sparse 측정을 시뮬레이션한다</div><div class="bi-d">간격 k로 일부만 측정 → 시간 절감과 trade-off 관찰</div></div></div>
+            <div class="bitem anim d3"><div class="bi-ic">4</div><div><div class="bi-t">선형 보간으로 복원하고 평가한다</div><div class="bi-d">B1 베이스라인을 만들고 |Δφ|로 한계를 측정</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>04</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 5 · SECTION 01 ============ -->
+  <section class="divider dark" data-label="§1 데이터 이해">
+    <div class="div-num">01</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 01</div>
+      <h2 class="div-title">데이터 이해하기</h2>
+      <p class="div-sub">Voxel · Slice · Porosity — 우리가 다루는 3D 암석 데이터의 기본기.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>05</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 6 · VOXEL ============ -->
+  <section data-label="Voxel">
+    <div class="s-pad">
+      <div class="eyebrow">CONCEPT</div>
+      <h2 class="s-title sm">Voxel — 3D의 픽셀</h2>
+      <p class="ko-en">volume[z, y, x] 의 한 칸 = 작은 정육면체 하나</p>
+      <div class="body vcenter">
+        <div class="two r-wide">
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic navy">▦</div><div><div class="bi-t">Pixel → Voxel</div><div class="bi-d">2D image[y,x] 가 3D로 확장된 것. 부피의 최소 단위.</div></div></div>
+            <div class="bitem"><div class="bi-ic navy">⬚</div><div><div class="bi-t">본 데이터: 256 × 256 × 256</div><div class="bi-d">= 약 1,677만 voxel. dtype=uint8, 값은 0 또는 1.</div></div></div>
+            <div class="bitem"><div class="bi-ic">1/0</div><div><div class="bi-t">1 = pore(공극) · 0 = solid(암석)</div><div class="bi-d">이 단순한 이진값이 공극률 계산을 한 줄로 만들어 줍니다.</div></div></div>
+          </div>
+          <div class="fig"><img src="assets/slices/BB_bin.png" alt=""><div class="fig-tag">binarized</div><div class="fig-cap">BB · 한 슬라이스의 pore/solid</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>06</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 7 · THREE AXIS ============ -->
+  <section data-label="세 축 슬라이스">
+    <div class="gmark"><span class="g">1조 · z/y/x</span><span class="g on2">2조 · 1개 축부터</span></div>
+    <div class="s-pad">
+      <div class="eyebrow">show_three_axis()</div>
+      <h2 class="s-title sm">한 부피, 세 방향의 슬라이스</h2>
+      <p class="s-sub">같은 256³ 부피를 z·y·x 세 평면으로 잘라 봅니다. 가장자리와 중앙, 축에 따라 다르게 보입니다.</p>
+      <div class="body">
+        <div class="dom-row">
+          <div class="dom-c"><div class="fig"><img src="assets/slices/BB_raw.png" alt=""><div class="fig-tag" style="background:#1F3A5F">z 축</div></div><div class="dom-meta"><div class="dom-name">volume[z, :, :]</div><div class="dom-note">깊이 방향 단면</div></div></div>
+          <div class="dom-c"><div class="fig"><img src="assets/slices/BB_raw.png" alt="" style="object-position:30% 70%"><div class="fig-tag" style="background:#1F3A5F">y 축</div></div><div class="dom-meta"><div class="dom-name">volume[:, y, :]</div><div class="dom-note">세로 방향 단면</div></div></div>
+          <div class="dom-c"><div class="fig"><img src="assets/slices/BB_raw.png" alt="" style="object-position:70% 30%"><div class="fig-tag" style="background:#1F3A5F">x 축</div></div><div class="dom-meta"><div class="dom-name">volume[:, :, x]</div><div class="dom-note">가로 방향 단면</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>07</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 8 · POROSITY ============ -->
+  <section data-label="Porosity">
+    <div class="s-pad">
+      <div class="eyebrow">POROSITY φ</div>
+      <h2 class="s-title sm">공극률 — 빈 공간의 비율</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div style="font-size:26px;color:var(--ink-2);line-height:1.6;margin-bottom:34px">전체 voxel 중 <b style="color:var(--ink)">pore(1)</b>가 차지하는 비율.
+              값이 0/1뿐이므로 <b style="color:var(--orange-600)">평균(mean)이 곧 φ</b>가 됩니다.</div>
+            <div class="code"><span class="cm"># 공극률 = pore voxel 수 / 전체</span><br/>phi = binary_volume.<span class="or">mean</span>()  <span class="cm"># 0 ~ 1</span></div>
+            <div style="display:flex;gap:60px;margin-top:44px">
+              <div><div class="bignum" style="font-size:64px">0.22</div><div style="font-size:20px;color:var(--ink-3);margin-top:6px">= 22% 가 빈 공간</div></div>
+              <div><div class="bignum" style="font-size:64px;color:var(--orange-600)">1 줄</div><div style="font-size:20px;color:var(--ink-3);margin-top:6px">numpy로 계산 끝</div></div>
+            </div>
+          </div>
+          <div class="fig"><img src="assets/slices/Bentheimer_bin.png" alt=""><div class="fig-cap">흰색 비율 ≈ 공극률</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>08</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 9 · DOMAINS ============ -->
+  <section data-label="도메인 셋">
+    <div class="s-pad">
+      <div class="eyebrow">DATASET · MICRO-CT</div>
+      <h2 class="s-title sm">세 개의 사암 도메인</h2>
+      <p class="s-sub">같은 코드, 다른 암석. 공극률과 구조가 다르면 sparse 보간 난이도도 달라집니다.</p>
+      <div class="body">
+        <div class="dom-row">
+          <div class="dom-c"><div class="fig"><img src="assets/slices/BB_bin.png" alt=""></div><div class="dom-meta"><div class="dom-name">BB Sandstone</div><div class="dom-phi">φ = 0.221</div><div class="dom-note">기준 학습 도메인</div></div></div>
+          <div class="dom-c"><div class="fig"><img src="assets/slices/CastleGate_bin.png" alt=""></div><div class="dom-meta"><div class="dom-name">CastleGate</div><div class="dom-phi">φ = 0.262</div><div class="dom-note">고공극 · 불균질</div></div></div>
+          <div class="dom-c"><div class="fig"><img src="assets/slices/Bentheimer_bin.png" alt=""></div><div class="dom-meta"><div class="dom-name">Bentheimer</div><div class="dom-phi">φ = 0.234</div><div class="dom-note">균질 사암</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>09</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 10 · PROFILE / ISOTROPY ============ -->
+  <section data-label="Profile · Isotropy">
+    <div class="s-pad">
+      <div class="eyebrow">porosity_profile()</div>
+      <h2 class="s-title sm">슬랩별 공극률 &amp; 등방성</h2>
+      <div class="body vcenter">
+        <div class="two l-wide">
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic navy">▤</div><div><div class="bi-t">Slab — 부피를 두껍게 자른 덩어리</div><div class="bi-d">축 방향으로 n등분해 각 슬랩의 공극률을 프로파일로</div></div></div>
+            <div class="bitem"><div class="bi-ic navy">⇄</div><div><div class="bi-t">Isotropy — 세 축이 통계적으로 같다</div><div class="bi-d">z·y·x 프로파일이 비슷하면 등방성. 본 연구의 핵심 가정.</div></div></div>
+            <div class="bitem"><div class="bi-ic">σ</div><div><div class="bi-t">std가 작을수록 균일한 부피</div><div class="bi-d">trade-off: n_slabs↑ → 분해능↑, 통계 안정성↓</div></div></div>
+          </div>
+          <div class="chart-wrap vcenter">
+            <div class="eyebrow navy" style="font-size:18px">slab porosity · n=16</div>
+            <svg viewBox="0 0 520 300" style="width:100%;margin-top:18px">
+              <line x1="50" y1="250" x2="500" y2="250" stroke="#E4DED2" stroke-width="2"/>
+              <line x1="50" y1="40" x2="50" y2="250" stroke="#E4DED2" stroke-width="2"/>
+              <polyline fill="none" stroke="#1F3A5F" stroke-width="3.5" stroke-linejoin="round"
+                points="50,150 100,138 150,162 200,144 250,156 300,140 350,158 400,146 450,150 500,152"/>
+              <polyline fill="none" stroke="#EA851B" stroke-width="3.5" stroke-linejoin="round" stroke-dasharray="2 7" stroke-linecap="round"
+                points="50,120 100,180 150,110 200,200 250,128 300,176 350,112 400,196 450,132 500,150"/>
+              <text x="55" y="34" font-family="JetBrains Mono" font-size="16" fill="#1F3A5F">— BB (std↓ 균일)</text>
+              <text x="300" y="34" font-family="JetBrains Mono" font-size="16" fill="#D4760F">--- CastleGate (std↑)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>10</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 11 · SECTION 02 ============ -->
+  <section class="divider dark" data-label="§2 Sparse Imaging">
+    <div class="div-num">02</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 02</div>
+      <h2 class="div-title">Sparse Imaging</h2>
+      <p class="div-sub">전부 측정하지 않는다 — 일부만 측정하고 나머지를 복원하는 전략.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>11</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 12 · TIME PROBLEM ============ -->
+  <section data-label="Acquisition time">
+    <div class="s-pad">
+      <div class="eyebrow">WHY SPARSE?</div>
+      <h2 class="s-title sm">촬영 시간이라는 벽</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <p style="font-size:27px;color:var(--ink-2);line-height:1.6">Micro-CT는 <b style="color:var(--ink)">높은 해상도</b>와 <b style="color:var(--ink)">좁은 슬라이스 간격</b>을 함께 요구할수록 촬영이 느려집니다.</p>
+            <div class="callout navy" style="margin-top:34px">
+              <div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.5"/></svg></div>
+              <div><div class="co-t">핵심 아이디어</div><div class="co-d">k장 중 1장만 측정하면 촬영 시간이 거의 <b>1/k</b>로 줄어듭니다. 문제는 "나머지를 어떻게 복원하느냐".</div></div>
+            </div>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center;align-items:center">
+            <div style="text-align:center">
+              <div class="bignum" style="font-size:120px;color:var(--orange)">1/k</div>
+              <div style="font-size:24px;color:var(--ink-2);margin-top:12px">측정량 → 시간</div>
+              <div style="font-size:20px;color:var(--ink-3);margin-top:28px;font-family:var(--mono)">k=3 → 67% 시간 절감<br/>k=5 → 80% 시간 절감</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>12</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 13 · SPARSE CONCEPT ============ -->
+  <section data-label="make_sparse">
+    <div class="s-pad">
+      <div class="eyebrow">make_sparse(vol, k)</div>
+      <h2 class="s-title sm">측정된 슬라이스 vs 누락된 슬라이스</h2>
+      <p class="s-sub">간격 k로 known / missing 인덱스를 나눕니다. 아래는 k=3일 때의 측정 패턴.</p>
+      <div class="body vcenter">
+        <div style="display:flex;gap:7px;align-items:flex-end;margin-bottom:40px">
+          <!-- 18 slices, k=3 measured -->
+          <div style="display:flex;gap:7px;flex:1">
+            <div class="sp m"></div><div class="sp i"></div><div class="sp i"></div>
+            <div class="sp m"></div><div class="sp i"></div><div class="sp i"></div>
+            <div class="sp m"></div><div class="sp i"></div><div class="sp i"></div>
+            <div class="sp m"></div><div class="sp i"></div><div class="sp i"></div>
+            <div class="sp m"></div><div class="sp i"></div><div class="sp i"></div>
+            <div class="sp m"></div><div class="sp i"></div><div class="sp m"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:40px;align-items:center">
+          <div style="display:flex;align-items:center;gap:12px;font-size:22px;color:var(--ink-2)"><span style="width:22px;height:40px;background:var(--orange);border-radius:5px;display:inline-block"></span>측정됨 (known)</div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:22px;color:var(--ink-2)"><span style="width:22px;height:28px;background:#D8DCE3;border-radius:5px;display:inline-block"></span>누락 (missing) → 보간으로 복원</div>
+          <div class="chip ghost" style="margin-left:auto">k=3 → 6장 측정 / 18장</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>13</b> / 22</div></div>
+    <style>.sp{flex:1;border-radius:5px}.sp.m{height:80px;background:var(--orange)}.sp.i{height:52px;background:#D8DCE3}</style>
+  </section>
+
+  <!-- ============ 14 · K EFFECT TABLE ============ -->
+  <section data-label="k의 효과">
+    <div class="s-pad">
+      <div class="eyebrow">TRADE-OFF</div>
+      <h2 class="s-title sm">k를 키우면 — 빨라지지만 어려워진다</h2>
+      <div class="body vcenter">
+        <div class="ktab">
+          <div class="kt-row kt-head"><div>k (간격)</div><div>측정 슬라이스 (256축)</div><div>시간 절감</div><div>복원 난이도</div></div>
+          <div class="kt-row"><div class="kmono">1</div><div class="kmono">256 (전부)</div><div class="kmono">0%</div><div><span class="kbar" style="--w:6%"></span></div></div>
+          <div class="kt-row"><div class="kmono">3</div><div class="kmono">86</div><div class="kmono">67%</div><div><span class="kbar" style="--w:28%"></span></div></div>
+          <div class="kt-row hl"><div class="kmono">5</div><div class="kmono">52</div><div class="kmono">80%</div><div><span class="kbar" style="--w:48%"></span></div></div>
+          <div class="kt-row"><div class="kmono">7</div><div class="kmono">37</div><div class="kmono">86%</div><div><span class="kbar" style="--w:70%"></span></div></div>
+          <div class="kt-row"><div class="kmono">10</div><div class="kmono">26</div><div class="kmono">90%</div><div><span class="kbar" style="--w:92%"></span></div></div>
+        </div>
+        <div class="callout" style="margin-top:36px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10z"/></svg></div>
+          <div><div class="co-t">어느 k까지 버틸 수 있을까?</div><div class="co-d">이 질문의 답이 다음 섹션의 <b>선형 보간</b>과 |Δφ| 곡선에 있습니다.</div></div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>14</b> / 22</div></div>
+    <style>.ktab{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+      .kt-row{display:grid;grid-template-columns:1fr 2fr 1.2fr 2fr;gap:24px;padding:22px 36px;border-bottom:1px solid var(--line-2);align-items:center;font-size:24px}
+      .kt-row:last-child{border-bottom:0}.kt-head{background:var(--panel-2);font-family:var(--mono);font-size:19px;color:var(--ink-3);font-weight:600;letter-spacing:.04em}
+      .kt-row.hl{background:#FBE7CE}.kmono{font-family:var(--mono);font-weight:700;color:var(--navy)}.kt-row.hl .kmono{color:var(--orange-600)}
+      .kbar{display:block;height:16px;width:var(--w);background:linear-gradient(90deg,var(--orange),var(--orange-600));border-radius:100px}</style>
+  </section>
+
+  <!-- ============ 15 · SECTION 03 ============ -->
+  <section class="divider dark" data-label="§3 Linear Interp">
+    <div class="div-num">03</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 03</div>
+      <h2 class="div-title">선형 보간<br/>— 첫 베이스라인</h2>
+      <p class="div-sub">누락된 슬라이스를 가장 단순한 방법으로 복원하고, 그 한계를 측정합니다. (연구의 B1)</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>15</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 16 · LINEAR CONCEPT ============ -->
+  <section data-label="Linear interp">
+    <div class="gmark"><span class="g">1조 · linear</span><span class="g on2">2조 · 단순 평균</span></div>
+    <div class="s-pad">
+      <div class="eyebrow">linear_interpolate_slice(a, b, α)</div>
+      <h2 class="s-title sm">두 측정 사이를 α로 섞는다</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="code" style="font-size:24px">result =<br/>&nbsp;&nbsp;(1−<span class="or">α</span>)·slice_before<br/>&nbsp;&nbsp;+ <span class="or">α</span>·slice_after</div>
+            <div class="blist" style="margin-top:36px">
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:22px;color:var(--ink-2)"><b style="color:var(--ink)">α=0.5</b> → 정확히 중간 슬라이스</div></div>
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:22px;color:var(--ink-2)">두 슬라이스가 비슷하면 매끈, 다르면 <b style="color:var(--red)">흐려짐</b></div></div>
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:22px;color:var(--ink-2)">마지막에 <b>0.5 임계</b>로 다시 0/1 이진화</div></div>
+            </div>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center">
+            <div class="eyebrow navy" style="font-size:18px;text-align:center;margin-bottom:24px">α 에 따른 보간</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+              <div style="text-align:center"><div class="alpha-sq" style="background:#1F3A5F"></div><div class="al-l">before<br/>α=0</div></div>
+              <div style="text-align:center"><div class="alpha-sq" style="background:#48597a"></div><div class="al-l">α=0.25</div></div>
+              <div style="text-align:center"><div class="alpha-sq" style="background:#7a86a0;outline:3px solid var(--orange);outline-offset:3px"></div><div class="al-l" style="color:var(--orange-600)">α=0.5</div></div>
+              <div style="text-align:center"><div class="alpha-sq" style="background:#aeb6c6"></div><div class="al-l">α=0.75</div></div>
+              <div style="text-align:center"><div class="alpha-sq" style="background:#E4E7EC"></div><div class="al-l">after<br/>α=1</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>16</b> / 22</div></div>
+    <style>.alpha-sq{width:108px;height:108px;border-radius:12px}.al-l{font-family:var(--mono);font-size:17px;color:var(--ink-3);margin-top:12px;line-height:1.3}</style>
+  </section>
+
+  <!-- ============ 17 · B1 RECONSTRUCT ============ -->
+  <section data-label="B1 reconstruct">
+    <div class="s-pad">
+      <div class="eyebrow">reconstruct_sparse_linear() · B1</div>
+      <h2 class="s-title sm">부피 전체를 복원하는 3단계</h2>
+      <div class="body vcenter">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px">
+          <div class="dcard"><div class="step-n">01</div><div class="step-t">측정 슬라이스는 그대로 복사</div><div class="step-d">known 인덱스의 평면은 원본을 손대지 않습니다.</div></div>
+          <div class="dcard"><div class="step-n">02</div><div class="step-t">누락 슬라이스는 선형 보간</div><div class="step-d">가장 가까운 앞·뒤 known 사이를 α로 보간.</div></div>
+          <div class="dcard"><div class="step-n">03</div><div class="step-t">0.5 임계로 이진화</div><div class="step-d">interp &gt; 0.5 → pore. 다시 0/1 부피 완성.</div></div>
+        </div>
+        <div class="callout navy" style="margin-top:40px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/></svg></div>
+          <div><div class="co-t">이것이 연구의 베이스라인 B1</div><div class="co-d">W2에서 scipy로 정식 구현(B1·B2·B3), W3에서 딥러닝 버전으로 확장합니다.</div></div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>17</b> / 22</div></div>
+    <style>.step-n{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--orange-600)}.step-t{font-size:25px;font-weight:700;margin-top:14px;line-height:1.3}.step-d{font-size:20px;color:var(--ink-2);margin-top:12px;line-height:1.5}</style>
+  </section>
+
+  <!-- ============ 18 · ERROR CURVE ============ -->
+  <section data-label="k vs |Δφ|">
+    <div class="s-pad">
+      <div class="eyebrow">RESULT · 실용 한계 k</div>
+      <h2 class="s-title sm">k가 커지면 |Δφ|는 언제 무너지나</h2>
+      <div class="body vcenter">
+        <div class="two r-wide">
+          <div class="vcenter">
+            <p style="font-size:25px;color:var(--ink-2);line-height:1.6">측정량을 줄일수록(k↑) 공극률 오차 |Δφ|가 커집니다. 오차가 <b style="color:var(--red)">급격히 꺾이는 지점</b>이 선형 보간의 실용 한계입니다.</p>
+            <div class="callout" style="margin-top:30px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+              <div><div class="co-t">웹 데모에서 직접 움직여 보기</div><div class="co-d">k·축·임계값을 바꾸며 |Δφ| 곡선을 실시간으로 확인하세요.</div></div></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="eyebrow navy" style="font-size:18px">k vs |Δφ| · BB</div>
+            <svg viewBox="0 0 560 340" style="width:100%;margin-top:14px;flex:1">
+              <line x1="60" y1="280" x2="540" y2="280" stroke="#E4DED2" stroke-width="2"/>
+              <line x1="60" y1="40" x2="60" y2="280" stroke="#E4DED2" stroke-width="2"/>
+              <path d="M60,272 L120,266 L180,256 L300,236 L420,150 L540,60 L540,280 L60,280 Z" fill="url(#og)"/>
+              <polyline fill="none" stroke="#EA851B" stroke-width="4" stroke-linejoin="round" points="60,272 120,266 180,256 300,236 420,150 540,60"/>
+              <line x1="380" y1="40" x2="380" y2="280" stroke="#C83A3A" stroke-width="2.5" stroke-dasharray="6 6"/>
+              <text x="390" y="120" font-family="JetBrains Mono" font-size="18" fill="#C83A3A">실용 한계 k</text>
+              <circle cx="300" cy="236" r="7" fill="#1F3A5F"/><text x="288" y="225" font-family="JetBrains Mono" font-size="16" fill="#1F3A5F">k=5</text>
+              <defs><linearGradient id="og" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EA851B" stop-opacity=".22"/><stop offset="1" stop-color="#EA851B" stop-opacity="0"/></linearGradient></defs>
+              <text x="58" y="305" font-family="JetBrains Mono" font-size="16" fill="#8A93A3">k=1</text>
+              <text x="525" y="305" font-family="JetBrains Mono" font-size="16" fill="#8A93A3">k=10</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>18</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 19 · WHY DL ============ -->
+  <section class="divider dark" data-label="왜 딥러닝">
+    <div class="s-pad">
+      <div class="div-kick">The Motivation</div>
+      <h2 class="div-title">선형 보간은 <span style="color:#F6C994">모양</span>을 모른다</h2>
+      <p class="div-sub">두 슬라이스를 단순히 섞을 뿐, pore가 <b style="color:#fff">어떻게 연결되는지</b>는 모릅니다.
+        k가 커질수록 구조가 뭉개지죠. 그래서 <b style="color:#F6C994">pore 기하를 학습</b>하는 딥러닝이 필요합니다.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:56px;max-width:1500px">
+        <div class="why-c"><div class="why-n">W1·2</div><div class="why-t">Linear / Cubic</div><div class="why-d">구조를 모르는 보간</div></div>
+        <div class="why-c"><div class="why-n">W3·4</div><div class="why-t">UNet · pix2pix</div><div class="why-d">pore 모양을 학습</div></div>
+        <div class="why-c hl"><div class="why-n">W5·6</div><div class="why-t">Tri-Axis · Physics</div><div class="why-d">3D 일관성 + 기하 보존</div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>19</b> / 22</div></div>
+    <style>.why-c{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:32px}
+      .why-c.hl{background:rgba(234,133,27,.16);border-color:rgba(246,201,148,.4)}
+      .why-n{font-family:var(--mono);font-size:19px;color:#9DB1CB}.why-c.hl .why-n{color:#F6C994}
+      .why-t{font-size:28px;font-weight:700;color:#fff;margin-top:12px}.why-d{font-size:20px;color:#A9BBD0;margin-top:10px}</style>
+  </section>
+
+  <!-- ============ 20 · GROUP DIFF ============ -->
+  <section data-label="1조 vs 2조">
+    <div class="s-pad">
+      <div class="eyebrow">TWO TRACKS</div>
+      <h2 class="s-title sm">같은 W1, 두 가지 깊이</h2>
+      <div class="body">
+        <div class="gc2">
+          <div class="gcc a">
+            <div style="display:flex;align-items:baseline;gap:14px"><span class="gc-name">1조</span><span class="gc-tag">Advanced · 심화</span></div>
+            <div style="font-size:21px;color:var(--ink-2);margin-top:8px">심화 탐구 트랙 — 확장 과제 중심</div>
+            <div class="gc-stats"><div><div class="n">20</div><div class="l">슬라이드</div></div><div><div class="n">17</div><div class="l">노트북 셀</div></div><div><div class="n">5</div><div class="l">Try-it!</div></div></div>
+            <div class="gc-li"><span class="b"></span><div><b>도메인 간 비교</b> · 세 도메인 k-sweep 곡선</div></div>
+            <div class="gc-li"><span class="b"></span><div><b>축별 비교</b> · z/y/x 각각 |Δφ|, tri-axis 정당화</div></div>
+            <div class="gc-li"><span class="b"></span><div><b>임계값 / Random sparse</b> (선택, 도전)</div></div>
+          </div>
+          <div class="gcc b">
+            <div style="display:flex;align-items:baseline;gap:14px"><span class="gc-name">2조</span><span class="gc-tag">Core · 기본</span></div>
+            <div style="font-size:21px;color:var(--ink-2);margin-top:8px">개념 중심 트랙 — 단계별 [Try-it!]</div>
+            <div class="gc-stats"><div><div class="n">22</div><div class="l">슬라이드</div></div><div><div class="n">20</div><div class="l">노트북 셀</div></div><div><div class="n">4</div><div class="l">Try-it!</div></div></div>
+            <div class="gc-li"><span class="b"></span><div><b>[Try-it!] 4종 수행</b> · 각 한 문장 관찰 기록</div></div>
+            <div class="gc-li"><span class="b"></span><div><b>두 도메인 슬랩 비교</b> · std로 균일성 판단</div></div>
+            <div class="gc-li"><span class="b"></span><div><b>α–공극률 / 세 축 sparse</b> (선택)</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>20</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 21 · TASKS & W2 ============ -->
+  <section data-label="과제 · W2 예고">
+    <div class="s-pad">
+      <div class="eyebrow">ASSIGNMENT · NEXT</div>
+      <h2 class="s-title sm">오늘의 과제 &amp; 다음 주</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="dcard vcenter">
+            <div class="eyebrow navy" style="font-size:18px">W2 전까지</div>
+            <div class="blist" style="margin-top:24px">
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:23px"><b>탐구 과제</b> 수행 (그룹별 핸드아웃 §4)</div></div>
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:23px"><b>자기 점검 Q1–Q5</b> 직접 답 작성</div></div>
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:23px"><b>웹 데모</b>로 k·축 실험해 감 잡기</div></div>
+            </div>
+          </div>
+          <div class="dcard tint vcenter">
+            <div class="chip navy" style="align-self:flex-start"><span class="dot"></span>WEEK 02</div>
+            <div style="font-size:34px;font-weight:800;margin-top:18px">Classical Baseline</div>
+            <div class="ko-en" style="margin-top:6px">Linear &amp; Cubic (scipy)</div>
+            <p style="font-size:21px;color:var(--ink-2);line-height:1.5;margin-top:18px">평가지표를 |Δφ| + |ΔSA| + <b>SSIM</b>으로 확장하고 B1·B2·B3 베이스라인을 정식 구현합니다.</p>
+            <div class="chip ghost" style="align-self:flex-start;margin-top:20px">준비물 · pip install scipy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>21</b> / 22</div></div>
+  </section>
+
+  <!-- ============ 22 · CLOSING ============ -->
+  <section class="divider dark" data-label="Q&A">
+    <div class="s-pad" style="justify-content:center">
+      <div class="mark" style="margin-bottom:40px">
+        <svg width="46" height="46" viewBox="0 0 40 40"><path d="M6 30.8 L20 24.8 L34 30.8 L20 36.8 Z" fill="#EA851B"/><path d="M6 22.4 L20 16.4 L34 22.4 L20 28.4 Z" fill="#9DB1CB"/><path d="M6 14 L20 8 L34 14 L20 20 Z" fill="#9DB1CB"/><path d="M6 5.6 L20 -0.4 L34 5.6 L20 11.6 Z" fill="#fff"/></svg>
+        <div><div class="m-name">Digital Rock</div><div class="m-sub" style="color:#9DB1CB">Sparse Slice Interpolation</div></div>
+      </div>
+      <h2 class="div-title">질문 &amp; 다음 시간에.</h2>
+      <p class="div-sub">오늘 만든 |Δφ| 곡선이, 앞으로 6주간 딥러닝으로 무엇을 이겨야 하는지 보여줍니다.</p>
+      <div style="display:flex;gap:16px;margin-top:44px"><span class="chip dark"><span class="dot"></span>web: 학습 UI · 데모</span><span class="chip dark"><span class="dot"></span>repo: Digital_rock_DL_Education</span></div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>22</b> / 22</div></div>
+  </section>
+
+</deck-stage>
+<script src="deck/deck-stage.js"></script>
+</body>
+</html>
