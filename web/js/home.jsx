@@ -144,7 +144,7 @@ function HomePage({ group, onNav }) {
           <h1>Sparse 측정으로 빠르게,<br/><span className="accent">딥러닝</span>으로 정확하게.</h1>
           <p className="hero-lead">
             Micro-CT 암석 단면의 일부만 측정(sparse imaging)하고, 누락된 슬라이스를 딥러닝으로 복원합니다.
-            6주 동안 데이터 탐색부터 tri-axis 복원까지 — 직접 손으로 만들어봅니다.
+            6주 동안 데이터 탐색부터 딥러닝 파라미터 조절까지 — 분석 및 평가를 진행합니다.
           </p>
           <div className="hero-cta">
             <button className="btn btn-primary btn-lg" onClick={() => onNav('w1')}>
@@ -158,7 +158,7 @@ function HomePage({ group, onNav }) {
             <div><div className="m-n tnum">6</div><div className="m-l">주차 커리큘럼</div></div>
             <div><div className="m-n tnum">2</div><div className="m-l">학습 그룹</div></div>
             <div><div className="m-n tnum">256³</div><div className="m-l">voxel 부피</div></div>
-            <div><div className="m-n tnum">4</div><div className="m-l">암석 도메인</div></div>
+            <div><div className="m-n tnum">6</div><div className="m-l">암석 도메인</div></div>
           </div>
         </div>
         <div className="hero-visual">

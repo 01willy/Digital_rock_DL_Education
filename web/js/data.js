@@ -14,75 +14,96 @@ window.COURSE = {
     g2: { id:'g2', name:'2조', tag:'Core',     track:'기본 트랙', desc:'개념 중심 트랙 — 단계별 [Try-it!]로 기초를 탄탄히 다집니다.', accent:'orange' },
   },
 
-  // 6-week roadmap — revised plan (2026-06-05)
-  // 변경 사항:
-  //  • W1 = 데이터+Classical (구 W1+W2 통합) — 한 세션에 데이터/sparse/선형/Cubic 모두 다룸
-  //  • W2 = DL 입문 + mini UNet 학습 (skeleton 코드, 학습시간 옵션 10/30/60min)
-  //  • W3 = 손실 함수 + HPO (Optuna 결과 분석 + mini Optuna 직접 실행)
-  //  • W4 = 다른 아키텍처 (UNetG vs SwinUNet vs 3D UNet)
-  //  • W5 = Tri-axis aggregation (3가지 GT-free 방법 비교)
-  //  • W6 = Cross-domain + Carbonate (Ketton/Estaillades) + LBM + 발표
+  // 6-week roadmap — revised (2026-06-08)
+  //  • W1 = 데이터 + Classical (선형/Cubic 보간) — 학생이 2주에 걸쳐 충분히 소화
+  //  • W2 = Deep Learning 입문 — UNet/pix2pix 구조와 학습 루프 직접 분석
+  //  • W3 = 적대적 학습 (GAN) — pix2pix → 조건부 GAN 으로 확장, 학습 안정화
+  //  • W4 = 다른 아키텍처 — Transformer 기반, 3D 모델, 파라미터 trade-off
+  //  • W5 = 한계 극복 기법 — tri-axis, multi-k 학습, augmentation, 후처리
+  //  • W6 = Cross-domain 분석 — Carbonate, Zero-shot vs Fine-tune
   weeks: [
     {
       n:1, status:'now', slug:'w1', available:true,
       title:'데이터 탐색 + Classical Baseline',
       en:'Load · Preprocess · Linear/Cubic',
-      summary:'Micro-CT voxel 데이터를 직접 열고, 데이터 전처리(normalize·Otsu)와 sparse imaging 문제를 정의. scipy 기반 선형/Cubic 보간으로 |Δφ|·|ΔSA|·SSIM까지 측정 — 왜 딥러닝이 필요한지 정량적으로 확인합니다.',
-      concepts:['Voxel & Slice','Preprocessing','Porosity φ','Sparse imaging (k)','Linear/Cubic','|Δφ|·SSIM'],
+      summary:'Micro-CT voxel 데이터를 직접 열고, 전처리(normalize·Otsu)와 sparse imaging 문제를 정의. scipy 기반 선형/Cubic 보간으로 |Δφ|·|ΔSA|·SSIM 측정.',
+      concepts:['Voxel · Slice','전처리','Porosity φ','Sparse imaging (k)','Linear · Cubic','|Δφ|·SSIM'],
       nonDL:true,
     },
     {
       n:2, status:'next', slug:'w2', available:false,
-      title:'Deep Learning 입문 — mini UNet 학습',
-      en:'UNet skeleton + Train',
-      summary:'2D 슬라이스 보간을 학습하는 첫 신경망. UNet 구조·skip-connection·학습 루프를 코드로 직접 따라가고, mini UNet(~100K params)을 학생 노트북에서 10/30/60분 옵션으로 학습합니다. 1조는 skeleton 받아 학습, 2조는 pre-trained ckpt 로드 후 파라미터 sweep.',
-      concepts:['UNet','skip-connection','학습 루프','Patching·Dataset','학습시간 옵션'],
+      title:'Deep Learning 입문 — UNet · pix2pix 구조',
+      en:'UNet · pix2pix · Train',
+      summary:'슬라이스 보간을 학습 가능한 함수로 정식화. UNet 기본 구조와 pix2pix(조건부 image-to-image) 흐름을 코드로 따라가고, mini UNet을 학생 노트북에서 직접 학습 + 평가합니다.',
+      concepts:['UNet','pix2pix 흐름','학습 루프','Loss·optimizer'],
       nonDL:false,
-      plan:['ML용 dataset 만들기 (patching·sparse mask·augmentation)','UNet 구조 분석 + skip-connection 시각','mini UNet 학습 (base=8/16, epoch 20/50/100)','B1·B2 baseline 대비 |Δφ|·SSIM 비교'],
-      newUtils:['SliceDataset','UNetMini','train_one_epoch','evaluate_model','load_pretrained'],
-      prep:['pip install torch torchvision','W1 baseline 결과 (|Δφ| at k=3,5)'],
+      plan:[
+        'sparse triplet dataset 구성 (입력 2채널 → 가운데 슬라이스)',
+        'UNet/pix2pix generator 구조 분석',
+        '학습 루프 직접 실행 + 학습 곡선 해석',
+        'W1 classical baseline 대비 정량 비교',
+      ],
+      newUtils:['SliceDataset','UNetMini','train_quick','evaluate_model'],
+      prep:['pip install torch torchvision','W1 baseline 결과'],
     },
     {
       n:3, status:'upcoming', slug:'w3', available:false,
-      title:'손실 함수 + HPO 입문',
-      en:'Losses · Optuna',
-      summary:'6개 손실 함수(L1·SSIM·Gradient·Porosity·SurfaceArea·S2)의 효과를 ablation으로 분석하고, Optuna multi-objective HPO 결과를 해석. 1조는 mini Optuna(3 trial, ~20min)를 직접 실행.',
-      concepts:['Loss ablation','Soft-Otsu porosity loss','Surface area loss','Optuna','Pareto front'],
+      title:'적대적 학습 — pix2pix GAN',
+      en:'Conditional GAN',
+      summary:'L1 손실만으로는 흐릿한 복원이 한계. pix2pix 구조에 patch discriminator를 더해 조건부 GAN 학습으로 확장. 학습 안정화·loss weight 균형·평가 metric 추가.',
+      concepts:['GAN','Discriminator','Adversarial loss','L1 + GAN 균형','학습 안정화'],
       nonDL:false,
-      plan:['6개 손실 함수 시각 비교 ablation','Loss weight sweep — 어떤 조합이 어떤 결과를 내나','Optuna 60-trial 결과 Pareto 시각화','1조: mini Optuna 3-trial 직접 실행','연구 결과 fig_component_waterfall 해석'],
-      newUtils:['compute_porosity_loss','compute_sa_loss','compute_s2_loss','run_optuna_mini'],
-      prep:['pip install pytorch-msssim optuna scikit-image','W2 학습된 mini UNet 체크포인트'],
+      plan:[
+        'Discriminator 구조와 PatchGAN',
+        'L1 / SSIM / Adversarial loss 가중 균형',
+        '학습 안정화 (gradient penalty · spectral norm)',
+        'W2 결과 대비 시각·정량 비교',
+      ],
+      newUtils:['PatchDiscriminator','gan_train_step','loss_balancer'],
+      prep:['W2 학습된 mini UNet 체크포인트'],
     },
     {
       n:4, status:'upcoming', slug:'w4', available:false,
       title:'다른 아키텍처 비교',
-      en:'UNet · Transformer · 3D',
-      summary:'같은 sparse 보간 문제를 여러 모델로 풀어 비교 — 파라미터·시간·정확도 trade-off.',
-      concepts:['아키텍처 비교','Pre-trained 활용','trade-off'],
+      en:'Transformer · 3D · trade-off',
+      summary:'CNN 외의 아키텍처(Transformer 기반·3D conv)들을 같은 sparse 보간 문제에 적용. 파라미터 수·학습 시간·정확도의 trade-off를 비교.',
+      concepts:['Attention','Transformer encoder','3D Conv','파라미터 효율'],
       nonDL:false,
-      plan:['주요 아키텍처 후보들 개요','각 모델 inference·비교','평가 지표 다중 비교'],
-      newUtils:['model_zoo','benchmark_models'],
+      plan:[
+        '주요 아키텍처 후보 (UNet · SwinUNet · 3D UNet) 비교',
+        '동일 데이터·예산에서의 평가',
+        '평가지표 다중 비교 표',
+      ],
+      newUtils:['SwinUNetMini','UNet3DMini','benchmark_models'],
       prep:['Pre-trained ckpt 안내'],
     },
     {
       n:5, status:'upcoming', slug:'w5', available:false,
-      title:'Tri-Axis Aggregation',
-      en:'2.5-D Fusion',
-      summary:'세 직교축 보간 결과를 융합하는 여러 GT-free 방식 비교 및 등방성 검증.',
-      concepts:['Tri-axis','GT-free','등방성'],
+      title:'한계 극복 기법',
+      en:'Tri-axis · multi-k · augmentation',
+      summary:'단일 축·단일 k 학습의 한계를 보완하는 여러 기법 검토. 세 직교축 정보 융합(2.5D), 다양한 k에서의 학습, 데이터 증강·후처리 전략.',
+      concepts:['Tri-axis fusion','Multi-k training','Augmentation','후처리'],
       nonDL:false,
-      plan:['축별 inference','aggregation 방식 비교','도메인별 평가'],
-      newUtils:['triaxis_inference','aggregate_methods'],
-      prep:['W4 또는 W2 ckpt'],
+      plan:[
+        '세 축 정보 융합으로 2.5D 복원',
+        'Multi-k 학습이 일반화에 미치는 영향',
+        '증강·후처리 효과 정량 평가',
+      ],
+      newUtils:['triaxis_fusion','multi_k_loader','postproc_morph'],
+      prep:['W2 또는 W4 학습 모델'],
     },
     {
       n:6, status:'upcoming', slug:'w6', available:false,
-      title:'Cross-domain Transfer',
-      en:'Sandstone → Carbonate',
-      summary:'다른 암석 도메인(carbonate)에서의 Zero-shot vs Fine-tune 비교, 인코딩 sanity check, 발표.',
-      concepts:['Cross-domain','Zero-shot vs FT','Encoding sanity'],
+      title:'Cross-domain 분석 — 일반화 능력',
+      en:'Zero-shot · Fine-tune',
+      summary:'다른 암석 도메인(sandstone → carbonate)에서의 zero-shot 평가 vs 짧은 fine-tune 결과 비교. 데이터 인코딩 차이 점검과 종합 발표.',
+      concepts:['Cross-domain','Zero-shot','Fine-tuning','Domain shift'],
       nonDL:false,
-      plan:['Carbonate 데이터 로딩·인코딩 점검','ZS vs FT 비교','종합 발표'],
+      plan:[
+        'Carbonate 데이터 로딩 + 인코딩 점검',
+        'Zero-shot 평가 vs Fine-tune 결과',
+        '종합 발표 + 회고',
+      ],
       newUtils:['load_carbonate','fine_tune_short'],
       prep:['전체 주차 결과 정리','발표 자료'],
     },

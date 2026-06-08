@@ -136,22 +136,32 @@ function DemoPage({ group }) {
                 <p className="cmp-note">이 슬라이스는 <b>k 간격에 포함되어 실제로 측정</b>되었습니다. 복원이 필요 없습니다.</p>
               </div>
             ) : (
-              <div className="compare-4">
-                <div className="cmp-cell">
-                  <PlaneCanvas dep={[axis, before]} draw={(c) => VV.drawPlane(c, VV.getPlane(vol, vol.bin, axis, before))} />
-                  <div className="cmp-cap">앞 측정 <span className="font-mono">{AX[axis].k}={before}</span></div>
-                </div>
-                <div className="cmp-cell">
-                  <PlaneCanvas dep={[axis, vi, thr]} draw={(c) => VV.drawPlane(c, interp)} />
-                  <div className="cmp-cap orange">선형 보간 복원</div>
-                </div>
-                <div className="cmp-cell">
-                  <PlaneCanvas dep={[axis, vi]} draw={(c) => VV.drawPlane(c, origPlane)} />
-                  <div className="cmp-cap">원본 (GT)</div>
-                </div>
-                <div className="cmp-cell">
-                  <PlaneCanvas dep={[axis, vi, thr]} draw={(c) => VV.drawDiff(c, interp, origPlane)} />
-                  <div className="cmp-cap red">오차맵 (빨강=불일치)</div>
+              <div>
+                <p className="cmp-note" style={{ marginTop: 0, marginBottom: 12 }}>
+                  실제 sparse 측정에서는 이 위치의 슬라이스 정보가 <b>존재하지 않습니다</b>.
+                  본 비교는 학습 목적으로 가상의 ground truth를 함께 표시 — 실제 운용에서는 <b>앞·뒤 측정 슬라이스</b>만 알 수 있고, 가운데 슬라이스는 <b>보간 또는 학습된 모델로 복원</b>해야 합니다.
+                </p>
+                <div className="compare-4">
+                  <div className="cmp-cell">
+                    <PlaneCanvas dep={[axis, before]} draw={(c) => VV.drawPlane(c, VV.getPlane(vol, vol.bin, axis, before))} />
+                    <div className="cmp-cap">앞 측정 <span className="font-mono">{AX[axis].k}={before}</span></div>
+                  </div>
+                  <div className="cmp-cell">
+                    <PlaneCanvas dep={[axis, after]} draw={(c) => VV.drawPlane(c, VV.getPlane(vol, vol.bin, axis, after))} />
+                    <div className="cmp-cap">뒤 측정 <span className="font-mono">{AX[axis].k}={after}</span></div>
+                  </div>
+                  <div className="cmp-cell">
+                    <PlaneCanvas dep={[axis, vi, thr]} draw={(c) => VV.drawPlane(c, interp)} />
+                    <div className="cmp-cap orange">선형 보간 복원</div>
+                  </div>
+                  <div className="cmp-cell">
+                    <PlaneCanvas dep={[axis, vi]} draw={(c) => VV.drawPlane(c, origPlane)} />
+                    <div className="cmp-cap">원본 GT (참고용)</div>
+                  </div>
+                  <div className="cmp-cell">
+                    <PlaneCanvas dep={[axis, vi, thr]} draw={(c) => VV.drawDiff(c, interp, origPlane)} />
+                    <div className="cmp-cap red">오차맵 (빨강=불일치)</div>
+                  </div>
                 </div>
               </div>
             )}
@@ -166,11 +176,24 @@ function DemoPage({ group }) {
             <ErrorCurve curve={curve} k={k} onPick={setK} />
             <div className="ctl-hint" style={{ marginTop: 10 }}>
               x축 = sparse 간격 k · y축 = 같은 부피를 k 간격으로 sampling 후 선형 보간했을 때의 |Δφ|.
-              <br/>곡선은 한 번 계산되어 정적이지만, <b>k 슬라이더로 좌측 4-up 슬라이스 비교는 매번 다시 계산</b>됩니다.
-              곡선이 급격히 꺾이는 k가 선형 보간의 실용 한계로, 그 이후로는 더 정교한 방법(deep learning)이 필요해집니다.
+              <br/>곡선은 본 부피에 대해 한 번 계산되어 정적이지만, k 슬라이더로 좌측 슬라이스 비교는 매번 새로 계산됩니다.
+              <br/><b style={{ color: 'var(--ink-2-solid)' }}>합성 데이터 한계</b> — 본 부피는 단순한 구조라 |Δφ|가 비교적 완만히 증가합니다. 실제 micro-CT 암석 데이터는 구조가 훨씬 복잡해 k가 커질수록 오차가 더 가파르게 증가하며, 그 지점부터 학습 기반 방법(deep learning)이 필요해집니다.
             </div>
           </div>
         </div>
+      </div>
+
+      {/* research model context — what the actual research model predicts */}
+      <div className="card card-pad" style={{ marginTop: 16 }}>
+        <div className="eyebrow" style={{ marginBottom: 12 }}>본 연구 모델의 예측 범위</div>
+        <p style={{ marginTop: 0, marginBottom: 12, color: 'var(--ink)' }}>
+          본 데모는 단순 <b>선형 보간</b>으로 누락 슬라이스를 채웁니다. 본 연구의 학습 기반 모델은 한 번의 예측마다
+          <b> 한 장의 가운데 슬라이스</b>를 출력하지만, 입력으로 양옆의 측정 슬라이스 <b>6장</b>(현재 위치 기준 ±3, ±9, ±15)을 받아 더 넓은 문맥을 활용합니다.
+        </p>
+        <p style={{ marginTop: 0, marginBottom: 12, color: 'var(--ink)' }}>
+          따라서 <span className="font-mono">z=4, 7</span>이 측정되어 있을 때 <span className="font-mono">z=5, 6</span>을 모두 복원하려면 모델을 <b>두 번 호출</b>합니다 — z=5 예측 시 입력 6장, z=6 예측 시 입력 6장(서로 다름).
+          단, 학습은 <b>k=2 정규 측정</b> (짝수 측정 / 홀수 예측) 시나리오에서 이루어졌기 때문에, 학습 분포 밖의 측정 패턴(예: 불규칙 간격)에서는 정확도가 떨어질 수 있습니다 — 이는 W6 cross-domain 분석에서 다룹니다.
+        </p>
       </div>
 
       {/* insight callouts — open-ended exploration */}

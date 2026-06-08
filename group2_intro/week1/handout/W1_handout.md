@@ -1,143 +1,71 @@
-# Week 1 Handout — 2조 Intro (재정비판 2026-06-05)
+# Week 1 — 데이터 탐색 + Classical Baseline (2조)
 
-> **Digital Rock 6주 코스 · 1주차 — 데이터 탐색 + Classical Baseline 통합판**
-> 구 W1 + W2 합쳐서 W1으로. 이제 W2는 \"Deep Learning 입문\" 부터 시작합니다.
+본 주차는 micro-CT 부피 데이터를 직접 다루며 sparse imaging 문제를 정의하고, 단순 평균 보간과 Cubic spline 보간의 한계를 정량적으로 확인하는 것이 목표입니다.
 
----
+## 1. 사전 준비
 
-## 0. 체크리스트
-
-- [ ] `COMMON/environment_setup_guide.md` 설치 완료
-- [ ] 가상환경 `rock` 활성화
-- [ ] `pip install scipy scikit-image` (W1 추가)
-- [ ] data 폴더에 3개 .bin 파일 (BB, CastleGate, Parker)
+- 환경 설정 가이드: `COMMON/environment_setup_guide.md`
+- 추가 패키지: `pip install scipy scikit-image`
+- 데이터 폴더에 3개 파일 확인: `BB_256.bin`, `CastleGate_256.bin`, `Parker_256.bin`
+- 노트북 실행
 
 ```bash
 cd group2_intro/week1/notebooks/
 jupyter notebook W1_load_and_explore.ipynb
 ```
 
----
+## 2. 학습 목표
 
-## 1. 학습 흐름 (90분)
+1. 3D voxel 데이터(.bin)의 구조와 로딩 방법
+2. 정규화 / Otsu 임계값 — 전처리 기초
+3. 세 도메인(BB, CastleGate, Parker)의 통계 비교 + 슬랩별 공극률 분석
+4. Sparse imaging의 정의와 평가 지표(|Δφ|, |ΔSA|, SSIM)
+5. Linear / Cubic spline 보간을 도메인·k에 걸쳐 평가
 
-| 시간 | 활동 |
-|------|------|
-| 0~25분 | 강의 개념 + 데이터·전처리 |
-| 25~55분 | 노트북 §0~§4 (로드·정규화·Otsu·시각화) + [Try-it! ①~②] |
-| 55~75분 | 노트북 §5~§7 (Sparse·B1·B2·도메인 sweep) + [Try-it! ③~④] |
-| 75~85분 | 자기 점검 + 탐구 과제 시작 |
-| 85~90분 | Q&A + W2 예고 |
-
----
-
-## 2. 핵심 용어 사전
+## 3. 핵심 용어
 
 | 용어 | 정의 |
 |------|------|
-| **Voxel** | 3D pixel. `vol[z,y,x]` 의 한 칸 |
-| **Slice** | 3D 부피를 한 평면으로 자른 2D 이미지 |
-| **Porosity (φ)** | 공극(pore)의 비율. 본 데이터 평균 = mean |
-| **Normalization** | uint8 → float [0,1] 변환. DL 학습 안정성 |
-| **Otsu threshold** | 자동 임계값 알고리즘 — \"두 봉우리 사이 골짜기 찾기\" |
-| **B1, B2** | Baseline. B1=Linear, B2=Cubic spline |
-| **\|Δφ\|** | 공극률 오차 \|복원 − 원본\| |
-| **\|ΔSA\|** | 표면적 오차 (per Mvoxel) |
-| **SSIM** | 구조 유사도. 0~1, 1=완벽 |
-| **Sparse k** | k=3 → 3장 중 1장만 측정 |
-| **Tri-axis aggregation** | (W5) 세 방향 보간 결과 통합 |
+| Voxel | 3D pixel. `vol[z, y, x]`의 한 칸 |
+| Slice | 3D 부피를 한 평면으로 자른 2D 이미지 |
+| Porosity (φ) | 공극(pore)이 차지하는 비율 |
+| Normalization | uint8 → float [0,1] 변환 |
+| Otsu threshold | 자동 임계값 알고리즘 — 두 봉우리 사이 골짜기를 찾음 |
+| Sparse k | 측정 간격. k=3 → 3장 중 1장만 측정 |
+| Interpolation | 측정되지 않은 슬라이스를 측정 슬라이스로부터 복원 |
+| \|Δφ\|, \|ΔSA\|, SSIM | 보간 정확도 평가 지표 3종 |
 
----
+## 4. 탐구 과제
 
-## 3. 노트북 [Try-it!] 정리
+본 노트북을 본인 작업 파일로 복사한 뒤, 다음 과제를 본인 분석·시각화·해석과 함께 정리해 제출합니다.
 
-| # | 함수 | 변수 | 관찰 포인트 |
-|---|------|------|-------------|
-| ① | `otsu_threshold` (인공 grayscale) | noise σ ∈ {0.05, 0.2, 0.4} | 노이즈 클수록 Otsu가 어디서 망가지나 |
-| ② | `porosity_profile` | n_slabs, axis | 슬랩 수와 축의 효과 |
-| ③ | `reconstruct_sparse_linear/cubic` | k ∈ {3,5,7} | 두 baseline 차이 |
-| ④ | `linear_interpolate_slice` (탐구과제) | 두 슬라이스 간격 | 간격 클수록 흐려짐 |
+### 과제 1 (필수) — 9개 조합 baseline 비교
 
----
+세 도메인 × {Linear, Cubic} × k ∈ {2, 3, 5} = 9개 조합에 대해 `summarize_metrics`를 호출하고 결과를 표로 정리합니다. 어느 조합이 가장 정확한지, 그리고 Cubic이 항상 Linear보다 좋은지 본인 해석으로 정리합니다.
 
-## 4. 탐구 과제 (W2 시작 전까지)
+### 과제 2 (필수) — Otsu 노이즈 sweep
 
-### 과제 1 — 9개 조합 baseline 표 (필수)
+인공 grayscale(binary + 가우시안 노이즈) 데이터에서 노이즈 σ ∈ {0.05, 0.1, 0.2, 0.3, 0.5}로 sweep하고, 각 σ에서 Otsu binarize 결과의 공극률을 측정해 plot합니다. σ가 어떤 수준에서 Otsu가 신뢰할 수 없게 되는지 본인 기준으로 정의합니다.
 
-3 도메인 × {B1, B2} × k ∈ {2, 3, 5} = 9 조합 + 빈 칸:
+### 과제 3 (선택) — 세 축 보간 비교
 
-| 도메인 | k | B1 \|Δφ\| | B1 SSIM | B2 \|Δφ\| | B2 SSIM |
-|---|---|---|---|---|---|
-| BB | 2 | | | | |
-| BB | 3 | | | | |
-| BB | 5 | | | | |
-| CastleGate | 2 | | | | |
-| CastleGate | 3 | | | | |
-| CastleGate | 5 | | | | |
-| Parker | 2 | | | | |
-| Parker | 3 | | | | |
-| Parker | 5 | | | | |
+`reconstruct_sparse_linear(bb, k=3, axis=...)`의 `axis`를 0/1/2로 바꾸면서 세 축 보간 결과의 |Δφ|를 비교합니다. 본 데이터가 세 축에서 통계적으로 비슷한지 본인 실험으로 검토합니다.
 
-**보고**:
-- 어느 조합이 가장 정확한가? (= 가장 작은 |Δφ| + 가장 큰 SSIM)
-- B2가 B1보다 항상 좋은가, 아니면 경우에 따라 다른가?
+### 과제 4 (선택, 도전) — 슬라이스 간격의 영향
 
-### 과제 2 — Otsu noise sweep (필수)
+`linear_interpolate_slice(bb[a], bb[b], 0.5)`에서 두 슬라이스 간격 `b-a` ∈ {1, 3, 7, 15, 30}으로 sweep하고 α=0.5 결과를 시각화합니다. 간격이 클수록 결과가 어떻게 변하는지, 그 한계가 본 연구가 deep learning을 도입하는 동기와 어떻게 연결되는지 본인 해석.
 
-[Try-it! ①] 의 노이즈 σ ∈ {0.05, 0.1, 0.2, 0.3, 0.5} 로 sweep.
-각 σ에서 Otsu binarize 결과의 공극률 φ을 측정하여 한 plot에 plot.
+## 5. 다음 주차 사전 준비
 
-**보고**:
-- σ가 클수록 φ가 어떻게 변하나? (높아지나 / 낮아지나 / 임의?)
-- Otsu가 \"신뢰할 수 없게 되는\" 노이즈 수준은 대략?
+- W2: Deep Learning 입문 — UNet / pix2pix 구조와 학습 루프
+- 추가 패키지: `pip install torch torchvision pytorch-msssim`
+- 본 주차 baseline 결과를 메모해 두면 W2에서 직접 비교 가능합니다.
 
-### 과제 3 — 세 축 sparse 비교 (선택)
-
-`reconstruct_sparse_linear(bb, k=3, axis=0)` 의 `axis` 인자를 0, 1, 2로 바꿔서 세 축 sparse 보간 결과의 |Δφ| 비교.
-
-**보고**:
-- 세 결과가 \"거의 같은가\"? 다르다면 어느 축이 가장 어려운가?
-- 본 연구의 \"세 방향 통합\" 이 합리적인 이유를 자신의 말로.
-
-### 과제 4 — 슬라이스 간격에 따른 \"흐려짐\" (선택, 도전)
-
-`linear_interpolate_slice(bb[a], bb[b], 0.5)` 에서 두 슬라이스 간격 `b-a` ∈ {1, 3, 7, 15, 30} 으로 sweep. 5장의 α=0.5 결과를 한 줄로 시각화.
-
-**보고**:
-- 간격이 클수록 \"흐려짐\" 이 어떻게 보이나? (구조? 경계? 공극 크기?)
-- 이 흐려짐이 본 연구가 \"deep learning\" 으로 해결하려는 핵심 문제와 어떤 관계?
-
----
-
-## 5. 회고 — 자기 점검 (본인 노트에 자유 기록)
-
-본인이 본 W1에서 정리하면 좋을 회고 포인트:
-
-- 본 데이터의 0/1 의미와, normalize·Otsu 같은 전처리가 W2 이후 deep learning에서 어떻게 활용될지
-- k=3, 5 시나리오의 시간 절감률과 본인이 측정한 B1·B2 결과 — 두 baseline의 차이가 가장 큰 경우는 언제
-- 세 축에서 데이터가 \"통계적으로 비슷한가\" 를 본인이 어떻게 확인했는지
-- 단순 평균 보간이 한계를 보이기 시작하는 지점 + 그 지점부터 deep learning이 무엇을 더해줄 수 있을지에 대한 본인 예측
-- 본 motivation 곡선을 강사가 묻는다면 어떻게 한 문단으로 설명할지
-
-
----
-
-## 6. W2 (Deep Learning 입문) 진입 전
-
-- `pip install torch torchvision pytorch-msssim` (CPU 버전 OK)
-- W1 baseline 결과 (특히 BB k=5에서의 |Δφ|·SSIM) 메모
-
----
-
-## 7. Troubleshooting
+## 6. 자주 발생하는 문제
 
 | 증상 | 해결 |
 |------|------|
 | `scipy not found` | `pip install scipy` |
-| Cubic spline 계산 느림 | 정상. 30초 정도 소요 |
+| Cubic spline 계산이 느림 | 정상 (약 30초 소요) |
 | matplotlib 한글 깨짐 | 첫 셀 `setup_plot_style()` 호출 확인 |
-| `FileNotFoundError: Parker_256.bin` | data/ 폴더에 있는지 확인 |
-
----
-
-*W1 handout · 2조 Intro · 2026-06-05 (재정비판)*
+| 데이터 파일을 찾을 수 없음 | 노트북 실행 위치가 `notebooks/` 폴더 내인지 확인 |
