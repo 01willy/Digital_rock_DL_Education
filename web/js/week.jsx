@@ -117,8 +117,9 @@ function WeekFull({ w, group, onGroup, onNav }) {
   const C = window.COURSE;
   const gd = C.w1.groups[group];
   const grp = C.groups[group];
-  // 자료는 같은 도메인의 /downloads/ 정적 경로에 호스팅 (GitHub 노출 X)
-  const dl = `downloads/w1/${group}`;
+  // 본 자료는 그룹과 무관하게 공통 (shared/), 2조에게는 보조 노트(g2_supplement/) 추가 카드
+  const shared = `downloads/shared/w1`;
+  const supp = `downloads/g2_supplement/w1`;
 
   return (
     <div className="page page-wide">
@@ -148,24 +149,62 @@ function WeekFull({ w, group, onGroup, onNav }) {
         </div>
       </div>
 
-      {/* resources */}
+      {/* 공통 본 자료 */}
       <section style={{ marginTop: 36 }}>
+        <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--orange-600)' }}>본 자료 · 모든 학생 공통</div>
         <div className="res-grid">
-          <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name={`W1_${group === 'g1' ? 'group1' : 'group2'} deck`}
-            meta={`${gd.slides}장 · 웹에서 바로 보기`} href={group === 'g1' ? 'W1_deck.html' : 'W1_deck_group2.html'} primary />
-          <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name={gd.notebook}
-            meta={`${gd.cells} 셀 · 클릭 시 .ipynb 다운로드`} href={`${dl}/W1_load_and_explore.ipynb`} />
+          <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name="W1 deck"
+            meta="웹에서 바로 보기" href="W1_deck.html" primary />
+          <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name="W1_load_and_explore.ipynb"
+            meta="클릭 시 .ipynb 다운로드" href={`${shared}/W1_load_and_explore.ipynb`} />
           <ResourceCard icon="terminal" kind="유틸리티 (다운로드)" name="dr_utils.py"
-            meta="8개 함수 · 클릭 시 .py 다운로드" href={`${dl}/dr_utils.py`} />
+            meta="클릭 시 .py 다운로드" href={`${shared}/dr_utils.py`} />
           <ResourceCard icon="book" kind="핸드아웃 (다운로드)" name="W1_handout.md"
-            meta="자기 점검 · 탐구 과제" href={`${dl}/W1_handout.md`} />
+            meta="탐구 과제 안내" href={`${shared}/W1_handout.md`} />
         </div>
         <div className="ctl-hint" style={{ marginTop: 14 }}>
-          모두 한 번에 받기 — <a href={`downloads/w1/w1_${group}_code.zip`}>w1_{group}_code.zip</a>
-          {' · '}
-          데이터 (.bin 256³) — <a href={`downloads/data_w1_${group}.zip`}>data_w1_{group}.zip</a>
+          📦 모든 코드·문서 한 번에 받기 — <a href={`downloads/shared/w1_code.zip`}><b>w1_code.zip</b></a>
         </div>
       </section>
+
+      {/* 데이터 — 독립 카드로 분리 */}
+      <section style={{ marginTop: 36 }}>
+        <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--orange-600)' }}>실습 데이터 · 노트북 실행에 필요</div>
+        <div className="card card-pad" style={{ background: 'var(--tint)', borderColor: 'var(--orange-200)' }}>
+          <div className="row between center wrap" style={{ gap: 14 }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>data_w1.zip — 256³ binary · 4 도메인</div>
+              <div className="muted" style={{ fontSize: 14 }}>
+                BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB).
+                노트북 옆 <span className="font-mono">data/</span> 폴더에 압축 해제.
+              </div>
+            </div>
+            <a href="downloads/data_w1.zip" className="btn btn-primary btn-lg" download>
+              <Icon name="download" size={18} />데이터 다운로드
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 2조 전용 보조 노트 */}
+      {group === 'g2' && (
+        <section style={{ marginTop: 36 }}>
+          <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--orange-600)' }}>
+            2조 전용 보조 노트 · 본 자료를 더 친절히 설명
+          </div>
+          <div className="res-grid">
+            <ResourceCard icon="book" kind="개념 풀이" name="W1_concept_notes.md"
+              meta="voxel · normalize · Otsu · sparse 등" href={`${supp}/W1_concept_notes.md`} />
+            <ResourceCard icon="terminal" kind="코드 walkthrough" name="W1_code_walkthrough.md"
+              meta="셀별 코드 설명 + 인자 변경 가이드" href={`${supp}/W1_code_walkthrough.md`} />
+            <ResourceCard icon="notebook" kind="작은 예시 노트북" name="W1_extra_examples.ipynb"
+              meta="단계별 mini 예제 4개" href={`${supp}/W1_extra_examples.ipynb`} />
+          </div>
+          <div className="ctl-hint" style={{ marginTop: 14 }}>
+            📦 보조 노트 한 번에 받기 — <a href={`downloads/g2_supplement/w1_supplement.zip`}><b>w1_supplement.zip</b></a>
+          </div>
+        </section>
+      )}
 
       {/* learning flow — NO times */}
       <section style={{ marginTop: 56 }}>
