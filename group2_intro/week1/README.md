@@ -28,13 +28,6 @@ cd notebooks/
 jupyter notebook W1_load_and_explore.ipynb
 ```
 
-## 학습 흐름 (권장 90분)
-1. (30분) 강의 — `slides/W1_group2.pptx` 1~12장 (천천히, 용어 풀이 충분히)
-2. (35분) 노트북 실행 + [Try-it!] 박스 4개 수행
-3. (15분) 슬라이드 13~21 + 노트북 후반 (sparse + 단순 평균 보간)
-4. (8분) 자기 점검 + 탐구 과제 시작 (handout 4번)
-5. (2분) Q&A + W2 예고
-
 ## 사전 요구
 - `COMMON/environment_setup_guide.md` 의 환경 설정 완료
 - `COMMON/requirements_student.txt` 패키지 설치 완료

@@ -45,7 +45,7 @@ function DemoPage({ group }) {
     <div className="page page-wide">
       <SectionHead eyebrow="HANDS-ON DEMO"
         title="Sparse 측정 & 선형 보간 플레이그라운드"
-        sub="하나의 합성 64³ 공극 부피를 ground truth로 고정하고, 그 위에서 sparse 간격 k·측정 축·이진화 임계값만 바꿔 보간 정확도를 비교합니다. 실제 micro-CT는 매번 다른 측정 데이터를 얻지만, 본 데모는 변수 통제를 통한 직관 형성이 목적입니다." />
+        sub="합성 부피를 sparse 간격 k로 측정한 뒤 선형 보간으로 복원합니다. k 슬라이더, 측정 축, 이진화 임계값을 바꿔보며 슬라이스별 측정·보간 결과와 복원 품질의 변화를 직관적으로 살펴봅니다." />
 
       <div className="demo-grid">
         {/* LEFT: controls + pattern + stats */}
@@ -106,7 +106,7 @@ function DemoPage({ group }) {
             <div className="stat-card"><div className="sc-n font-mono tnum">{recon.nMeasured}<span className="sc-u">/{L}</span></div><div className="sc-l">측정 슬라이스</div></div>
             <div className="stat-card"><div className="sc-n font-mono tnum orange">{speed}×</div><div className="sc-l">획득 속도</div></div>
             <div className="stat-card"><div className="sc-n font-mono tnum">{timeSaving}%</div><div className="sc-l">시간 절감</div></div>
-            <div className="stat-card hl"><div className="sc-n font-mono tnum">{recon.absDphi.toFixed(4)}</div><div className="sc-l">|Δφ| 공극률 오차</div></div>
+            <div className="stat-card hl"><div className="sc-n font-mono tnum">{(recon.mismatchRatio*100).toFixed(1)}<span className="sc-u">%</span></div><div className="sc-l">복원 voxel 불일치율</div></div>
           </div>
           <div className="phi-row">
             <span>φ 원본 <b className="font-mono">{recon.phiOrig.toFixed(3)}</b></span>
@@ -170,30 +170,16 @@ function DemoPage({ group }) {
           {/* error curve */}
           <div className="card card-pad" style={{ marginTop: 16 }}>
             <div className="row between center" style={{ marginBottom: 10 }}>
-              <div className="eyebrow muted">동일 부피 / k 1–10 시뮬레이션 · {AX[axis].k}축</div>
-              <span className="muted" style={{ fontSize: 12 }}>현재 <b className="font-mono" style={{ color: 'var(--orange-600)' }}>k={k} · |Δφ|={(recon.absDphi*100).toFixed(2)}%p</b></span>
+              <div className="eyebrow muted">k vs 복원 voxel 불일치율 · {AX[axis].k}축</div>
+              <span className="muted" style={{ fontSize: 12 }}>현재 <b className="font-mono" style={{ color: 'var(--orange-600)' }}>k={k} · 불일치 {(recon.mismatchRatio*100).toFixed(1)}%</b></span>
             </div>
             <ErrorCurve curve={curve} k={k} onPick={setK} />
             <div className="ctl-hint" style={{ marginTop: 10 }}>
-              x축 = sparse 간격 k · y축 = 같은 부피를 k 간격으로 sampling 후 선형 보간했을 때의 |Δφ|.
-              <br/>곡선은 본 부피에 대해 한 번 계산되어 정적이지만, k 슬라이더로 좌측 슬라이스 비교는 매번 새로 계산됩니다.
-              <br/><b style={{ color: 'var(--ink-2-solid)' }}>합성 데이터 한계</b> — 본 부피는 단순한 구조라 |Δφ|가 비교적 완만히 증가합니다. 실제 micro-CT 암석 데이터는 구조가 훨씬 복잡해 k가 커질수록 오차가 더 가파르게 증가하며, 그 지점부터 학습 기반 방법(deep learning)이 필요해집니다.
+              y축 = 복원된 부피와 원본의 voxel 단위 불일치율. k가 커질수록 측정 정보가 줄어 단조 증가하는 직관적인 metric입니다.
+              <br/>곡선은 한 번 계산되어 정적이고, k 슬라이더로 좌측 슬라이스 비교만 매번 새로 계산됩니다. 곡선이 가파르게 꺾이는 지점이 단순 보간의 한계입니다.
             </div>
           </div>
         </div>
-      </div>
-
-      {/* research model context — what the actual research model predicts */}
-      <div className="card card-pad" style={{ marginTop: 16 }}>
-        <div className="eyebrow" style={{ marginBottom: 12 }}>본 연구 모델의 예측 범위</div>
-        <p style={{ marginTop: 0, marginBottom: 12, color: 'var(--ink)' }}>
-          본 데모는 단순 <b>선형 보간</b>으로 누락 슬라이스를 채웁니다. 본 연구의 학습 기반 모델은 한 번의 예측마다
-          <b> 한 장의 가운데 슬라이스</b>를 출력하지만, 입력으로 양옆의 측정 슬라이스 <b>6장</b>(현재 위치 기준 ±3, ±9, ±15)을 받아 더 넓은 문맥을 활용합니다.
-        </p>
-        <p style={{ marginTop: 0, marginBottom: 12, color: 'var(--ink)' }}>
-          따라서 <span className="font-mono">z=4, 7</span>이 측정되어 있을 때 <span className="font-mono">z=5, 6</span>을 모두 복원하려면 모델을 <b>두 번 호출</b>합니다 — z=5 예측 시 입력 6장, z=6 예측 시 입력 6장(서로 다름).
-          단, 학습은 <b>k=2 정규 측정</b> (짝수 측정 / 홀수 예측) 시나리오에서 이루어졌기 때문에, 학습 분포 밖의 측정 패턴(예: 불규칙 간격)에서는 정확도가 떨어질 수 있습니다 — 이는 W6 cross-domain 분석에서 다룹니다.
-        </p>
       </div>
 
       {/* insight callouts — open-ended exploration */}

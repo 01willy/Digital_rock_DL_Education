@@ -108,7 +108,12 @@
       setPlane(i, plane);
     }
     const phiO = phi(bin), phiR = phi(recon);
+    // voxel-level mismatch ratio — 항상 단조 증가하는 직관적 metric (k 커질수록 측정 정보 ↓ → 불일치 ↑)
+    let nMismatch = 0;
+    for (let i = 0; i < bin.length; i++) if (recon[i] !== bin[i]) nMismatch++;
+    const mismatchRatio = nMismatch / bin.length;
     return { recon, meas, measSet, L, phiOrig: phiO, phiRecon: phiR, absDphi: Math.abs(phiR - phiO),
+             mismatchRatio,
              nMeasured: meas.length, ratio: meas.length / L };
   }
 
@@ -123,10 +128,13 @@
     return { rows: sample.rows, cols: sample.cols, data: plane, alpha };
   }
 
-  // error curve |Δφ| over k = 1..maxK
+  // error curve over k = 1..maxK — voxel mismatch ratio (단조 증가, 학생 직관용)
   function errorCurve(v, axis, thr, maxK) {
     const out = [];
-    for (let k = 1; k <= maxK; k++) out.push({ k, err: reconstruct(v, axis, k, thr).absDphi });
+    for (let k = 1; k <= maxK; k++) {
+      const r = reconstruct(v, axis, k, thr);
+      out.push({ k, err: r.mismatchRatio });
+    }
     return out;
   }
 
