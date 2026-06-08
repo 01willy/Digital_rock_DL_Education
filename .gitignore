@@ -1,7 +1,8 @@
 # ─── Claude design 의뢰용 (repo에 들어가지 않음) ────────────
 _for_claude_design/
 digital_rock_design_brief.zip
-*.zip
+# *.zip 패턴은 너무 광범위 — 학생용 web/downloads/*.zip 도 차단됨.
+# 외부 의뢰 zip만 명시적으로 제외하고, 학생 자료 ZIP은 트래킹.
 
 # ─── Python ─────────────────────────────────────────────────
 __pycache__/
