@@ -161,7 +161,7 @@ window.COURSE = {
         slides:22, cells:20, tryits:4,
         notebook:'W1_load_and_explore.ipynb',
         tasks:[
-          { t:'[Try-it!] 4종 수행', req:true, d:'노트북 [Try-it! ①~④] 박스를 모두 수행하고 각각 한 문장씩 관찰 기록.' },
+          { t:'실습 셀 sweep 수행', req:true, d:'노트북의 파라미터 sweep 셀들을 실행하고 결과를 본인 분석으로 정리.' },
           { t:'두 도메인 슬랩 비교', req:true, d:'BB·CastleGate porosity_profile(n_slabs=16) 두 곡선 겹쳐 그리기. 어느 쪽이 더 균일한가? std로 비교.' },
           { t:'α와 공극률 관계', req:false, d:'linear_interpolate_slice의 α를 0~1 sweep. α=0.5 공극률이 앞뒤 평균과 같은가?' },
           { t:'세 축 sparse 비교', req:false, d:'make_sparse의 axis를 0·1·2로 바꿔 측정 패턴 시각화 비교. 등방성이면 통계적으로 같아야 함.' },

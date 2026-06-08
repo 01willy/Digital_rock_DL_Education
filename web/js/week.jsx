@@ -146,8 +146,27 @@ function WeekFull({ w, group, onGroup, onNav }) {
             <Icon name="layers" size={15} />
             <span><b>{grp.name} · {grp.track}</b> — {grp.desc}</span>
           </div>
+          <div className="muted" style={{ fontSize: 12, marginTop: 8, lineHeight: 1.5 }}>
+            본 자료는 모든 학생 공통. <b style={{ color: 'var(--orange-600)' }}>2조 선택 시</b> 개념 풀이·코드 walkthrough·mini 예제 3종이 추가로 표시됩니다.
+          </div>
         </div>
       </div>
+
+      {/* Step 0 — 환경 설치 안내 */}
+      <section style={{ marginTop: 36 }}>
+        <div className="card card-pad" style={{ background: 'var(--tint-navy)', borderColor: '#CBD8E6' }}>
+          <div className="row between center wrap" style={{ gap: 14 }}>
+            <div>
+              <div className="eyebrow" style={{ color: 'var(--navy)', marginBottom: 6 }}>STEP 0 — 처음이라면</div>
+              <div style={{ fontWeight: 700, fontSize: 17 }}>먼저 Python 환경부터 설정하세요 (약 5분)</div>
+              <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>conda 환경 + 필수 패키지 설치. GPU 없이 CPU만으로 W1 진행 가능.</div>
+            </div>
+            <a href="#/setup" className="btn btn-ghost btn-lg" style={{ borderColor: 'var(--navy)' }}>
+              <Icon name="terminal" size={18} />환경 설치 가이드
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* 공통 본 자료 */}
       <section style={{ marginTop: 36 }}>
@@ -155,6 +174,8 @@ function WeekFull({ w, group, onGroup, onNav }) {
         <div className="res-grid">
           <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name="W1 deck"
             meta="웹에서 바로 보기" href="W1_deck.html" primary />
+          <ResourceCard icon="external" kind="노트북 미리보기 (웹뷰)" name="실행 결과 + 그림 포함"
+            meta="다운로드 전 결과 미리 확인" href="notebooks/W1_load_and_explore.html" />
           <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name="W1_load_and_explore.ipynb"
             meta="클릭 시 .ipynb 다운로드" href={`${shared}/W1_load_and_explore.ipynb`} />
           <ResourceCard icon="terminal" kind="유틸리티 (다운로드)" name="dr_utils.py"
@@ -167,17 +188,26 @@ function WeekFull({ w, group, onGroup, onNav }) {
         </div>
       </section>
 
-      {/* 데이터 — 독립 카드로 분리 */}
+      {/* 데이터 — 독립 카드로 분리 + 디렉토리 안내 */}
       <section style={{ marginTop: 36 }}>
         <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--orange-600)' }}>실습 데이터 · 노트북 실행에 필요</div>
         <div className="card card-pad" style={{ background: 'var(--tint)', borderColor: 'var(--orange-200)' }}>
           <div className="row between center wrap" style={{ gap: 14 }}>
-            <div>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>data_w1.zip — 256³ binary · 4 도메인</div>
               <div className="muted" style={{ fontSize: 14 }}>
                 BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB).
-                노트북 옆 <span className="font-mono">data/</span> 폴더에 압축 해제.
               </div>
+              <pre style={{ background: 'var(--panel)', padding: '10px 14px', marginTop: 10, fontSize: 13, borderRadius: 8, lineHeight: 1.6 }}>
+{`<본인 작업 폴더>/
+├ W1_load_and_explore.ipynb
+├ dr_utils.py
+└ data/        ← data_w1.zip의 .bin 파일을 여기에 압축 해제
+  ├ BB_256.bin
+  ├ CastleGate_256.bin
+  ├ Bentheimer_256.bin
+  └ Parker_256.bin`}
+              </pre>
             </div>
             <a href="downloads/data_w1.zip" className="btn btn-primary btn-lg" download>
               <Icon name="download" size={18} />데이터 다운로드

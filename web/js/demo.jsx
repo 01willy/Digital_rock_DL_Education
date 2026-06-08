@@ -45,7 +45,7 @@ function DemoPage({ group }) {
     <div className="page page-wide">
       <SectionHead eyebrow="HANDS-ON DEMO"
         title="Sparse 측정 & 선형 보간 플레이그라운드"
-        sub="합성 부피를 sparse 간격 k로 측정한 뒤 선형 보간으로 복원합니다. k 슬라이더, 측정 축, 이진화 임계값을 바꿔보며 슬라이스별 측정·보간 결과와 복원 품질의 변화를 직관적으로 살펴봅니다." />
+        sub="합성 64³ 부피로 직관을 빠르게 확인하는 인터랙티브 데모입니다. k 슬라이더·측정 축·이진화 임계값을 바꿔보며 슬라이스별 측정·보간 결과와 복원 품질의 변화를 살펴봅니다. 실제 256³ 암석 데이터는 W1 노트북에서 다룹니다." />
 
       <div className="demo-grid">
         {/* LEFT: controls + pattern + stats */}
