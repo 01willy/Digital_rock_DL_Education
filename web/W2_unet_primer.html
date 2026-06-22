@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>U-Net & 코드 기초 해설 — Digital Rock W2 보충</title>
+<link rel="stylesheet" href="deck/deck.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<style>
+  /* primer-specific helpers (deck.css 위에 얹음) */
+  .eq{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 28px; font-size:30px; color:var(--ink); display:flex; align-items:center; justify-content:center; }
+  .eq.tint{ background:var(--panel-2); }
+  .eqlabel{ font-family:var(--mono); font-size:18px; color:var(--ink-3); margin-bottom:10px; }
+  .codeblk{ font-family:var(--mono); font-size:21px; background:#16223A; color:#E8ECF2; padding:24px 28px; border-radius:14px; line-height:1.7; white-space:pre; overflow:hidden; }
+  .codeblk .kw{ color:#E2A6FF; } .codeblk .fn{ color:#86C99B; } .codeblk .cm{ color:#7E8AA0; } .codeblk .st{ color:#F6C994; } .codeblk .nb{ color:#9CD0FF; }
+  .note{ font-size:20px; color:var(--ink-2); line-height:1.55; }
+  .shape-tab{ background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; width:100%; }
+  .shape-tab .r{ display:grid; grid-template-columns:1.1fr 1.3fr 2fr; gap:16px; padding:14px 26px; border-bottom:1px solid var(--line-2); font-size:21px; align-items:center; }
+  .shape-tab .r:last-child{ border-bottom:0; }
+  .shape-tab .r.h{ background:var(--panel-2); font-family:var(--mono); font-size:17px; color:var(--ink-3); font-weight:600; letter-spacing:.03em; }
+  .shape-tab .stage-n{ font-family:var(--mono); font-weight:700; color:var(--navy); }
+  .shape-tab .shape{ font-family:var(--mono); color:var(--orange-600); font-weight:700; }
+  .shape-tab .r.bn{ background:#FBF4E9; }
+  .kgrid{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+  .kcard{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px 26px; }
+  .kcard .kt{ font-size:23px; font-weight:700; } .kcard .kd{ font-size:19px; color:var(--ink-2); margin-top:8px; line-height:1.5; }
+  .pill{ font-family:var(--mono); font-size:16px; padding:4px 12px; border-radius:100px; background:#E2E9F1; color:var(--navy); }
+</style>
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+  <!-- ============ 1 · COVER ============ -->
+  <section class="cover" data-label="Cover">
+    <div class="cover-grid">
+      <div class="cover-l">
+        <div class="mark">
+          <svg width="46" height="46" viewBox="0 0 40 40"><path d="M6 30.8 L20 24.8 L34 30.8 L20 36.8 Z" fill="#EA851B"/><path d="M6 22.4 L20 16.4 L34 22.4 L20 28.4 Z" fill="#C9CCD2"/><path d="M6 14 L20 8 L34 14 L20 20 Z" fill="#C9CCD2"/><path d="M6 5.6 L20 -0.4 L34 5.6 L20 11.6 Z" fill="#1F3A5F"/></svg>
+          <div><div class="m-name">Digital Rock</div><div class="m-sub">W2 보충 자료</div></div>
+        </div>
+        <div style="margin-top:54px"><span class="chip navy"><span class="dot"></span>딥러닝이 처음이어도 OK</span></div>
+        <h1 class="cover-title anim">U-Net &amp; 코드<br/><span class="ac">완전 해부</span></h1>
+        <p class="ko-en anim d1" style="font-size:27px;margin-top:24px">신경망의 기초 수식부터, 우리가 W2에서 쓴 코드 한 줄 한 줄까지</p>
+        <div class="cover-meta anim d2">
+          <div><div class="m-n">수식</div><div class="m-l">기초부터 차근차근</div></div>
+          <div><div class="m-n">그림</div><div class="m-l">합성곱·U-Net 시각화</div></div>
+          <div><div class="m-n">코드</div><div class="m-l">model_utils.py 해설</div></div>
+        </div>
+      </div>
+      <div class="cover-r">
+        <div class="cover-strip">
+          <div class="cs"><img src="assets/slices/BB_raw.png" alt=""><div class="cover-cap">입력</div></div>
+          <div class="cs"><img src="assets/slices/BB_bin.png" alt=""><div class="cover-cap">U-Net이 배우는 것</div></div>
+          <div class="cs"><img src="assets/slices/Bentheimer_bin.png" alt=""><div class="cover-cap">구조</div></div>
+        </div>
+        <div class="cover-fade"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 · WHO/WHAT ============ -->
+  <section data-label="이 자료는">
+    <div class="s-pad">
+      <div class="eyebrow">READ THIS FIRST</div>
+      <h2 class="s-title sm">이 자료는 무엇인가</h2>
+      <div class="body vcenter">
+        <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kcard"><div class="pill">누구를 위해</div><div class="kt" style="margin-top:14px">딥러닝이 처음인 학생</div><div class="kd">미적분·행렬을 깊이 몰라도 따라올 수 있게, 직관과 수식을 같이 놓았습니다.</div></div>
+          <div class="kcard"><div class="pill">무엇을</div><div class="kt" style="margin-top:14px">U-Net + 우리 코드</div><div class="kd">신경망이 학습하는 원리 → 합성곱 → U-Net 구조 → W2에서 쓴 코드까지.</div></div>
+          <div class="kcard"><div class="pill">어떻게</div><div class="kt" style="margin-top:14px">수식 ↔ 그림 ↔ 코드</div><div class="kd">한 개념을 수식·그림·실제 코드 세 가지로 연결해 이해를 굳힙니다.</div></div>
+        </div>
+        <div class="callout navy" style="margin-top:34px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/></svg></div>
+          <div><div class="co-t">수식이 무서워도 괜찮습니다</div><div class="co-d">모든 수식 옆에 "한국어로 풀면" 설명을 붙였습니다. 수식은 "정확히 무엇을 계산하는지" 적어둔 약속일 뿐입니다.</div></div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>02</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 3 · §1 DIVIDER ============ -->
+  <section class="divider dark" data-label="§1 신경망 기초">
+    <div class="div-num">01</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 01</div>
+      <h2 class="div-title">신경망은<br/>어떻게 배우나</h2>
+      <p class="div-sub">함수 · 가중치 · 손실 · 경사하강 — 딥러닝의 네 기둥을 수식으로.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>03</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 4 · FUNCTION ============ -->
+  <section data-label="함수를 배운다">
+    <div class="s-pad">
+      <div class="eyebrow">THE BIG IDEA</div>
+      <h2 class="s-title sm">신경망 = "함수"를 데이터로 배우는 것</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">모델이 하는 일</div>
+            <div class="eq">$\hat{y} = f(x\,;\,\theta)$</div>
+            <div class="note" style="margin-top:22px">
+              <b>$x$</b> : 입력 (우리 경우 = 앞·뒤 슬라이스)<br/>
+              <b>$\hat{y}$</b> : 예측 (가운데 슬라이스)<br/>
+              <b>$\theta$</b> : <b style="color:var(--orange-600)">가중치</b> — 학습으로 정하는 수많은 숫자<br/>
+              <b>$f$</b> : 구조 (우리 경우 = U-Net)
+            </div>
+          </div>
+          <div class="vcenter">
+            <div class="callout"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg></div>
+              <div><div class="co-t">한국어로 풀면</div><div class="co-d">"입력 $x$를 넣으면 출력 $\hat{y}$가 나오는 기계가 있는데, 그 기계의 손잡이($\theta$)를 데이터를 보며 맞춰 간다." 학습 = 손잡이 맞추기.</div></div></div>
+            <div class="note" style="margin-top:24px">우리의 목표: 예측 $\hat{y}$가 진짜 정답 $y$(원본 슬라이스)와 최대한 같아지도록 $\theta$를 찾는 것.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>04</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 5 · LINEAR LAYER ============ -->
+  <section data-label="선형 계층">
+    <div class="s-pad">
+      <div class="eyebrow">BUILDING BLOCK</div>
+      <h2 class="s-title sm">가장 작은 단위 — 선형 계층</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">입력에 가중치를 곱하고 더한다</div>
+            <div class="eq">$y = W x + b$</div>
+            <div class="note" style="margin-top:22px">
+              <b>$W$</b> : 가중치 행렬 (곱하는 양)<br/>
+              <b>$b$</b> : 편향 (bias, 더하는 양)<br/>
+              학습으로 정해지는 $\theta = \{W, b\}$
+            </div>
+          </div>
+          <div class="vcenter">
+            <div class="eqlabel">예: 3개 입력 → 2개 출력</div>
+            <div class="eq tint" style="font-size:24px">$\begin{bmatrix} y_1 \\ y_2 \end{bmatrix} = \begin{bmatrix} w_{11} & w_{12} & w_{13} \\ w_{21} & w_{22} & w_{23} \end{bmatrix}\!\begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix} + \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}$</div>
+            <div class="note" style="margin-top:18px">합성곱(Conv)도 결국 "위치마다 가중치를 곱해 더하는" 이 연산의 특별한 형태입니다 (§2에서).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>05</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 6 · ACTIVATION ============ -->
+  <section data-label="활성 함수">
+    <div class="s-pad">
+      <div class="eyebrow">ACTIVATION</div>
+      <h2 class="s-title sm">비선형 — 곡선을 그릴 수 있게</h2>
+      <p class="s-sub">선형 계층만 쌓으면 여전히 직선밖에 못 그립니다. 사이사이 <b>비선형 함수</b>를 넣어야 복잡한 모양을 배웁니다.</p>
+      <div class="body vcenter">
+        <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kcard">
+            <div class="kt">ReLU</div>
+            <div class="eq" style="font-size:24px;margin:14px 0">$\max(0,\,x)$</div>
+            <div class="kd">음수는 0으로, 양수는 그대로. 가장 흔함.</div>
+          </div>
+          <div class="kcard">
+            <div class="kt">LeakyReLU</div>
+            <div class="eq" style="font-size:22px;margin:14px 0">$\max(0.1x,\,x)$</div>
+            <div class="kd">음수도 살짝 통과. <b>우리 ConvBlock이 사용</b> (기울기 0.1).</div>
+          </div>
+          <div class="kcard">
+            <div class="kt">Sigmoid</div>
+            <div class="eq" style="font-size:22px;margin:14px 0">$\dfrac{1}{1+e^{-x}}$</div>
+            <div class="kd">출력을 0~1로 누름. <b>U-Net 마지막</b>에 사용 (pore 확률).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>06</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 7 · LOSS ============ -->
+  <section data-label="손실 함수">
+    <div class="s-pad">
+      <div class="eyebrow">LOSS</div>
+      <h2 class="s-title sm">손실 — "얼마나 틀렸나"를 숫자로</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">L1 손실 (절대오차) — 우리 W2 기본</div>
+            <div class="eq">$L_1 = \dfrac{1}{N}\sum_{i=1}^{N} \lvert \hat{y}_i - y_i \rvert$</div>
+            <div class="eqlabel" style="margin-top:24px">L2 손실 (제곱오차, MSE)</div>
+            <div class="eq tint">$L_2 = \dfrac{1}{N}\sum_{i=1}^{N} (\hat{y}_i - y_i)^2$</div>
+          </div>
+          <div class="vcenter">
+            <div class="callout"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg></div>
+              <div><div class="co-t">한국어로 풀면</div><div class="co-d">모든 픽셀에서 "예측 $\hat{y}_i$ 와 정답 $y_i$ 의 차이"를 재서 평균낸 값. <b>0에 가까울수록 잘 맞춘 것.</b></div></div></div>
+            <div class="note" style="margin-top:22px"><b>L1 vs L2</b>: L2는 큰 오차를 제곱해 더 세게 벌점 → 선명하지만 outlier에 민감. L1은 더 안정적·부드러움. 학습은 이 $L$ 을 줄이는 과정.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>07</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 8 · GRADIENT DESCENT ============ -->
+  <section data-label="경사하강">
+    <div class="s-pad">
+      <div class="eyebrow">GRADIENT DESCENT</div>
+      <h2 class="s-title sm">학습 = 손실을 줄이는 방향으로 한 걸음</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">가중치 갱신 규칙</div>
+            <div class="eq">$\theta \;\leftarrow\; \theta \;-\; \eta \, \dfrac{\partial L}{\partial \theta}$</div>
+            <div class="note" style="margin-top:22px">
+              <b>$\dfrac{\partial L}{\partial \theta}$</b> (gradient) : $\theta$를 조금 바꾸면 $L$이 어디로 변하는지 = 기울기<br/>
+              <b>$\eta$</b> (learning rate) : 한 걸음의 크기 (우리 코드 $\eta=10^{-3}$)
+            </div>
+          </div>
+          <div class="chart-wrap vcenter">
+            <div class="eyebrow navy" style="font-size:18px">손실 골짜기를 따라 내려간다</div>
+            <svg viewBox="0 0 520 300" style="width:100%;margin-top:8px">
+              <path d="M40,40 Q260,360 480,40" fill="none" stroke="#1F3A5F" stroke-width="3"/>
+              <path d="M93,108 L150,160 L207,191 L260,200" fill="none" stroke="#EA851B" stroke-width="2" stroke-dasharray="3 4"/>
+              <circle cx="93" cy="108" r="8" fill="#EA851B"/><circle cx="150" cy="160" r="8" fill="#EA851B"/><circle cx="207" cy="191" r="8" fill="#EA851B"/><circle cx="260" cy="200" r="9" fill="#EA851B" stroke="#fff" stroke-width="2"/>
+              <text x="66" y="98" font-family="JetBrains Mono" font-size="15" fill="#D4760F">시작 (높은 손실)</text>
+              <text x="236" y="226" font-family="JetBrains Mono" font-size="15" fill="#D4760F">최소 (낮은 손실)</text>
+              <text x="44" y="288" font-family="JetBrains Mono" font-size="13" fill="#8A93A3">가중치 θ →</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>08</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 9 · BACKPROP ============ -->
+  <section data-label="역전파">
+    <div class="s-pad">
+      <div class="eyebrow">BACKPROPAGATION</div>
+      <h2 class="s-title sm">역전파 — 기울기를 연쇄법칙으로 계산</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">연쇄법칙 (chain rule)</div>
+            <div class="eq">$\dfrac{\partial L}{\partial w} = \dfrac{\partial L}{\partial \hat{y}} \cdot \dfrac{\partial \hat{y}}{\partial w}$</div>
+            <div class="note" style="margin-top:22px">출력 쪽 오차를 입력 쪽으로 <b>거꾸로 곱해 가며</b> 각 가중치가 손실에 준 책임(기울기)을 구합니다.</div>
+          </div>
+          <div class="vcenter">
+            <div class="callout navy"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></div>
+              <div><div class="co-t">PyTorch가 자동으로 해 준다</div><div class="co-d"><span class="font-mono">loss.backward()</span> 한 줄이면 모든 $\dfrac{\partial L}{\partial w}$ 가 자동 계산됩니다. 우리는 수식을 직접 미분할 필요 없이 <b>구조·손실·학습률만</b> 고르면 됩니다.</div></div></div>
+            <div class="codeblk" style="margin-top:22px;font-size:19px"><span class="fn">loss</span>.<span class="fn">backward</span>()   <span class="cm"># 기울기 자동 계산</span>
+<span class="nb">optimizer</span>.<span class="fn">step</span>()     <span class="cm"># θ ← θ − η·기울기</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>09</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 10 · §2 DIVIDER ============ -->
+  <section class="divider dark" data-label="§2 합성곱">
+    <div class="div-num">02</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 02</div>
+      <h2 class="div-title">합성곱<br/>Convolution</h2>
+      <p class="div-sub">이미지를 다루는 신경망의 핵심 연산 — 작은 커널이 그림 위를 미끄러진다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>10</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 11 · CONVOLUTION MATH ============ -->
+  <section data-label="합성곱 연산">
+    <div class="s-pad">
+      <div class="eyebrow">THE OPERATION</div>
+      <h2 class="s-title sm">합성곱 — 국소 가중합</h2>
+      <div class="body vcenter">
+        <div class="two l-wide">
+          <div class="vcenter">
+            <div class="eqlabel">출력 한 칸 = 커널 $K$ 와 겹친 입력 $I$ 의 가중합</div>
+            <div class="eq" style="font-size:26px">$(I * K)(i,j) = \displaystyle\sum_{m}\sum_{n} I(i{+}m,\, j{+}n)\,K(m,n)$</div>
+            <div class="note" style="margin-top:22px">3×3 <b>커널</b>이 이미지 위를 한 칸씩 미끄러지며, 겹친 9개 픽셀에 각자의 가중치를 곱해 더합니다. 같은 커널을 <b>전체에 공유</b> → 위치가 달라도 같은 패턴(엣지·텍스처)을 검출하고, 파라미터가 적습니다.</div>
+          </div>
+          <div class="chart-wrap vcenter">
+            <svg viewBox="0 0 240 240" style="width:230px;margin:0 auto">
+              <g fill="#EEF1F5" stroke="#D8DCE3" stroke-width="1.5">
+                <rect x="15" y="15" width="42" height="42"/><rect x="57" y="15" width="42" height="42"/><rect x="99" y="15" width="42" height="42"/><rect x="141" y="15" width="42" height="42"/><rect x="183" y="15" width="42" height="42"/>
+                <rect x="15" y="57" width="42" height="42"/><rect x="183" y="57" width="42" height="42"/>
+                <rect x="15" y="99" width="42" height="42"/><rect x="183" y="99" width="42" height="42"/>
+                <rect x="15" y="141" width="42" height="42"/><rect x="183" y="141" width="42" height="42"/>
+                <rect x="15" y="183" width="42" height="42"/><rect x="57" y="183" width="42" height="42"/><rect x="99" y="183" width="42" height="42"/><rect x="141" y="183" width="42" height="42"/><rect x="183" y="183" width="42" height="42"/>
+              </g>
+              <g fill="#FBE7CE" stroke="#EA851B" stroke-width="2">
+                <rect x="57" y="57" width="42" height="42"/><rect x="99" y="57" width="42" height="42"/><rect x="141" y="57" width="42" height="42"/>
+                <rect x="57" y="99" width="42" height="42"/><rect x="99" y="99" width="42" height="42"/><rect x="141" y="99" width="42" height="42"/>
+                <rect x="57" y="141" width="42" height="42"/><rect x="99" y="141" width="42" height="42"/><rect x="141" y="141" width="42" height="42"/>
+              </g>
+              <text x="120" y="122" font-family="JetBrains Mono" font-size="15" fill="#D4760F" text-anchor="middle">3×3 커널</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>11</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 12 · CHANNELS ============ -->
+  <section data-label="채널 · feature map">
+    <div class="s-pad">
+      <div class="eyebrow">CHANNELS</div>
+      <h2 class="s-title sm">채널 — 여러 종류의 패턴 검출기</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic navy">▦</div><div><div class="bi-t">입력 채널 → 출력 채널</div><div class="bi-d">예: 입력 2채널(앞·뒤 슬라이스) → 출력 8채널. 출력 채널 하나 = 커널 하나가 만든 <b>feature map</b>.</div></div></div>
+            <div class="bitem"><div class="bi-ic">▤</div><div><div class="bi-t">feature map</div><div class="bi-d">"이 위치에 이 패턴이 얼마나 있나"를 담은 지도. 채널이 많을수록 다양한 패턴을 본다.</div></div></div>
+            <div class="bitem"><div class="bi-ic navy">⬚</div><div><div class="bi-t">padding</div><div class="bi-d">가장자리를 0으로 채워 크기를 유지 (우리 코드 <span class="font-mono">padding=1</span> → 3×3에서 크기 보존).</div></div></div>
+          </div>
+          <div class="vcenter">
+            <div class="codeblk" style="font-size:19px"><span class="cm"># model_utils.py · ConvBlock 의 한 줄</span>
+nn.<span class="fn">Conv2d</span>(in_ch, out_ch, <span class="nb">3</span>, padding=<span class="nb">1</span>)
+<span class="cm">#         입력채널  출력채널  커널3×3  크기보존</span></div>
+            <div class="note" style="margin-top:22px">커널 크기 3, padding 1 → 출력의 가로·세로 크기는 입력과 같고, <b>채널 수만</b> in_ch→out_ch 로 바뀝니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>12</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 13 · POOL / CONVTRANSPOSE ============ -->
+  <section data-label="Pool · ConvTranspose">
+    <div class="s-pad">
+      <div class="eyebrow">DOWN &amp; UP</div>
+      <h2 class="s-title sm">크기를 줄이고 — 다시 키우고</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="kcard">
+            <div class="kt">MaxPool 2×2 — 다운샘플 ↓</div>
+            <div class="note" style="margin-top:12px">2×2 구역마다 <b>최댓값 하나</b>만 남겨 크기를 절반으로. 64×64 → 32×32. "넓게 보는" 효과 + 계산량 절감.</div>
+            <div class="codeblk" style="margin-top:16px;font-size:18px">nn.<span class="fn">MaxPool2d</span>(<span class="nb">2</span>)  <span class="cm"># 64→32</span></div>
+          </div>
+          <div class="kcard">
+            <div class="kt">ConvTranspose 2×2 — 업샘플 ↑</div>
+            <div class="note" style="margin-top:12px">학습된 커널로 크기를 <b>두 배</b>로 키움 (16×16 → 32×32). decoder가 해상도를 복원할 때 사용.</div>
+            <div class="codeblk" style="margin-top:16px;font-size:18px">nn.<span class="fn">ConvTranspose2d</span>(c, c, <span class="nb">2</span>, stride=<span class="nb">2</span>)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>13</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 14 · BATCHNORM ============ -->
+  <section data-label="BatchNorm">
+    <div class="s-pad">
+      <div class="eyebrow">BATCH NORMALIZATION</div>
+      <h2 class="s-title sm">BatchNorm — 학습을 안정시키는 정규화</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">각 채널을 평균 0·분산 1로 정규화</div>
+            <div class="eq">$\hat{x} = \dfrac{x - \mu}{\sqrt{\sigma^2 + \epsilon}}$</div>
+            <div class="note" style="margin-top:22px"><b>$\mu, \sigma^2$</b> : batch 안에서 잰 평균·분산<br/><b>$\epsilon$</b> : 0으로 나눔 방지용 아주 작은 수</div>
+          </div>
+          <div class="vcenter">
+            <div class="callout"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 4v16h16"/><path d="M8 15l3-4 3 2 4-6"/></svg></div>
+              <div><div class="co-t">왜 필요한가</div><div class="co-d">층을 지날수록 값의 크기가 들쭉날쭉해지면 학습이 불안정합니다. 매 층에서 값을 "비슷한 크기"로 맞춰 주면 <b>더 빠르고 안정적</b>으로 학습됩니다.</div></div></div>
+            <div class="codeblk" style="margin-top:22px;font-size:19px">nn.<span class="fn">BatchNorm2d</span>(out_ch)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>14</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 15 · §3 DIVIDER ============ -->
+  <section class="divider dark" data-label="§3 U-Net 구조">
+    <div class="div-num">03</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 03</div>
+      <h2 class="div-title">U-Net 구조</h2>
+      <p class="div-sub">압축(encoder) → 복원(decoder) + 건너뛰기(skip). 이제 부품을 조립합니다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>15</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 16 · UNET BIG PICTURE ============ -->
+  <section data-label="U-Net 큰 그림">
+    <div class="s-pad">
+      <div class="eyebrow">UNetMini · base=8</div>
+      <h2 class="s-title sm">U자 모양 — 압축했다가 복원한다</h2>
+      <div class="body vcenter">
+        <div class="chart-wrap" style="padding:28px 36px">
+          <svg viewBox="0 0 1180 340" style="width:100%">
+            <rect x="50"  y="70"  width="40" height="190" rx="6" fill="#E2E9F1" stroke="#CBD8E6" stroke-width="2"/>
+            <text x="70" y="285" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">64²·8</text>
+            <text x="70" y="56" font-family="JetBrains Mono" font-size="13" fill="#1F3A5F" text-anchor="middle">e1</text>
+            <path d="M96 165 L138 165" stroke="#8A93A3" stroke-width="2" marker-end="url(#d)"/>
+            <rect x="148" y="105" width="48" height="120" rx="6" fill="#CBD8E6" stroke="#9DB1CB" stroke-width="2"/>
+            <text x="172" y="285" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">32²·16</text>
+            <text x="172" y="92" font-family="JetBrains Mono" font-size="13" fill="#1F3A5F" text-anchor="middle">e2</text>
+            <path d="M204 165 L244 165" stroke="#8A93A3" stroke-width="2" marker-end="url(#d)"/>
+            <rect x="256" y="138" width="56" height="56" rx="6" fill="#1F3A5F"/>
+            <text x="284" y="285" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">16²·32</text>
+            <text x="284" y="126" font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">bottleneck</text>
+            <path d="M320 165 L360 165" stroke="#8A93A3" stroke-width="2" marker-end="url(#u)"/>
+            <rect x="372" y="105" width="48" height="120" rx="6" fill="#F6C994" stroke="#F2D6B2" stroke-width="2"/>
+            <text x="396" y="285" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">32²·16</text>
+            <text x="396" y="92" font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">d2</text>
+            <path d="M428 165 L468 165" stroke="#8A93A3" stroke-width="2" marker-end="url(#u)"/>
+            <rect x="480" y="70" width="40" height="190" rx="6" fill="#FBE7CE" stroke="#F2D6B2" stroke-width="2"/>
+            <text x="500" y="285" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">64²·8</text>
+            <text x="500" y="56" font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">d1</text>
+            <path d="M526 165 L566 165" stroke="#8A93A3" stroke-width="2" marker-end="url(#u)"/>
+            <rect x="578" y="90" width="28" height="150" rx="6" fill="#EA851B"/>
+            <text x="592" y="285" font-family="JetBrains Mono" font-size="15" fill="#D4760F" text-anchor="middle">64²·1</text>
+            <text x="592" y="78" font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">out</text>
+            <path d="M90 88 C 270 18, 320 18, 480 88" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="7 6"/>
+            <path d="M196 120 C 290 80, 320 80, 372 120" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="7 6"/>
+            <text x="284" y="24" font-family="JetBrains Mono" font-size="15" fill="#EA851B" text-anchor="middle">skip-connection (detail 전달)</text>
+            <text x="170" y="325" font-family="JetBrains Mono" font-size="14" fill="#1F3A5F" text-anchor="middle">◀ Encoder (압축)</text>
+            <text x="450" y="325" font-family="JetBrains Mono" font-size="14" fill="#D4760F" text-anchor="middle">Decoder (복원) ▶</text>
+            <g font-family="JetBrains Mono">
+              <text x="720" y="110" font-size="20" fill="#1F3A5F">입력 [앞, 뒤] (2채널, 64×64)</text>
+              <text x="720" y="165" font-size="20" fill="#5A6475">Conv→Pool 반복 → 압축 (채널↑ 크기↓)</text>
+              <text x="720" y="220" font-size="20" fill="#5A6475">ConvT → 복원 (크기↑) + skip 합치기</text>
+              <text x="720" y="275" font-size="20" fill="#D4760F">출력 가운데 슬라이스 (1채널, sigmoid)</text>
+            </g>
+            <defs>
+              <marker id="d" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker>
+              <marker id="u" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>16</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 17 · CONVBLOCK CODE ============ -->
+  <section data-label="ConvBlock 코드">
+    <div class="s-pad">
+      <div class="eyebrow">CODE · model_utils.py</div>
+      <h2 class="s-title sm">ConvBlock — U-Net의 기본 부품</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="codeblk" style="font-size:18px"><span class="kw">class</span> <span class="fn">ConvBlock</span>(nn.Module):
+  <span class="cm"># Conv → BN → LeakyReLU 를 두 번</span>
+  self.conv = nn.<span class="fn">Sequential</span>(
+    nn.<span class="fn">Conv2d</span>(in_ch, out_ch, <span class="nb">3</span>, padding=<span class="nb">1</span>),
+    nn.<span class="fn">BatchNorm2d</span>(out_ch),
+    nn.<span class="fn">LeakyReLU</span>(<span class="nb">0.1</span>),
+    nn.<span class="fn">Conv2d</span>(out_ch, out_ch, <span class="nb">3</span>, padding=<span class="nb">1</span>),
+    nn.<span class="fn">BatchNorm2d</span>(out_ch),
+    nn.<span class="fn">LeakyReLU</span>(<span class="nb">0.1</span>),
+  )</div>
+          </div>
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic navy">1</div><div><div class="bi-t">Conv2d — 패턴 추출</div><div class="bi-d">3×3 커널로 국소 패턴을 읽어 채널을 in→out 으로.</div></div></div>
+            <div class="bitem"><div class="bi-ic navy">2</div><div><div class="bi-t">BatchNorm2d — 정규화</div><div class="bi-d">값 크기를 맞춰 학습 안정화.</div></div></div>
+            <div class="bitem"><div class="bi-ic">3</div><div><div class="bi-t">LeakyReLU — 비선형</div><div class="bi-d">곡선을 그릴 수 있게. 음수도 0.1배로 통과.</div></div></div>
+            <div class="note" style="margin-top:8px">이 3단계를 <b>두 번</b> 반복한 것이 ConvBlock 하나. U-Net은 이 블록을 여러 개 쌓아 만듭니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>17</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 18 · SHAPE TRACE ============ -->
+  <section data-label="텐서 shape 추적">
+    <div class="s-pad">
+      <div class="eyebrow">FORWARD PASS · base=8</div>
+      <h2 class="s-title sm">입력이 출력까지 — 크기를 따라가 보자</h2>
+      <div class="body vcenter">
+        <div class="shape-tab">
+          <div class="r h"><div>단계</div><div>텐서 (채널×H×W)</div><div>무슨 일</div></div>
+          <div class="r"><div class="stage-n">입력</div><div class="shape">2 × 64 × 64</div><div class="note">[앞 슬라이스, 뒤 슬라이스]</div></div>
+          <div class="r"><div class="stage-n">e1</div><div class="shape">8 × 64 × 64</div><div class="note">ConvBlock — 채널 2→8</div></div>
+          <div class="r"><div class="stage-n">e2</div><div class="shape">16 × 32 × 32</div><div class="note">Pool 후 ConvBlock — 압축</div></div>
+          <div class="r"><div class="stage-n">e3 (bottleneck)</div><div class="shape">32 × 16 × 16</div><div class="note">가장 압축된 표현</div></div>
+          <div class="r"><div class="stage-n">d2</div><div class="shape">16 × 32 × 32</div><div class="note">ConvT 업샘플 + e2 skip 합치기</div></div>
+          <div class="r"><div class="stage-n">d1</div><div class="shape">8 × 64 × 64</div><div class="note">ConvT 업샘플 + e1 skip 합치기</div></div>
+          <div class="r bn"><div class="stage-n">출력</div><div class="shape">1 × 64 × 64</div><div class="note">1×1 Conv + sigmoid → 가운데 슬라이스</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>18</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 19 · SKIP CODE ============ -->
+  <section data-label="skip-connection 코드">
+    <div class="s-pad">
+      <div class="eyebrow">SKIP-CONNECTION</div>
+      <h2 class="s-title sm">건너뛰기 — encoder의 detail을 직접 전달</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="codeblk" style="font-size:19px"><span class="kw">class</span> <span class="fn">UpBlock</span>(nn.Module):
+  <span class="kw">def</span> <span class="fn">forward</span>(self, x, skip):
+    x = self.<span class="fn">up</span>(x)              <span class="cm"># 크기 ↑</span>
+    x = torch.<span class="fn">cat</span>([x, skip], dim=<span class="nb">1</span>)
+    <span class="cm"># ↑ encoder의 같은 크기 feature를 채널로 합침</span>
+    <span class="kw">return</span> self.<span class="fn">conv</span>(x)</div>
+            <div class="note" style="margin-top:20px"><span class="font-mono">dim=1</span> = 채널 축. 합치면 채널이 두 배가 되고, 이어지는 ConvBlock이 그걸 다시 정리합니다.</div>
+          </div>
+          <div class="vcenter">
+            <div class="callout"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+              <div><div class="co-t">왜 중요한가</div><div class="co-d">압축하며 잃어버린 <b>엣지·경계 detail</b>을 decoder가 그대로 돌려받습니다. skip이 없으면 → 흐릿한 복원, 있으면 → <b>선명한 pore 경계</b>.</div></div></div>
+            <svg viewBox="0 0 420 220" style="width:100%;margin-top:18px">
+              <rect x="20" y="40" width="120" height="60" rx="8" fill="#E2E9F1" stroke="#9DB1CB" stroke-width="2"/>
+              <text x="80" y="30" font-family="JetBrains Mono" font-size="14" fill="#1F3A5F" text-anchor="middle">encoder feature</text>
+              <rect x="20" y="140" width="120" height="60" rx="8" fill="#F6C994" stroke="#F2D6B2" stroke-width="2"/>
+              <text x="80" y="216" font-family="JetBrains Mono" font-size="14" fill="#D4760F" text-anchor="middle">upsampled</text>
+              <path d="M140 70 C 220 70, 220 105, 280 110" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#c2)"/>
+              <path d="M140 170 C 220 170, 220 130, 280 125" fill="none" stroke="#1F3A5F" stroke-width="2.5" marker-end="url(#c2)"/>
+              <rect x="286" y="85" width="110" height="60" rx="8" fill="#FBE7CE" stroke="#EA851B" stroke-width="2"/>
+              <text x="341" y="120" font-family="JetBrains Mono" font-size="16" fill="#D4760F" text-anchor="middle">cat → Conv</text>
+              <defs><marker id="c2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker></defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>19</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 20 · §4 DIVIDER ============ -->
+  <section class="divider dark" data-label="§4 우리 코드">
+    <div class="div-num">04</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 04</div>
+      <h2 class="div-title">우리가 쓴<br/>코드 읽기</h2>
+      <p class="div-sub">데이터 만들기 · 학습 루프 · 하이퍼파라미터 · 평가 — W2 노트북의 핵심.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>20</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 21 · SLICEDATASET ============ -->
+  <section data-label="SliceDataset">
+    <div class="s-pad">
+      <div class="eyebrow">DATA · SliceDataset</div>
+      <h2 class="s-title sm">학습 데이터 만들기 — triplet</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eqlabel">누락된 z 하나마다, 앞·뒤 측정 슬라이스를 찾는다</div>
+            <div class="eq tint" style="font-size:24px">$\text{before} = z - (z \bmod k), \quad \text{after} = \text{before} + k$</div>
+            <div class="note" style="margin-top:20px">$z \bmod k$ = z를 k로 나눈 나머지. 예) $k{=}2,\ z{=}5$ → before$=4$, after$=6$. 입력 $[\,$slice$_4$, slice$_6\,]$ → 정답 slice$_5$.</div>
+          </div>
+          <div class="vcenter">
+            <div class="codeblk" style="font-size:18px"><span class="kw">for</span> z <span class="kw">in</span> <span class="fn">range</span>(Z):
+  <span class="kw">if</span> z % k == <span class="nb">0</span>: <span class="kw">continue</span>  <span class="cm"># 측정됨→건너뜀</span>
+  before = z - (z % k)
+  after  = before + k
+  <span class="cm"># 입력 [bb[before], bb[after]] → 정답 bb[z]</span></div>
+            <div class="note" style="margin-top:18px">이렇게 만든 (before, 정답, after) 한 묶음이 학습 sample 하나. 부피 전체에서 수백 개가 자동 생성됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>21</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 22 · TRAINING LOOP ============ -->
+  <section data-label="학습 루프 코드">
+    <div class="s-pad">
+      <div class="eyebrow">TRAINING LOOP · train_one_epoch</div>
+      <h2 class="s-title sm">학습 루프 = 우리가 본 4박자</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="codeblk" style="font-size:19px"><span class="kw">for</span> x, y <span class="kw">in</span> loader:
+    pred = <span class="fn">model</span>(x)          <span class="cm"># ① Forward</span>
+    loss = <span class="fn">criterion</span>(pred, y) <span class="cm"># ② Loss</span>
+    optimizer.<span class="fn">zero_grad</span>()
+    loss.<span class="fn">backward</span>()          <span class="cm"># ③ Backward</span>
+    optimizer.<span class="fn">step</span>()           <span class="cm"># ④ 갱신</span></div>
+          </div>
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic navy">①</div><div><div class="bi-t">Forward</div><div class="bi-d">입력 x로 예측 pred ($\hat{y}$).</div></div></div>
+            <div class="bitem"><div class="bi-ic">②</div><div><div class="bi-t">Loss</div><div class="bi-d">정답 y와의 L1 손실.</div></div></div>
+            <div class="bitem navy"><div class="bi-ic navy">③</div><div><div class="bi-t">Backward</div><div class="bi-d">$\partial L/\partial\theta$ 자동 계산.</div></div></div>
+            <div class="bitem"><div class="bi-ic">④</div><div><div class="bi-t">step</div><div class="bi-d">$\theta \leftarrow \theta - \eta\,\partial L/\partial\theta$.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>22</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 23 · HYPERPARAMS + METRICS ============ -->
+  <section data-label="하이퍼파라미터 · 평가">
+    <div class="s-pad">
+      <div class="eyebrow">KNOBS &amp; METRICS</div>
+      <h2 class="s-title sm">우리가 고르는 손잡이 &amp; 채점 기준</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="eyebrow navy" style="font-size:18px;margin-bottom:14px">하이퍼파라미터 (train_quick)</div>
+            <div class="kgrid">
+              <div class="kcard" style="padding:18px 20px"><div class="kt" style="font-size:20px">base</div><div class="kd">채널 폭 = 모델 크기 (8/16)</div></div>
+              <div class="kcard" style="padding:18px 20px"><div class="kt" style="font-size:20px">epochs</div><div class="kd">데이터 전체 반복 횟수</div></div>
+              <div class="kcard" style="padding:18px 20px"><div class="kt" style="font-size:20px">lr ($\eta$)</div><div class="kd">한 걸음 크기 (1e-3)</div></div>
+              <div class="kcard" style="padding:18px 20px"><div class="kt" style="font-size:20px">k</div><div class="kd">측정 간격 (sparsity)</div></div>
+            </div>
+          </div>
+          <div class="vcenter">
+            <div class="eyebrow navy" style="font-size:18px;margin-bottom:14px">평가 지표</div>
+            <div class="eqlabel">공극률 오차 (작을수록 좋음)</div>
+            <div class="eq" style="font-size:26px">$\lvert\Delta\phi\rvert = \lvert \phi_{\text{복원}} - \phi_{\text{원본}} \rvert$</div>
+            <div class="note" style="margin-top:16px"><b>SSIM</b> : 구조 유사도 (0~1, 클수록 좋음). 공극률은 "양"이 맞는지, SSIM은 "모양"이 맞는지를 봅니다 — 둘을 함께.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>23</b> / 24</div></div>
+  </section>
+
+  <!-- ============ 24 · CLOSING ============ -->
+  <section class="divider dark" data-label="정리">
+    <div class="s-pad" style="justify-content:center">
+      <div class="div-kick">이제 직접 해보자</div>
+      <h2 class="div-title">수식 → 그림 → 코드,<br/>이제 <span style="color:#F6C994">노트북</span>에서.</h2>
+      <p class="div-sub">W2 노트북에서 이 부품들이 실제로 돌아갑니다. §6.5 심화에서 base·손실·k 를 직접 바꿔
+        보며, "딥러닝은 어느 영역에서 linear를 이기는가"를 스스로 확인하세요.</p>
+      <div style="display:flex;gap:16px;margin-top:40px">
+        <span class="chip dark"><span class="dot"></span>W2_deep_learning_intro.ipynb</span>
+        <span class="chip dark"><span class="dot"></span>model_utils.py</span>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · U-Net 기초 해설</div><div class="pg"><b>24</b> / 24</div></div>
+  </section>
+
+</deck-stage>
+<script src="deck/deck-stage.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+  // KaTeX 렌더링 — 슬라이드는 light DOM(body)에 있으므로 body 전체를 스캔.
+  // deck-stage가 폰트 로드까지 stage를 숨기므로, 로드 후 재렌더 한 번 더.
+  function _renderMath(){
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+        throwOnError: false
+      });
+    }
+  }
+  window.addEventListener('load', () => { _renderMath(); setTimeout(_renderMath, 300); });
+</script>
+</body>
+</html>
