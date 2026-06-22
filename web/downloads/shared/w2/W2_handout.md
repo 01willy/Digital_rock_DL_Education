@@ -67,9 +67,9 @@ jupyter notebook W2_deep_learning_intro.ipynb
 
 §6.5-B 확장: `nn.L1Loss()` / `nn.MSELoss()` 비교에 더해 **L1 + λ·(1−SSIM) 복합 손실을 직접 구현**하고, λ 를 바꿔 가며 선명도와 |Δφ| 의 trade-off를 분석합니다.
 
-### 과제 4 (선택, 심화) — k 일반화 & 실패 모드
+### 과제 4 (선택, 심화) — k-regime crossover & 실패 모드
 
-§6.5-C/D 확장: 학습 k 와 평가 k 를 바꿔 **성능 지도**를 만들고, per-slice 오차가 큰 슬라이스들의 **구조적 공통점**을 찾아 모델의 한계를 서술합니다. (도전: lr sweep `{1e-4, 5e-4, 1e-3, 5e-3}` 으로 발산/수렴 양상도 함께.)
+§6.5-C/D 확장: 각 k(2·3·5)에서 UNet과 linear를 같은 조건으로 비교해 **UNet이 이기는 k 영역**을 지도로 만들고(작은 k=UNet 우세, 큰 k=linear 우세인 crossover를 확인), per-slice 오차가 큰 슬라이스들의 **구조적 공통점**으로 한계를 서술합니다. (도전: lr sweep `{1e-4, 5e-4, 1e-3, 5e-3}` 으로 발산/수렴도.)
 
 ## 6. 다음 주차 사전 준비
 

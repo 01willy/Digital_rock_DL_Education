@@ -35,7 +35,7 @@ window.COURSE = {
       title:'Deep Learning 입문 — UNet · pix2pix 구조',
       en:'UNet · pix2pix · Train',
       summary:'슬라이스 보간을 학습 가능한 함수로 정식화. UNet 구조와 pix2pix(조건부 image-to-image) 흐름을 코드로 따라가고, mini UNet을 직접 학습합니다. 나아가 학습 루프·손실·모델 크기를 직접 수정하며 cross-domain 일반화와 실패 모드까지 분석합니다.',
-      concepts:['UNet · skip','pix2pix 흐름','학습 루프 직접 제어','L1/MSE/복합 손실','k 일반화 · 실패 모드'],
+      concepts:['UNet · skip','pix2pix 흐름','학습 루프 직접 제어','L1/MSE/복합 손실','k-regime crossover'],
       nonDL:false,
       plan:[
         'sparse triplet dataset 구성 (입력 2채널 → 가운데 슬라이스)',
@@ -305,7 +305,7 @@ window.COURSE = {
           { t:'preset & 모델 크기', req:true, d:'fast·standard 비교에 더해 train_custom(base=…)로 모델 크기를 직접 바꿔 파라미터 ↔ |Δφ|·SSIM ↔ 학습시간 trade-off 곡선을 그리기. 학습 곡선에서 overfitting 징후를 찾아 설명.' },
           { t:'Cross-domain 일반화', req:true, d:'4 도메인 평가표 + 시각화. 추가로 각 도메인의 Linear 대비 개선폭을 계산하고, 일반화가 깨지는 도메인과 원인 가설(공극률·구조·등방성)을 정량 근거와 함께 제시.' },
           { t:'복합 손실 함수 (도전)', req:false, d:'§6.5-B 확장 — L1/MSE 비교에 더해 L1 + λ·(1−SSIM) 복합 손실을 직접 구현, λ 를 바꿔 선명도와 |Δφ| 의 trade-off를 분석.' },
-          { t:'k 일반화 & 실패 모드 (심화)', req:false, d:'§6.5-C/D 확장 — 학습 k≠평가 k 성능 지도 + per-slice 오차가 큰 슬라이스의 구조적 공통점으로 모델의 한계를 서술. (lr sweep으로 발산/수렴도 함께.)' },
+          { t:'k-regime crossover & 실패 모드 (심화)', req:false, d:'§6.5-C/D 확장 — UNet이 linear를 이기는 k 영역을 직접 지도로(작은 k=UNet, 큰 k=linear) + per-slice 오차가 큰 슬라이스의 구조적 공통점으로 한계를 서술. (lr sweep으로 발산/수렴도.)' },
         ],
       },
       g2: {
@@ -376,7 +376,7 @@ window.COURSE = {
           { n:'09', kind:'cross', t:'Cross-domain 평가', code:"for name in ['CastleGate','Bentheimer','Parker']:\n    vol = load_volume(DATA / f'{name}_256.bin')\n    evaluate_model(model, vol, k=5, device=DEVICE)", d:'BB로 학습한 모델을 다른 도메인에 zero-shot 평가. [Try-it! ②] — 일반화를 관찰.' },
           { n:'10', kind:'train', t:'§6.5-A 학습 루프 직접 제어', code:"def train_custom(volume, k=5, base=8, epochs=20,\n                 lr=1e-3, criterion=None):\n    ...   # train_quick을 펼친 형태\nm, h = train_custom(bb, base=8, lr=1e-3)", d:'편의 함수에 가려졌던 학습 루프를 펼쳐 손실·lr·구조를 직접 바꿉니다. [Try-it! ①④]' },
           { n:'11', kind:'train', t:'§6.5-B 손실 함수 비교', code:"for name, crit in [('L1', nn.L1Loss()),\n                   ('MSE', nn.MSELoss())]:\n    m, h = train_custom(bb, criterion=crit)", d:'L1 vs MSE 학습 곡선·|Δφ|·SSIM 비교. 복합 손실(L1+SSIM)까지 직접 구현 도전. [Try-it! ③]' },
-          { n:'12', kind:'cross', t:'§6.5-C k 일반화', code:"model_k3, _ = train_custom(bb, k=3)\nfor k_eval in [2, 3, 5, 7]:\n    evaluate_model(model_k3, bb, k=k_eval)", d:'학습 k와 평가 k가 다를 때 성능 변화 — sparsity 일반화를 관찰. [Try-it! ⑤]' },
+          { n:'12', kind:'cross', t:'§6.5-C k-regime crossover', code:"for k in [2, 3, 5]:\n    lin = summarize_metrics(reconstruct_sparse_linear(bb, k=k), bb)\n    mk, _ = train_custom(bb, k=k)\n    evaluate_model(mk, bb, k=k)  # vs linear", d:'각 k에서 UNet과 linear를 같은 조건으로 비교 — 작은 k는 UNet, 큰 k는 linear가 이기는 crossover. [Try-it! ⑤]' },
           { n:'13', kind:'view', t:'§6.5-D per-slice 실패 분석', code:"per_slice = [abs(recon[z].mean()-bb[z].mean())\n             for z in range(256)]\nworst = np.argsort(per_slice)[-5:]", d:'슬라이스별 |Δφ|를 그려 모델이 어디서 실패하는지 찾고 구조적 원인을 분석. [Try-it! ⑥]' },
         ],
         tryits: [
@@ -384,7 +384,7 @@ window.COURSE = {
           { n:'②', fn:'evaluate_model (도메인)', change:'BB 모델을 4개 도메인에 평가', observe:'학습 도메인 밖 일반화 + 도메인별 Linear 대비 개선폭' },
           { n:'③', fn:'criterion (loss)', change:'L1 → MSE → L1+λ(1−SSIM) 복합', observe:'손실 종류에 따른 선명도·안정성·|Δφ| 변화' },
           { n:'④', fn:'Adam (learning rate)', change:'lr ∈ {1e-4, 5e-4, 1e-3, 5e-3}', observe:'학습 곡선 — 너무 작으면 느림, 너무 크면 NaN 발산' },
-          { n:'⑤', fn:'k 일반화', change:'학습 k=3 → 평가 k∈{2,3,5,7}', observe:'학습 k에서 멀어질수록 성능 변화 (sparsity 일반화)' },
+          { n:'⑤', fn:'k-regime crossover', change:'각 k(2·3·5)에서 학습·평가 vs linear', observe:'작은 k=UNet 우세, 큰 k=linear 우세 (crossover)' },
           { n:'⑥', fn:'per-slice 오차', change:'|Δφ| per slice 계산·정렬', observe:'모델이 실패하는 슬라이스의 구조적 공통점' },
         ],
       },

@@ -168,23 +168,25 @@
             </div>
           </div>
           <div class="chart-wrap vcenter">
-            <svg viewBox="0 0 320 320" style="width:100%;max-width:320px;margin:0 auto">
-              <circle cx="160" cy="160" r="118" fill="none" stroke="#E4DED2" stroke-width="2" stroke-dasharray="4 8"/>
-              <!-- 4 nodes around a loop -->
-              <g font-family="JetBrains Mono" text-anchor="middle">
-                <circle cx="160" cy="42" r="34" fill="#1F3A5F"/><text x="160" y="40" font-size="13" fill="#fff">Forward</text><text x="160" y="56" font-size="11" fill="#9DB1CB">ŷ</text>
-                <circle cx="278" cy="160" r="34" fill="#EA851B"/><text x="278" y="158" font-size="13" fill="#fff">Loss</text><text x="278" y="174" font-size="11" fill="#FBE7CE">차이</text>
-                <circle cx="160" cy="278" r="34" fill="#1F3A5F"/><text x="160" y="276" font-size="12" fill="#fff">Backward</text><text x="160" y="292" font-size="11" fill="#9DB1CB">∇</text>
-                <circle cx="42" cy="160" r="34" fill="#2E8B57"/><text x="42" y="158" font-size="11" fill="#fff">Optim</text><text x="42" y="174" font-size="11" fill="#C9E8D5">step</text>
+            <svg viewBox="0 0 320 320" style="width:100%;max-width:330px;margin:0 auto">
+              <circle cx="160" cy="160" r="118" fill="none" stroke="#E8E2D6" stroke-width="2" stroke-dasharray="3 9"/>
+              <!-- clockwise arrows ending in the gaps between nodes (no text overlap) -->
+              <g fill="none" stroke="#C2C7CF" stroke-width="3" marker-end="url(#ahc)">
+                <path d="M204,51 A118,118 0 0 1 268,115"/>
+                <path d="M269,205 A118,118 0 0 1 205,269"/>
+                <path d="M116,269 A118,118 0 0 1 52,205"/>
+                <path d="M51,115 A118,118 0 0 1 115,51"/>
               </g>
-              <!-- arrows along circle -->
-              <path d="M196 64 A 118 118 0 0 1 256 124" fill="none" stroke="#C9CCD2" stroke-width="2.5" marker-end="url(#ah)"/>
-              <path d="M256 196 A 118 118 0 0 1 196 256" fill="none" stroke="#C9CCD2" stroke-width="2.5" marker-end="url(#ah)"/>
-              <path d="M124 256 A 118 118 0 0 1 64 196" fill="none" stroke="#C9CCD2" stroke-width="2.5" marker-end="url(#ah)"/>
-              <path d="M64 124 A 118 118 0 0 1 124 64" fill="none" stroke="#C9CCD2" stroke-width="2.5" marker-end="url(#ah)"/>
-              <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker></defs>
-              <text x="160" y="166" font-family="JetBrains Mono" font-size="14" fill="#8A93A3" text-anchor="middle">epoch ×</text>
-              <text x="160" y="186" font-family="JetBrains Mono" font-size="14" fill="#8A93A3" text-anchor="middle">수천 batch</text>
+              <!-- nodes drawn on top -->
+              <g font-family="JetBrains Mono" text-anchor="middle">
+                <circle cx="160" cy="42" r="37" fill="#1F3A5F"/><text x="160" y="39" font-size="13" fill="#fff">Forward</text><text x="160" y="56" font-size="11" fill="#9DB1CB">→ ŷ</text>
+                <circle cx="278" cy="160" r="37" fill="#EA851B"/><text x="278" y="157" font-size="14" fill="#fff">Loss</text><text x="278" y="174" font-size="11" fill="#FBE7CE">차이</text>
+                <circle cx="160" cy="278" r="37" fill="#1F3A5F"/><text x="160" y="275" font-size="12" fill="#fff">Backward</text><text x="160" y="292" font-size="11" fill="#9DB1CB">∇ grad</text>
+                <circle cx="42" cy="160" r="37" fill="#2E8B57"/><text x="42" y="157" font-size="12" fill="#fff">Optim</text><text x="42" y="174" font-size="11" fill="#C9E8D5">step</text>
+              </g>
+              <defs><marker id="ahc" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#9AA0A8"/></marker></defs>
+              <text x="160" y="156" font-family="JetBrains Mono" font-size="13" fill="#8A93A3" text-anchor="middle">epoch ×</text>
+              <text x="160" y="174" font-family="JetBrains Mono" font-size="13" fill="#8A93A3" text-anchor="middle">수천 batch</text>
             </svg>
           </div>
         </div>
@@ -645,39 +647,49 @@
   <!-- ============ 22 · RESULT: B1 vs UNet ============ -->
   <section data-label="Linear vs UNet">
     <div class="s-pad">
-      <div class="eyebrow">evaluate_model() · k=5</div>
-      <h2 class="s-title sm">선형 보간을 이겼나?</h2>
+      <div class="eyebrow">evaluate_model() · k-regime crossover</div>
+      <h2 class="s-title sm">선형 보간을 이겼나? — k에 따라 다르다</h2>
       <div class="body vcenter">
         <div class="two">
-          <div class="vcenter">
-            <p style="font-size:25px;color:var(--ink-2);line-height:1.6">같은 누락 슬라이스를 <b style="color:var(--ink)">B1 Linear</b>와 <b style="color:var(--orange-600)">UNet</b>으로 각각 복원해
-              <b>|Δφ|는 더 작게, SSIM은 더 크게</b> 나오는지 확인합니다.</p>
-            <div class="cmp" style="margin-top:30px">
-              <div class="cmp-row"><div class="cmp-l">|Δφ| <span>작을수록 좋음</span></div>
-                <div class="cmp-bars"><span class="cb nav" style="--w:78%">Linear</span><span class="cb or" style="--w:40%">UNet</span></div></div>
-              <div class="cmp-row"><div class="cmp-l">SSIM <span>클수록 좋음</span></div>
-                <div class="cmp-bars"><span class="cb nav" style="--w:62%">Linear</span><span class="cb or" style="--w:86%">UNet</span></div></div>
+          <div class="reg-card win">
+            <div class="reg-h"><span class="reg-k">k = 2</span><span class="reg-tag win">UNet 승</span></div>
+            <div class="reg-sub">측정 간격 좁음 · 50% 측정</div>
+            <div class="reg-rows">
+              <div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 3.40</span><span class="v-unet">UNet 0.76</span></div>
+              <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.803</span><span class="v-unet">UNet 0.862</span></div>
             </div>
-            <p style="font-size:18px;color:var(--ink-3);margin-top:18px;font-family:var(--mono)">* 막대는 방향만 — 실제 수치는 노트북에서 본인 결과로 채워 넣으세요.</p>
+            <div class="reg-note">pore 구조를 학습한 UNet이 <b>양 지표 모두 우세</b></div>
           </div>
-          <div class="dcard tint vcenter" style="justify-content:center">
-            <div class="eyebrow navy" style="font-size:18px;text-align:center;margin-bottom:20px">z=62 시각 비교</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-              <div style="text-align:center"><div class="vp"><img src="assets/slices/BB_bin.png" alt=""></div><div class="vp-l">GT</div></div>
-              <div style="text-align:center"><div class="vp"><img src="assets/slices/BB_bin.png" alt="" style="filter:blur(1.5px)"></div><div class="vp-l">B1 Linear</div></div>
-              <div style="text-align:center"><div class="vp"><img src="assets/slices/BB_bin.png" alt=""></div><div class="vp-l" style="color:var(--orange-600)">UNet</div></div>
-              <div style="text-align:center"><div class="vp" style="background:#1a0e08"></div><div class="vp-l">|GT − UNet|</div></div>
+          <div class="reg-card lose">
+            <div class="reg-h"><span class="reg-k">k = 5</span><span class="reg-tag lose">linear 승</span></div>
+            <div class="reg-sub">측정 간격 넓음 · 20% 측정</div>
+            <div class="reg-rows">
+              <div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 0.03</span><span class="v-unet">UNet 3.04</span></div>
+              <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.613</span><span class="v-unet">UNet 0.595</span></div>
             </div>
+            <div class="reg-note">sparse가 심하면 <b>단순 보간의 전역 평균 보존</b>이 강함</div>
           </div>
         </div>
+        <div class="callout navy" style="margin-top:26px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 4v16h16"/><path d="M8 14l3-3 3 2 4-6"/></svg></div>
+          <div><div class="co-t">k-regime crossover — 작은 k = UNet 영역, 큰 k = linear 영역</div><div class="co-d">대표 측정값(fast preset). "딥러닝이 <b>어디서</b> 이기나"가 핵심 — §6.5-C 에서 직접 확인하고, W3 GAN으로 더 넓은 영역을 정복합니다.</div></div></div>
       </div>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>22</b> / 26</div></div>
-    <style>.cmp{display:flex;flex-direction:column;gap:22px}.cmp-row{display:flex;flex-direction:column}.cmp-l{font-size:21px;font-weight:700;margin-bottom:10px}.cmp-l span{font-family:var(--mono);font-size:16px;font-weight:400;color:var(--ink-3);margin-left:10px}
-      .cmp-bars{display:flex;flex-direction:column;gap:10px}.cb{display:flex;align-items:center;height:38px;width:var(--w);min-width:90px;border-radius:8px;padding:0 16px;color:#fff;font-family:var(--mono);font-size:17px;font-weight:600}
-      .cb.nav{background:#1F3A5F}.cb.or{background:var(--orange)}
-      .vp{height:118px;border-radius:10px;overflow:hidden;background:#111;border:1px solid var(--line)}.vp img{width:100%;height:100%;object-fit:cover}
-      .vp-l{font-family:var(--mono);font-size:15px;color:var(--ink-3);margin-top:8px}</style>
+    <style>
+      .reg-card{border-radius:18px;padding:32px 34px;border:1px solid var(--line)}
+      .reg-card.win{background:#E8F2EC;border-color:#BFE0CD;border-top:5px solid #2E8B57}
+      .reg-card.lose{background:var(--panel);border-top:5px solid var(--navy)}
+      .reg-h{display:flex;align-items:center;justify-content:space-between}
+      .reg-k{font-family:var(--mono);font-size:36px;font-weight:800;color:var(--navy)}
+      .reg-tag{font-family:var(--mono);font-size:18px;font-weight:700;padding:6px 16px;border-radius:100px}
+      .reg-tag.win{background:#2E8B57;color:#fff}.reg-tag.lose{background:var(--navy);color:#fff}
+      .reg-sub{font-size:18px;color:var(--ink-3);margin-top:6px;font-family:var(--mono)}
+      .reg-rows{margin:26px 0 18px;display:flex;flex-direction:column;gap:14px}
+      .reg-row{display:grid;grid-template-columns:72px 1fr 1fr;gap:14px;align-items:center;font-family:var(--mono);font-size:22px}
+      .reg-row>span:first-child{color:var(--ink-3);font-weight:700}
+      .reg-card.win .v-unet{color:#2E8B57;font-weight:700}.reg-card.win .v-lin{color:var(--ink-3)}
+      .reg-card.lose .v-lin{color:var(--navy);font-weight:700}.reg-card.lose .v-unet{color:var(--ink-3)}
+      .reg-note{font-size:19px;color:var(--ink-2);line-height:1.45}</style>
   </section>
 
   <!-- ============ 23 · CROSS-DOMAIN ============ -->
@@ -713,7 +725,7 @@
           <div class="adv-card"><div class="adv-k">D</div><div><div class="adv-t">per-slice 실패 분석</div><div class="adv-d">슬라이스별 |Δφ| 를 그려 모델이 '어디서' 실패하는지 구조적 원인 탐색</div></div></div>
         </div>
         <div class="callout" style="margin-top:28px;background:#E1F0E8;border-color:#BFE0CD"><div class="co-ic" style="background:#2E8B57"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-          <div><div class="co-t">🏁 챌린지</div><div class="co-d" style="color:#2E6B47"><b>네 도메인 모두에서 Linear를 이기는</b> 설정을 찾아라 — 학습 적합 ↔ 일반화 ↔ 과적합의 균형이 관건.</div></div></div>
+          <div><div class="co-t">챌린지</div><div class="co-d" style="color:#2E6B47"><b>네 도메인 모두에서 Linear를 이기는</b> 설정을 찾아라 — 학습 적합 ↔ 일반화 ↔ 과적합의 균형이 관건.</div></div></div>
       </div>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>24</b> / 26</div></div>
