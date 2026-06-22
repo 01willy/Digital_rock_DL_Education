@@ -1,0 +1,76 @@
+<!-- @dsCard group="Diagrams" name="U-Net architecture" subtitle="encoder · bottleneck · decoder · skip" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>U-Net architecture — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{width:1320px;box-sizing:border-box;padding:56px;background:var(--bg);display:flex;flex-direction:column;gap:28px;align-items:stretch}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+<div class="eyebrow">DIAGRAM (SVG)</div><h2 class="s-title sm" style="margin-bottom:10px">U-Net architecture</h2><div class="chart-wrap"><svg viewBox="0 0 1320 360" style="width:100%">
+            <!-- encoder stacks (decreasing size, increasing channels) -->
+            <g>
+              <!-- e1 64x64 ch8 -->
+              <rect x="60"  y="70"  width="40" height="200" rx="6" fill="#E2E9F1" stroke="#CBD8E6" stroke-width="2"/>
+              <text x="80" y="295" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">64²·8</text>
+              <text x="80" y="55"  font-family="JetBrains Mono" font-size="13" fill="#1F3A5F" text-anchor="middle">e1</text>
+              <!-- pool arrow -->
+              <path d="M108 170 L150 170" stroke="#8A93A3" stroke-width="2" marker-end="url(#dn)"/>
+              <!-- e2 32x32 ch16 -->
+              <rect x="160" y="105" width="48" height="130" rx="6" fill="#CBD8E6" stroke="#9DB1CB" stroke-width="2"/>
+              <text x="184" y="295" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">32²·16</text>
+              <text x="184" y="92"  font-family="JetBrains Mono" font-size="13" fill="#1F3A5F" text-anchor="middle">e2</text>
+              <path d="M216 170 L256 170" stroke="#8A93A3" stroke-width="2" marker-end="url(#dn)"/>
+              <!-- e3 bottleneck 16x16 ch32 -->
+              <rect x="268" y="140" width="56" height="60" rx="6" fill="#1F3A5F"/>
+              <text x="296" y="295" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">16²·32</text>
+              <text x="296" y="128" font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">bottleneck</text>
+            </g>
+            <!-- decoder stacks (increasing size, decreasing channels) -->
+            <g>
+              <path d="M332 170 L372 170" stroke="#8A93A3" stroke-width="2" marker-end="url(#up)"/>
+              <rect x="384" y="105" width="48" height="130" rx="6" fill="#F6C994" stroke="#F2D6B2" stroke-width="2"/>
+              <text x="408" y="295" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">32²·16</text>
+              <text x="408" y="92"  font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">d2</text>
+              <path d="M440 170 L480 170" stroke="#8A93A3" stroke-width="2" marker-end="url(#up)"/>
+              <rect x="492" y="70" width="40" height="200" rx="6" fill="#FBE7CE" stroke="#F2D6B2" stroke-width="2"/>
+              <text x="512" y="295" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">64²·8</text>
+              <text x="512" y="55"  font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">d1</text>
+              <!-- output -->
+              <path d="M540 170 L580 170" stroke="#8A93A3" stroke-width="2" marker-end="url(#up)"/>
+              <rect x="592" y="90" width="28" height="160" rx="6" fill="#EA851B"/>
+              <text x="606" y="295" font-family="JetBrains Mono" font-size="15" fill="#D4760F" text-anchor="middle">64²·1</text>
+              <text x="606" y="78" font-family="JetBrains Mono" font-size="13" fill="#D4760F" text-anchor="middle">out</text>
+            </g>
+            <!-- skip connections -->
+            <path d="M100 90 C 280 16, 320 16, 492 90" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="7 6"/>
+            <path d="M208 120 C 300 78, 320 78, 384 120" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="7 6"/>
+            <text x="296" y="22" font-family="JetBrains Mono" font-size="15" fill="#EA851B" text-anchor="middle">skip-connection (detail 전달)</text>
+            <!-- input/output labels far right -->
+            <g font-family="JetBrains Mono">
+              <text x="80"  y="330" font-size="14" fill="#1F3A5F" text-anchor="middle">◀ Encoder (수축)</text>
+              <text x="470" y="330" font-size="14" fill="#D4760F" text-anchor="middle">Decoder (확장) ▶</text>
+            </g>
+            <!-- legend on the right -->
+            <g font-family="var(--sans)">
+              <text x="720" y="92"  font-family="JetBrains Mono" font-size="19" fill="#1F3A5F">in: [before, after]  (2ch)</text>
+              <text x="720" y="150" font-family="JetBrains Mono" font-size="19" fill="#5A6475">Conv→Pool 로 압축 (채널↑)</text>
+              <text x="720" y="208" font-family="JetBrains Mono" font-size="19" fill="#5A6475">ConvT 로 복원 (크기↑)</text>
+              <text x="720" y="266" font-family="JetBrains Mono" font-size="19" fill="#D4760F">out: middle slice  (1ch, sigmoid)</text>
+            </g>
+            <defs>
+              <marker id="dn" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker>
+              <marker id="up" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker>
+            </defs>
+          </svg></div>
+</div>
+</body>
+</html>

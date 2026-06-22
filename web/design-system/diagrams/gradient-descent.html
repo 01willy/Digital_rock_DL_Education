@@ -1,0 +1,39 @@
+<!-- @dsCard group="Diagrams" name="Gradient descent" subtitle="loss 골짜기 + lr 과대 발산" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gradient descent — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{width:720px;box-sizing:border-box;padding:56px;background:var(--bg);display:flex;flex-direction:column;gap:28px;align-items:stretch}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+<div class="eyebrow">DIAGRAM (SVG)</div><h2 class="s-title sm" style="margin-bottom:10px">Gradient descent</h2><div class="chart-wrap"><svg viewBox="0 0 520 300" style="width:100%;margin-top:8px">
+              <!-- bowl curve:  y(t)=40+640t-640t²,  x=40+440t,  min at (260,200) -->
+              <path d="M40,40 Q260,360 480,40" fill="none" stroke="#1F3A5F" stroke-width="3"/>
+              <!-- good descent — dots sit on the curve, into the minimum -->
+              <path d="M93,108 L150,160 L207,191 L260,200" fill="none" stroke="#EA851B" stroke-width="2" stroke-dasharray="3 4"/>
+              <circle cx="93" cy="108" r="8" fill="#EA851B"/>
+              <circle cx="150" cy="160" r="8" fill="#EA851B"/>
+              <circle cx="207" cy="191" r="8" fill="#EA851B"/>
+              <circle cx="260" cy="200" r="9" fill="#EA851B" stroke="#fff" stroke-width="2"/>
+              <text x="70" y="98" font-family="JetBrains Mono" font-size="14" fill="#D4760F">시작</text>
+              <text x="236" y="226" font-family="JetBrains Mono" font-size="14" fill="#D4760F">최소</text>
+              <!-- too-large lr — oscillates across the valley and diverges -->
+              <path d="M330,165 L175,150 L415,100" fill="none" stroke="#C83A3A" stroke-width="2" stroke-dasharray="2 5"/>
+              <circle cx="330" cy="165" r="7" fill="#C83A3A"/>
+              <circle cx="175" cy="150" r="7" fill="#C83A3A"/>
+              <circle cx="415" cy="100" r="7" fill="#C83A3A"/>
+              <text x="348" y="86" font-family="JetBrains Mono" font-size="14" fill="#C83A3A">lr 과대 → 발산</text>
+              <text x="44" y="290" font-family="JetBrains Mono" font-size="13" fill="#8A93A3">가중치 →</text>
+            </svg></div>
+</div>
+</body>
+</html>

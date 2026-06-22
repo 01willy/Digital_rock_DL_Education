@@ -1,0 +1,43 @@
+<!-- @dsCard group="Components" name="Comparison & spec table" subtitle="reg-card (win/lose) · shape-tab" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Comparison & spec table — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{width:1100px;box-sizing:border-box;padding:56px;background:var(--bg);display:flex;flex-direction:column;gap:28px;align-items:stretch}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+
+  <div class="eyebrow">COMPONENT</div><h2 class="s-title sm">Comparison cards &amp; spec table</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+    <div class="reg-card win">
+      <div class="reg-h"><span class="reg-k">k = 2</span><span class="reg-tag win">UNet 승</span></div>
+      <div class="reg-sub">측정 간격 좁음</div>
+      <div class="reg-rows"><div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 3.40</span><span class="v-unet">UNet 0.76</span></div>
+      <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.803</span><span class="v-unet">UNet 0.862</span></div></div>
+      <div class="reg-note">승자 강조 (.win → UNet 녹색)</div>
+    </div>
+    <div class="reg-card lose">
+      <div class="reg-h"><span class="reg-k">k = 5</span><span class="reg-tag lose">linear 승</span></div>
+      <div class="reg-sub">측정 간격 넓음</div>
+      <div class="reg-rows"><div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 0.03</span><span class="v-unet">UNet 3.04</span></div>
+      <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.613</span><span class="v-unet">UNet 0.595</span></div></div>
+      <div class="reg-note">.lose → linear 네이비 강조</div>
+    </div>
+  </div>
+  <div class="shape-tab" style="margin-top:8px">
+    <div class="r h"><div>단계</div><div>텐서</div><div>설명</div></div>
+    <div class="r"><div class="stage-n">입력</div><div class="shape">2 × 64 × 64</div><div class="note">앞·뒤 슬라이스</div></div>
+    <div class="r bn"><div class="stage-n">출력</div><div class="shape">1 × 64 × 64</div><div class="note">sigmoid</div></div>
+  </div>
+</div>
+</body>
+</html>

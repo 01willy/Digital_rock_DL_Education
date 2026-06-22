@@ -1,0 +1,28 @@
+<!-- @dsCard group="Components" name="Cards" subtitle="dcard · dcard.tint · kcard" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cards — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{width:1040px;box-sizing:border-box;padding:56px;background:var(--bg);display:flex;flex-direction:column;gap:28px;align-items:stretch}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+
+  <div class="eyebrow">COMPONENT</div><h2 class="s-title sm">Cards</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div class="dcard"><div style="font-size:24px;font-weight:700">기본 카드 (.dcard)</div><div class="note" style="margin-top:10px">흰 배경 + 얇은 테두리 + 옅은 그림자.</div></div>
+    <div class="dcard tint"><div style="font-size:24px;font-weight:700">틴트 카드 (.dcard.tint)</div><div class="note" style="margin-top:10px">살짝 다른 표면 톤.</div></div>
+    <div class="kcard"><span class="pill">라벨</span><div class="kt" style="margin-top:12px">정보 카드 (.kcard)</div><div class="kd">pill + 제목 + 설명 구조.</div></div>
+    <div class="dcard"><div class="step-n" style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--orange-600)">01</div><div style="font-size:22px;font-weight:700;margin-top:12px">번호 단계 카드</div><div class="note" style="margin-top:8px">step 번호 + 제목 + 설명.</div></div>
+  </div>
+</div>
+</body>
+</html>

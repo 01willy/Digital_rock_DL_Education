@@ -1,0 +1,31 @@
+<!-- @dsCard group="Diagrams" name="Skip-connection" subtitle="encoder feature → concat" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Skip-connection — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{width:640px;box-sizing:border-box;padding:56px;background:var(--bg);display:flex;flex-direction:column;gap:28px;align-items:stretch}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+<div class="eyebrow">DIAGRAM (SVG)</div><h2 class="s-title sm" style="margin-bottom:10px">Skip-connection</h2><div class="chart-wrap"><svg viewBox="0 0 420 220" style="width:100%;margin-top:18px">
+              <rect x="20" y="40" width="120" height="60" rx="8" fill="#E2E9F1" stroke="#9DB1CB" stroke-width="2"/>
+              <text x="80" y="30" font-family="JetBrains Mono" font-size="14" fill="#1F3A5F" text-anchor="middle">encoder feature</text>
+              <rect x="20" y="140" width="120" height="60" rx="8" fill="#F6C994" stroke="#F2D6B2" stroke-width="2"/>
+              <text x="80" y="216" font-family="JetBrains Mono" font-size="14" fill="#D4760F" text-anchor="middle">upsampled</text>
+              <path d="M140 70 C 220 70, 220 105, 280 110" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#c2)"/>
+              <path d="M140 170 C 220 170, 220 130, 280 125" fill="none" stroke="#1F3A5F" stroke-width="2.5" marker-end="url(#c2)"/>
+              <rect x="286" y="85" width="110" height="60" rx="8" fill="#FBE7CE" stroke="#EA851B" stroke-width="2"/>
+              <text x="341" y="120" font-family="JetBrains Mono" font-size="16" fill="#D4760F" text-anchor="middle">cat → Conv</text>
+              <defs><marker id="c2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#8A93A3"/></marker></defs>
+            </svg></div>
+</div>
+</body>
+</html>

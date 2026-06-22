@@ -1,0 +1,45 @@
+<!-- @dsCard group="Slide frames" name="Cover" subtitle="브랜드마크 · 타이틀 · 메타" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cover — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{position:relative;width:1920px;height:1080px;background:var(--bg);overflow:hidden}.ds-stage.dark{background:var(--navy);color:#fff}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+
+  <div class="cover-grid">
+    <div class="cover-l">
+      <div class="mark">
+        <svg width="46" height="46" viewBox="0 0 40 40"><path d="M6 30.8 L20 24.8 L34 30.8 L20 36.8 Z" fill="#EA851B"/><path d="M6 22.4 L20 16.4 L34 22.4 L20 28.4 Z" fill="#C9CCD2"/><path d="M6 14 L20 8 L34 14 L20 20 Z" fill="#C9CCD2"/><path d="M6 5.6 L20 -0.4 L34 5.6 L20 11.6 Z" fill="#1F3A5F"/></svg>
+        <div><div class="m-name">Digital Rock</div><div class="m-sub">Sparse Slice Interpolation</div></div>
+      </div>
+      <div style="margin-top:54px"><span class="chip orange"><span class="dot"></span>WEEK 02 · 90분 세션</span></div>
+      <h1 class="cover-title">딥러닝으로<br/><span class="ac">슬라이스를 학습</span></h1>
+      <p class="ko-en" style="font-size:28px;margin-top:24px">UNet · pix2pix — 보간을 학습 가능한 함수로</p>
+      <div class="cover-meta">
+        <div><div class="m-n">2 → 1</div><div class="m-l">입력 채널 → 출력</div></div>
+        <div><div class="m-n">~117K</div><div class="m-l">mini UNet 파라미터</div></div>
+        <div><div class="m-n">|Δφ|·SSIM</div><div class="m-l">평가지표</div></div>
+      </div>
+    </div>
+    <div class="cover-r">
+      <div class="cover-strip">
+        <div class="cs"><div style="position:absolute;inset:0;background:#1F3A5F"></div><div class="cover-cap">before</div></div>
+        <div class="cs"><div style="position:absolute;inset:0;background:#48597a"></div><div class="cover-cap">target</div></div>
+        <div class="cs"><div style="position:absolute;inset:0;background:#7a86a0"></div><div class="cover-cap">cross-domain</div></div>
+      </div>
+      <div class="cover-fade"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!-- @dsCard group="Components" name="Code & equation" subtitle="code · codeblk · eq" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Code & equation — Digital Rock Design System</title>
+<link rel="stylesheet" href="../styles/deck.css" />
+<style>
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink)}
+  .ds-stage{width:1040px;box-sizing:border-box;padding:56px;background:var(--bg);display:flex;flex-direction:column;gap:28px;align-items:stretch}
+  
+</style>
+</head>
+<body>
+<div class="ds-stage">
+
+  <div class="eyebrow">COMPONENT</div><h2 class="s-title sm">Code &amp; equation</h2>
+  <div class="eqlabel">인라인 코드 칩 (.code)</div>
+  <span class="code" style="align-self:flex-start"><span class="cm"># 한 줄</span><br/>phi = vol.<span class="or">mean</span>()</span>
+  <div class="eqlabel" style="margin-top:8px">멀티라인 코드 블록 (.codeblk)</div>
+  <div class="codeblk"><span class="kw">class</span> <span class="fn">ConvBlock</span>(nn.Module):
+    nn.<span class="fn">Conv2d</span>(in_ch, out_ch, <span class="nb">3</span>, padding=<span class="nb">1</span>)
+    nn.<span class="fn">LeakyReLU</span>(<span class="nb">0.1</span>)  <span class="cm"># 비선형</span></div>
+  <div class="eqlabel" style="margin-top:8px">수식 블록 (.eq) — KaTeX 호환</div>
+  <div class="eq">L₁ = (1/N) Σ |ŷ − y|</div>
+</div>
+</body>
+</html>
