@@ -61,6 +61,7 @@ function DomainStrip() {
 
 function StatusBadge({ status }) {
   const map = {
+    done:     { c:'status-done', t:'완료' },
     now:      { c:'status-now', t:'진행 중' },
     next:     { c:'status-next', t:'다음 주' },
     upcoming: { c:'status-upcoming', t:'예정' },
@@ -90,7 +91,7 @@ function Roadmap({ onOpen }) {
               {w.concepts.slice(0,4).map((c,i) => <span key={i} className="wk-chip">{c}</span>)}
             </div>
             <div className="wk-link">
-              {live ? <>주차 페이지 열기 <Icon name="arrow" size={15} /></> : <>미리보기 <Icon name="arrow" size={15} /></>}
+              {w.available ? <>주차 페이지 열기 <Icon name="arrow" size={15} /></> : <>미리보기 <Icon name="arrow" size={15} /></>}
             </div>
           </div>
         );
@@ -101,8 +102,11 @@ function Roadmap({ onOpen }) {
 
 function GroupCompare() {
   const C = window.COURSE;
-  const g1 = C.w1.groups.g1, g2 = C.w1.groups.g2;
+  const cur = C.currentWeek();
+  const cw = C[cur.slug];
+  const g1 = cw.groups.g1, g2 = cw.groups.g2;
   const G = C.groups;
+  const WK = cur.slug.toUpperCase();
   const card = (gid, data, grp) => (
     <div className={`gc-card ${gid}`}>
       <div className="gc-head">
@@ -115,7 +119,7 @@ function GroupCompare() {
         <div className="gc-stat"><div className="n tnum">{data.cells}</div><div className="l">노트북 셀</div></div>
         <div className="gc-stat"><div className="n tnum">{data.tryits}</div><div className="l">Try-it! 박스</div></div>
       </div>
-      <div className="eyebrow muted" style={{ marginBottom:10 }}>W1 탐구 과제</div>
+      <div className="eyebrow muted" style={{ marginBottom:10 }}>{WK} 탐구 과제</div>
       <div className="gc-tasks">
         {data.tasks.map((t,i) => (
           <div key={i} className="gc-task">
@@ -135,6 +139,8 @@ function GroupCompare() {
 }
 
 function HomePage({ group, onNav }) {
+  const cur = window.COURSE.currentWeek();
+  const CW = cur.slug.toUpperCase();
   return (
     <div className="page page-wide">
       {/* hero */}
@@ -147,8 +153,8 @@ function HomePage({ group, onNav }) {
             6주 동안 데이터 탐색부터 딥러닝 파라미터 조절까지 — 분석 및 평가를 진행합니다.
           </p>
           <div className="hero-cta">
-            <button className="btn btn-primary btn-lg" onClick={() => onNav('w1')}>
-              <Icon name="book" size={18} />W1 시작하기
+            <button className="btn btn-primary btn-lg" onClick={() => onNav(cur.slug)}>
+              <Icon name="book" size={18} />{CW} 시작하기
             </button>
             <button className="btn btn-ghost btn-lg" onClick={() => onNav('demo')}>
               <Icon name="sliders" size={18} />인터랙티브 데모
@@ -175,14 +181,14 @@ function HomePage({ group, onNav }) {
       <section style={{ marginTop: 64 }}>
         <SectionHead eyebrow="CURRICULUM" title="6주 로드맵"
           sub="non-DL 베이스라인으로 문제를 충분히 이해한 뒤, 딥러닝으로 넘어갑니다."
-          right={<div className="badge badge-orange"><span className="dot"></span>현재 W1 진행 중</div>} />
+          right={<div className="badge badge-orange"><span className="dot"></span>현재 {CW} 진행 중</div>} />
         <Roadmap onOpen={onNav} />
       </section>
 
       {/* group compare */}
       <section style={{ marginTop: 64 }}>
         <SectionHead eyebrow="TWO TRACKS" title="같은 연구, 두 개의 트랙"
-          sub="동일한 데이터와 목표를 공유하되, 트랙에 따라 탐구의 깊이와 페이스를 달리합니다. (W1 기준)" />
+          sub={`동일한 데이터와 목표를 공유하되, 트랙에 따라 탐구의 깊이와 페이스를 달리합니다. (${CW} 기준)`} />
         <GroupCompare />
       </section>
 

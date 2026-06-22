@@ -84,13 +84,14 @@ function GroupToggle({ value, onChange, size = 'md' }) {
 
 /* ---------- top navigation bar ---------- */
 function TopBar({ route, group, onGroup }) {
+  const cur = window.COURSE.currentWeek();
   const nav = [
-    { id:'home',  label:'홈',       icon:'home' },
-    { id:'w1',    label:'W1 주차',  icon:'book' },
-    { id:'demo',  label:'데모',     icon:'sliders' },
-    { id:'setup', label:'설치',     icon:'terminal' },
+    { id:'home',    label:'홈',                          icon:'home' },
+    { id:cur.slug,  label:`${cur.slug.toUpperCase()} 주차`, icon:'book', week:true },
+    { id:'demo',    label:'데모',                        icon:'sliders' },
+    { id:'setup',   label:'설치',                        icon:'terminal' },
   ];
-  const active = (id) => route === id || (id==='w1' && route.startsWith('w'));
+  const active = (n) => route === n.id || (n.week && /^w[1-6]$/.test(route));
   return (
     <header className="topbar">
       <a href="#/home" className="brand">
@@ -102,7 +103,7 @@ function TopBar({ route, group, onGroup }) {
       </a>
       <nav className="topnav">
         {nav.map(n => (
-          <a key={n.id} href={`#/${n.id}`} className={`topnav-i ${active(n.id) ? 'on' : ''}`}>
+          <a key={n.id} href={`#/${n.id}`} className={`topnav-i ${active(n) ? 'on' : ''}`}>
             <Icon name={n.icon} size={16} />{n.label}
           </a>
         ))}

@@ -4,12 +4,18 @@
 
 ## 1. 사전 준비
 
-- 패키지: `pip install torch torchvision pytorch-msssim`
+- 패키지: `pip install torch torchvision` (GPU 없이 CPU만으로도 동작 — PRESET `fast` 기준 ~10분)
 - W1 baseline 결과 (특히 BB k=5의 |Δφ|·SSIM) 메모
-- 데이터 폴더 확인: `BB_256.bin`, `CastleGate_256.bin`, `Bentheimer_256.bin`, `Parker_256.bin`
+- 폴더 구성: `w2_code.zip` 을 푼 폴더에 `data/`(=`data_w2.zip` 압축 해제)가 함께 있어야 합니다. 노트북은 `data/` 가 같은 폴더 또는 `../data` 둘 다 자동 인식합니다.
+
+```
+<작업 폴더>/
+├ W2_deep_learning_intro.ipynb
+├ dr_utils.py · model_utils.py
+└ data/   ← BB_256.bin · CastleGate_256.bin · Bentheimer_256.bin · Parker_256.bin
+```
 
 ```bash
-cd week2/notebooks/
 jupyter notebook W2_deep_learning_intro.ipynb
 ```
 
@@ -20,6 +26,8 @@ jupyter notebook W2_deep_learning_intro.ipynb
 3. SliceDataset — sparse triplet (before, middle, after) 학습 데이터 구성
 4. mini UNet (~30K–120K params) 학습 + 학습 곡선·평가 지표 해석
 5. W1 Linear baseline 대비 정량 비교, cross-domain 일반화 평가
+6. **(심화)** 학습 루프·손실·모델 크기를 *직접 수정*하고 그 영향을 정량 분석 (§6.5)
+7. **(심화)** k 일반화·per-slice 실패 모드 분석으로 모델의 *한계*를 서술
 
 ## 3. 핵심 용어
 
@@ -45,34 +53,36 @@ jupyter notebook W2_deep_learning_intro.ipynb
 
 ## 5. 탐구 과제
 
-다음 과제는 본 노트북의 코드를 수정·확장하며 결과 분석과 함께 정리합니다.
+노트북 **§6.5 심화** 셀(`train_custom` 등)을 바탕으로, 아래 과제를 *코드 수정 + 결과 분석*과 함께 정리합니다. 단순 실행이 아니라 **"무엇을 바꿨고 / 무엇이 변했고 / 왜 그런가"** 를 반드시 적으세요.
 
-### 과제 1 (필수) — preset 비교
+### 과제 1 (필수) — preset & 모델 크기
 
-`fast`와 `standard` 두 preset으로 학습하고 시간 / 파라미터 / |Δφ| / SSIM과 학습 곡선을 함께 비교합니다. 더 큰 모델이 항상 좋지 않을 수 있는 이유에 대한 본인 해석.
+`fast`·`standard` 비교에 더해 `train_custom(base=…)` 로 모델 크기를 직접 바꿔, 파라미터 수 ↔ |Δφ|·SSIM ↔ 학습 시간의 trade-off를 표/그래프로 정리. 학습 곡선에서 **overfitting 징후**를 찾아 설명합니다.
 
 ### 과제 2 (필수) — Cross-domain 일반화
 
-학습된 모델을 네 도메인(BB·CastleGate·Bentheimer·Parker)에 평가하고 결과 표 + 시각화로 정리합니다. 차이의 원인에 대한 본인 가설(공극률·구조·등방성 차이 등) 제시.
+학습된 모델을 네 도메인(BB·CastleGate·Bentheimer·Parker)에 평가하고 표 + 시각화로 정리. 추가로 **각 도메인의 Linear 대비 개선폭**을 계산하고, 어느 도메인에서 일반화가 깨지는지·그 원인 가설(공극률·구조·등방성)을 정량 근거와 함께 제시합니다.
 
-### 과제 3 (선택, 도전) — Loss 함수 비교
+### 과제 3 (선택, 도전) — 복합 손실 함수
 
-`nn.L1Loss()`를 `nn.MSELoss()` 또는 다른 손실로 바꾸어 같은 preset으로 재학습하고 결과 차이를 분석합니다. L1과 L2가 각각 유리한 상황에 대한 본인 해석.
+§6.5-B 확장: `nn.L1Loss()` / `nn.MSELoss()` 비교에 더해 **L1 + λ·(1−SSIM) 복합 손실을 직접 구현**하고, λ 를 바꿔 가며 선명도와 |Δφ| 의 trade-off를 분석합니다.
 
-### 과제 4 (선택, 심화) — Learning rate sensitivity
+### 과제 4 (선택, 심화) — k 일반화 & 실패 모드
 
-`train_quick` 내부 `Adam(lr=1e-3)`의 학습률을 ∈ {1e-4, 5e-4, 1e-3, 5e-3}로 sweep하고 학습 곡선을 비교합니다. 학습률이 너무 작거나 너무 큰 경우의 학습 양상 관찰.
+§6.5-C/D 확장: 학습 k 와 평가 k 를 바꿔 **성능 지도**를 만들고, per-slice 오차가 큰 슬라이스들의 **구조적 공통점**을 찾아 모델의 한계를 서술합니다. (도전: lr sweep `{1e-4, 5e-4, 1e-3, 5e-3}` 으로 발산/수렴 양상도 함께.)
 
 ## 6. 다음 주차 사전 준비
 
 - W3: 적대적 학습 — pix2pix GAN
-- 추가 패키지: `pip install pytorch-msssim` (이미 설치되어 있으면 생략)
+- 추가 패키지: `pip install pytorch-msssim optuna` (W3 손실·HPO용 — 이미 설치되어 있으면 생략)
 - 본 주차 학습 체크포인트 (`unet_mini_*.pth`) 보존
 
 ## 7. 자주 발생하는 문제
 
 | 증상 | 해결 |
 |------|------|
+| `FileNotFoundError: BB_256.bin` | 노트북과 같은 폴더에 `data/` 가 있고 그 안에 `.bin` 이 풀렸는지 확인 |
+| `ModuleNotFoundError: dr_utils` | `dr_utils.py`·`model_utils.py` 가 노트북과 같은 폴더에 있는지 확인 |
 | `torch not found` | `pip install torch torchvision` |
 | 학습이 너무 느림 | PRESET을 `fast`로 / 다른 프로그램 종료 |
 | Out of memory | `TRAINING_PRESETS`의 batch_size 축소 |

@@ -15,6 +15,7 @@
 *{box-sizing:border-box;}
 deck-stage:not(:defined){visibility:hidden;}
 body{margin:0;background:#0c1118;font-family:var(--sans);}
+.font-mono{font-family:var(--mono);}
 
 section{ background:var(--bg); color:var(--ink); overflow:hidden; }
 section *{ box-sizing:border-box; }

@@ -23,7 +23,7 @@ window.COURSE = {
   //  • W6 = Cross-domain 분석 — Carbonate, Zero-shot vs Fine-tune
   weeks: [
     {
-      n:1, status:'now', slug:'w1', available:true,
+      n:1, status:'done', slug:'w1', available:true,
       title:'데이터 탐색 + Classical Baseline',
       en:'Load · Preprocess · Linear/Cubic',
       summary:'Micro-CT voxel 데이터를 직접 열고, 전처리(normalize·Otsu)와 sparse imaging 문제를 정의. scipy 기반 선형/Cubic 보간으로 |Δφ|·|ΔSA|·SSIM 측정.',
@@ -31,11 +31,11 @@ window.COURSE = {
       nonDL:true,
     },
     {
-      n:2, status:'next', slug:'w2', available:true,
+      n:2, status:'now', slug:'w2', available:true,
       title:'Deep Learning 입문 — UNet · pix2pix 구조',
       en:'UNet · pix2pix · Train',
-      summary:'슬라이스 보간을 학습 가능한 함수로 정식화. UNet 기본 구조와 pix2pix(조건부 image-to-image) 흐름을 코드로 따라가고, mini UNet을 학생 노트북에서 직접 학습 + 평가합니다.',
-      concepts:['UNet','pix2pix 흐름','학습 루프','Loss·optimizer'],
+      summary:'슬라이스 보간을 학습 가능한 함수로 정식화. UNet 구조와 pix2pix(조건부 image-to-image) 흐름을 코드로 따라가고, mini UNet을 직접 학습합니다. 나아가 학습 루프·손실·모델 크기를 직접 수정하며 cross-domain 일반화와 실패 모드까지 분석합니다.',
+      concepts:['UNet · skip','pix2pix 흐름','학습 루프 직접 제어','L1/MSE/복합 손실','k 일반화 · 실패 모드'],
       nonDL:false,
       plan:[
         'sparse triplet dataset 구성 (입력 2채널 → 가운데 슬라이스)',
@@ -47,7 +47,7 @@ window.COURSE = {
       prep:['pip install torch torchvision','W1 baseline 결과'],
     },
     {
-      n:3, status:'upcoming', slug:'w3', available:false,
+      n:3, status:'next', slug:'w3', available:false,
       title:'적대적 학습 — pix2pix GAN',
       en:'Conditional GAN',
       summary:'L1 손실만으로는 흐릿한 복원이 한계. pix2pix 구조에 patch discriminator를 더해 조건부 GAN 학습으로 확장. 학습 안정화·loss weight 균형·평가 metric 추가.',
@@ -299,32 +299,32 @@ window.COURSE = {
     ],
     groups: {
       g1: {
-        slides:21, cells:18, tryits:4,
+        slides:26, cells:24, tryits:6,
         notebook:'W2_deep_learning_intro.ipynb',
         tasks:[
-          { t:'preset 비교', req:true, d:'fast·standard 두 preset으로 학습 → 시간·파라미터·|Δφ|·SSIM과 학습 곡선을 함께 비교. 더 큰 모델이 항상 좋지 않을 수 있는 이유를 본인 해석으로.' },
-          { t:'Cross-domain 일반화', req:true, d:'BB 학습 모델을 네 도메인(BB·CastleGate·Bentheimer·Parker)에 평가 → 표 + 시각화. 차이의 원인 가설(공극률·구조·등방성 차이).' },
-          { t:'Loss 함수 비교', req:false, d:'nn.L1Loss()를 nn.MSELoss() 등으로 바꿔 같은 preset 재학습. L1과 L2가 각각 유리한 상황을 본인 해석으로.' },
-          { t:'Learning rate sensitivity', req:false, d:'Adam(lr=1e-3)의 학습률을 {1e-4,5e-4,1e-3,5e-3}로 sweep하고 학습 곡선 비교. 너무 작거나 큰 경우의 양상 관찰.' },
+          { t:'preset & 모델 크기', req:true, d:'fast·standard 비교에 더해 train_custom(base=…)로 모델 크기를 직접 바꿔 파라미터 ↔ |Δφ|·SSIM ↔ 학습시간 trade-off 곡선을 그리기. 학습 곡선에서 overfitting 징후를 찾아 설명.' },
+          { t:'Cross-domain 일반화', req:true, d:'4 도메인 평가표 + 시각화. 추가로 각 도메인의 Linear 대비 개선폭을 계산하고, 일반화가 깨지는 도메인과 원인 가설(공극률·구조·등방성)을 정량 근거와 함께 제시.' },
+          { t:'복합 손실 함수 (도전)', req:false, d:'§6.5-B 확장 — L1/MSE 비교에 더해 L1 + λ·(1−SSIM) 복합 손실을 직접 구현, λ 를 바꿔 선명도와 |Δφ| 의 trade-off를 분석.' },
+          { t:'k 일반화 & 실패 모드 (심화)', req:false, d:'§6.5-C/D 확장 — 학습 k≠평가 k 성능 지도 + per-slice 오차가 큰 슬라이스의 구조적 공통점으로 모델의 한계를 서술. (lr sweep으로 발산/수렴도 함께.)' },
         ],
       },
       g2: {
-        slides:21, cells:18, tryits:4,
+        slides:26, cells:24, tryits:6,
         notebook:'W2_deep_learning_intro.ipynb',
         tasks:[
-          { t:'노트북 전체 실행', req:true, d:'환경 준비부터 평가까지 모든 셀을 순서대로 실행하고 결과(파라미터·학습 곡선·|Δφ|·SSIM)를 본인 말로 정리.' },
-          { t:'preset 두 개 비교', req:true, d:'fast와 standard 두 preset으로 학습해 학습 시간과 |Δφ|·SSIM을 표로 비교. 어느 쪽이 본인 환경에 맞는가?' },
-          { t:'cross-domain 관찰', req:false, d:'BB 학습 모델을 CastleGate에 평가. 같은 모델인데 왜 결과가 달라지는지 한 문장으로 설명.' },
-          { t:'학습 곡선 읽기', req:false, d:'epochs를 늘렸을 때 학습 곡선이 어떻게 바뀌는지 관찰하고 underfit / overfit 개념으로 설명.' },
+          { t:'노트북 전체 실행 + 심화 A', req:true, d:'환경 준비부터 평가까지 모든 셀을 실행하고, §6.5-A train_custom을 한 번 직접 돌려본 뒤 결과(파라미터·학습 곡선·|Δφ|·SSIM)를 본인 말로 정리.' },
+          { t:'preset 두 개 비교', req:true, d:'fast와 standard 두 preset의 학습 시간과 |Δφ|·SSIM을 표로 비교. 어느 쪽이 본인 환경에 맞는지 근거와 함께.' },
+          { t:'손실 바꿔보기', req:false, d:'§6.5-B에서 criterion을 L1 → MSE로 바꿔 학습 곡선과 결과가 어떻게 달라지는지 관찰·설명.' },
+          { t:'cross-domain 관찰', req:false, d:'BB 학습 모델을 CastleGate에 평가. 같은 모델인데 결과가 왜 달라지는지, per-slice 오차도 살펴 한두 문장으로.' },
         ],
       },
     },
     selfcheck: [
-      'UNet에서 skip-connection이 없으면 복원 결과에 어떤 문제가 생기나?',
-      'L1 손실과 L2(MSE) 손실은 결과 경향이 각각 어떻게 다른가?',
-      'base를 8→16으로 키우면 파라미터가 약 4배인데, 항상 더 좋을까? 왜?',
-      'learning rate가 너무 크면 학습 곡선(loss)이 어떻게 되나?',
-      'BB에서 학습한 모델이 Parker(저공극)에서 더 나쁘다면, 그 원인 가설은?',
+      'skip-connection을 제거하면 복원의 어떤 성질(경계·detail)이 먼저 무너지나? 그 이유는?',
+      'L1을 L2(MSE)로 바꾸면 학습 안정성과 선명도가 어떻게 달라지고, 그건 손실의 어떤 성질 때문인가?',
+      'base를 키워 파라미터를 늘렸는데 성능이 더 나빠졌다 — 학습 곡선의 어떤 신호로 overfitting을 진단하나?',
+      '학습 k=3 모델을 k=7로 평가하면 성능이 급락하는 이유는? 어떻게 완화할 수 있나?',
+      'per-slice |Δφ|가 특정 구간에서 치솟는다면, 그 슬라이스들의 구조적 공통점으로 무엇을 의심하나?',
     ],
     res: {
       deck: 'W2_deck.html',
@@ -374,12 +374,18 @@ window.COURSE = {
           { n:'07', kind:'metric', t:'평가 — Linear vs UNet', code:"res = evaluate_model(model, bb, k=5, device=DEVICE)\nprint(res['dphi_pp'], res['ssim'])   # vs m_baseline", d:'전체 부피의 누락 슬라이스를 모델로 복원해 |Δφ|·SSIM을 B1 Linear와 직접 비교합니다.' },
           { n:'08', kind:'view', t:'시각 비교 (GT/Linear/UNet/diff)', code:"# z=62: GT · B1 Linear · UNet · |GT−UNet|\naxes[3].imshow(np.abs(bb[z]-res['recon'][z]), cmap='hot')", d:'한 슬라이스를 네 패널로 비교 — 숫자뿐 아니라 어디서 좋아졌는지 눈으로 확인.' },
           { n:'09', kind:'cross', t:'Cross-domain 평가', code:"for name in ['CastleGate','Bentheimer','Parker']:\n    vol = load_volume(DATA / f'{name}_256.bin')\n    evaluate_model(model, vol, k=5, device=DEVICE)", d:'BB로 학습한 모델을 다른 도메인에 zero-shot 평가. [Try-it! ②] — 일반화를 관찰.' },
+          { n:'10', kind:'train', t:'§6.5-A 학습 루프 직접 제어', code:"def train_custom(volume, k=5, base=8, epochs=20,\n                 lr=1e-3, criterion=None):\n    ...   # train_quick을 펼친 형태\nm, h = train_custom(bb, base=8, lr=1e-3)", d:'편의 함수에 가려졌던 학습 루프를 펼쳐 손실·lr·구조를 직접 바꿉니다. [Try-it! ①④]' },
+          { n:'11', kind:'train', t:'§6.5-B 손실 함수 비교', code:"for name, crit in [('L1', nn.L1Loss()),\n                   ('MSE', nn.MSELoss())]:\n    m, h = train_custom(bb, criterion=crit)", d:'L1 vs MSE 학습 곡선·|Δφ|·SSIM 비교. 복합 손실(L1+SSIM)까지 직접 구현 도전. [Try-it! ③]' },
+          { n:'12', kind:'cross', t:'§6.5-C k 일반화', code:"model_k3, _ = train_custom(bb, k=3)\nfor k_eval in [2, 3, 5, 7]:\n    evaluate_model(model_k3, bb, k=k_eval)", d:'학습 k와 평가 k가 다를 때 성능 변화 — sparsity 일반화를 관찰. [Try-it! ⑤]' },
+          { n:'13', kind:'view', t:'§6.5-D per-slice 실패 분석', code:"per_slice = [abs(recon[z].mean()-bb[z].mean())\n             for z in range(256)]\nworst = np.argsort(per_slice)[-5:]", d:'슬라이스별 |Δφ|를 그려 모델이 어디서 실패하는지 찾고 구조적 원인을 분석. [Try-it! ⑥]' },
         ],
         tryits: [
-          { n:'①', fn:'train_quick (preset)', change:"preset 'fast' → 'standard' / 'full'", observe:'시간·파라미터·|Δφ|·SSIM·학습 곡선의 변화 (큰 모델이 항상 좋은가?)' },
-          { n:'②', fn:'evaluate_model (도메인)', change:'BB 모델을 4개 도메인에 평가', observe:'학습 도메인 밖에서의 일반화 — 공극률·구조 차이의 영향' },
-          { n:'③', fn:'criterion (loss)', change:'nn.L1Loss() → nn.MSELoss()', observe:'L1 vs L2 — 결과의 선명도·안정성 차이' },
+          { n:'①', fn:'train_custom (base·epochs)', change:'preset fast/standard + base 8↔16 직접 조절', observe:'파라미터 ↔ |Δφ|·SSIM ↔ 학습시간 trade-off, overfitting 징후' },
+          { n:'②', fn:'evaluate_model (도메인)', change:'BB 모델을 4개 도메인에 평가', observe:'학습 도메인 밖 일반화 + 도메인별 Linear 대비 개선폭' },
+          { n:'③', fn:'criterion (loss)', change:'L1 → MSE → L1+λ(1−SSIM) 복합', observe:'손실 종류에 따른 선명도·안정성·|Δφ| 변화' },
           { n:'④', fn:'Adam (learning rate)', change:'lr ∈ {1e-4, 5e-4, 1e-3, 5e-3}', observe:'학습 곡선 — 너무 작으면 느림, 너무 크면 NaN 발산' },
+          { n:'⑤', fn:'k 일반화', change:'학습 k=3 → 평가 k∈{2,3,5,7}', observe:'학습 k에서 멀어질수록 성능 변화 (sparsity 일반화)' },
+          { n:'⑥', fn:'per-slice 오차', change:'|Δφ| per slice 계산·정렬', observe:'모델이 실패하는 슬라이스의 구조적 공통점' },
         ],
       },
       utils: [
@@ -441,11 +447,18 @@ window.COURSE = {
     ],
     pkgs:['numpy','matplotlib','jupyter','scipy','torch · torchvision (W2~)'],
     troubles:[
-      { s:'FileNotFoundError: BB_256.bin', f:'노트북 실행 위치가 notebooks/ 폴더 안인지 확인' },
+      { s:'FileNotFoundError: BB_256.bin', f:'노트북과 같은 폴더에 data/ 가 있고 그 안에 .bin 이 풀렸는지 확인' },
       { s:'ValueError: 파일 크기 불일치', f:'load_volume의 shape / dtype 인자 확인' },
-      { s:'ModuleNotFoundError: dr_utils', f:'첫 셀의 sys.path.insert(0, …) 실행 여부 확인' },
+      { s:'ModuleNotFoundError: dr_utils', f:'dr_utils.py · model_utils.py 가 노트북과 같은 폴더에 있는지 확인' },
       { s:'ModuleNotFoundError: torch (W2~)', f:'pip install torch torchvision — W2 딥러닝부터 필요' },
       { s:'matplotlib 한글 깨짐', f:'첫 셀 setup_plot_style() 실행 — Pretendard 자동 등록' },
     ],
   },
 };
+
+// 현재 진행 주차 = status 'now' 인 (마지막) 주차, 없으면 공개된 마지막 주차 (네비·홈에서 사용)
+// 'now'를 여러 주차에 두면 가장 뒤 주차가 현재로 선택됨 → 다음 주 승급 시에도 안전
+window.COURSE.currentWeek = () =>
+  window.COURSE.weeks.filter(w => w.status === 'now').slice(-1)[0]
+  || window.COURSE.weeks.filter(w => w.available).slice(-1)[0]
+  || window.COURSE.weeks[0];

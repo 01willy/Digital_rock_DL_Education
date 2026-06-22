@@ -126,6 +126,8 @@
 .status-next { color: var(--navy); }
 .status-upcoming .d { background: #C9CCD2; }
 .status-upcoming { color: var(--ink-3); }
+.status-done .d { background: var(--green); }
+.status-done { color: var(--green); }
 
 /* ---------- group compare ---------- */
 .gcompare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
