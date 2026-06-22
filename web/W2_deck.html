@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>W2 · 딥러닝 입문 — UNet · pix2pix — Digital Rock</title>
+<link rel="stylesheet" href="deck/deck.css" />
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+  <!-- ============ 1 · COVER ============ -->
+  <section class="cover" data-label="Cover">
+    <div class="cover-grid">
+      <div class="cover-l">
+        <div class="mark">
+          <svg width="46" height="46" viewBox="0 0 40 40"><path d="M6 30.8 L20 24.8 L34 30.8 L20 36.8 Z" fill="#EA851B"/><path d="M6 22.4 L20 16.4 L34 22.4 L20 28.4 Z" fill="#C9CCD2"/><path d="M6 14 L20 8 L34 14 L20 20 Z" fill="#C9CCD2"/><path d="M6 5.6 L20 -0.4 L34 5.6 L20 11.6 Z" fill="#1F3A5F"/></svg>
+          <div><div class="m-name">Digital Rock</div><div class="m-sub">Sparse Slice Interpolation</div></div>
+        </div>
+        <div style="margin-top:54px"><span class="chip orange"><span class="dot"></span>WEEK 02 · 90분 세션</span></div>
+        <h1 class="cover-title anim">딥러닝으로<br/><span class="ac">슬라이스를 학습</span></h1>
+        <p class="ko-en anim d1" style="font-size:28px;margin-top:24px">UNet · pix2pix — 보간을 학습 가능한 함수로, mini UNet을 직접 학습합니다</p>
+        <div class="cover-meta anim d2">
+          <div><div class="m-n">2→1</div><div class="m-l">입력 채널 → 출력</div></div>
+          <div><div class="m-n">~117K</div><div class="m-l">mini UNet 파라미터</div></div>
+          <div><div class="m-n">|Δφ|·SSIM</div><div class="m-l">평가지표</div></div>
+          <div><div class="m-n">CPU OK</div><div class="m-l">학습 환경</div></div>
+        </div>
+      </div>
+      <div class="cover-r">
+        <div class="cover-strip">
+          <div class="cs"><img src="assets/slices/BB_raw.png" alt=""><div class="cover-cap">BB · before</div></div>
+          <div class="cs"><img src="assets/slices/BB_bin.png" alt=""><div class="cover-cap">middle · 학습 target</div></div>
+          <div class="cs"><img src="assets/slices/Bentheimer_bin.png" alt=""><div class="cover-cap">cross-domain</div></div>
+        </div>
+        <div class="cover-fade"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 · ROADMAP ============ -->
+  <section data-label="Roadmap">
+    <div class="s-pad">
+      <div class="eyebrow">6-WEEK COURSE</div>
+      <h2 class="s-title sm">6주 여정 — 이제 딥러닝으로</h2>
+      <p class="s-sub">W1에서 그린 |Δφ| 곡선이 우리가 이겨야 할 베이스라인입니다. 오늘부터 모델이 직접 pore 모양을 학습합니다.</p>
+      <div class="body vcenter">
+        <div class="mroad">
+          <div class="mr-c"><div class="mr-n">W1</div><div class="mr-t">데이터 탐색</div><div class="mr-e">Load &amp; Explore</div></div>
+          <div class="mr-c now"><div class="mr-n">W2</div><div class="mr-t">DL 입문</div><div class="mr-e">UNet · pix2pix</div></div>
+          <div class="mr-c"><div class="mr-n">W3</div><div class="mr-t">적대적 학습</div><div class="mr-e">pix2pix GAN</div></div>
+          <div class="mr-c"><div class="mr-n">W4</div><div class="mr-t">다른 아키텍처</div><div class="mr-e">Transformer · 3D</div></div>
+          <div class="mr-c"><div class="mr-n">W5</div><div class="mr-t">한계 극복</div><div class="mr-e">tri-axis · multi-k</div></div>
+          <div class="mr-c"><div class="mr-n">W6</div><div class="mr-t">Cross-domain</div><div class="mr-e">Zero-shot · Fine-tune</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>02</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 3 · BRIDGE (from W1) ============ -->
+  <section class="divider dark" data-label="W1에서 이어서">
+    <div class="s-pad">
+      <div class="div-kick">From W1</div>
+      <h2 class="div-title">선형 보간은 <span style="color:#F6C994">모양</span>을 모른다</h2>
+      <p class="div-sub">W1의 |Δφ| 곡선은 k가 커질수록 무너졌습니다. 두 슬라이스를 단순히 섞을 뿐,
+        pore가 <b style="color:#fff">어떻게 연결되는지</b>는 모르기 때문이죠.
+        오늘은 <b style="color:#F6C994">pore 기하를 데이터로 학습</b>하는 첫 모델을 만듭니다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>03</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 4 · OBJECTIVES ============ -->
+  <section data-label="학습 목표">
+    <div class="s-pad">
+      <div class="eyebrow">TODAY'S GOALS</div>
+      <h2 class="s-title sm">W2가 끝나면 할 수 있는 것</h2>
+      <div class="body vcenter">
+        <div class="two" style="gap:48px">
+          <div class="blist">
+            <div class="bitem anim"><div class="bi-ic navy">1</div><div><div class="bi-t">UNet 구조를 읽는다</div><div class="bi-d">encoder · decoder · skip-connection 이 무엇을 하는지 코드로 따라가기</div></div></div>
+            <div class="bitem anim d1"><div class="bi-ic navy">2</div><div><div class="bi-t">pix2pix 흐름을 이해한다</div><div class="bi-d">조건부 image-to-image — 앞·뒤 슬라이스에서 가운데를 만드는 변환</div></div></div>
+          </div>
+          <div class="blist">
+            <div class="bitem anim d2"><div class="bi-ic">3</div><div><div class="bi-t">학습 데이터를 구성한다</div><div class="bi-d">SliceDataset 으로 sparse triplet (before · middle · after) 만들기</div></div></div>
+            <div class="bitem anim d3"><div class="bi-ic">4</div><div><div class="bi-t">직접 학습하고 비교한다</div><div class="bi-d">mini UNet 을 CPU에서 학습 → W1 Linear baseline 대비 |Δφ|·SSIM 비교</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>04</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 5 · SECTION 01 ============ -->
+  <section class="divider dark" data-label="§1 학습 원리">
+    <div class="div-num">01</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 01</div>
+      <h2 class="div-title">신경망은 어떻게 학습하나</h2>
+      <p class="div-sub">Forward → Loss → Backward → Optimizer — 가중치를 데이터로 다듬는 한 사이클.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>05</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 6 · LEARNING CYCLE ============ -->
+  <section data-label="학습 사이클">
+    <div class="s-pad">
+      <div class="eyebrow">TRAINING LOOP</div>
+      <h2 class="s-title sm">학습의 네 박자</h2>
+      <p class="s-sub">"학습" = 모델의 가중치(weight)를 조정해 입력 → 출력 함수를 데이터로부터 만들어 가는 과정.</p>
+      <div class="body vcenter">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px">
+          <div class="dcard"><div class="step-n">01</div><div class="step-t">Forward</div><div class="step-d">모델에 입력을 넣어 예측 출력을 만든다.</div></div>
+          <div class="dcard"><div class="step-n">02</div><div class="step-t">Loss</div><div class="step-d">예측과 정답(GT)의 차이를 숫자로 계산한다.</div></div>
+          <div class="dcard"><div class="step-n">03</div><div class="step-t">Backward</div><div class="step-d">loss를 줄이는 gradient(기울기)를 계산한다.</div></div>
+          <div class="dcard"><div class="step-n">04</div><div class="step-t">Optimizer step</div><div class="step-d">가중치를 loss가 줄어드는 방향으로 한 걸음 옮긴다.</div></div>
+        </div>
+        <div class="callout navy" style="margin-top:40px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg></div>
+          <div><div class="co-t">이 사이클을 수많은 batch에 반복</div><div class="co-d">가중치가 조금씩 좋아지며, 예측이 점점 정답에 가까워집니다. 1 epoch = 데이터 전체를 한 번 학습.</div></div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>06</b> / 21</div></div>
+    <style>.step-n{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--orange-600)}.step-t{font-size:25px;font-weight:700;margin-top:14px;line-height:1.3}.step-d{font-size:19px;color:var(--ink-2);margin-top:12px;line-height:1.5}</style>
+  </section>
+
+  <!-- ============ 7 · LOSS & OPTIMIZER ============ -->
+  <section data-label="Loss · Optimizer">
+    <div class="s-pad">
+      <div class="eyebrow">L1 · L2 · Adam</div>
+      <h2 class="s-title sm">무엇을 줄이고, 어떻게 한 걸음 옮기나</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic">L1</div><div><div class="bi-t">L1 loss · 평균 절대오차</div><div class="bi-d">|pred − target| 평균. outlier에 강하고 부드럽지만 다소 흐림. <b>본 W2의 기본 손실.</b></div></div></div>
+            <div class="bitem"><div class="bi-ic">L2</div><div><div class="bi-t">L2 / MSE · 제곱오차</div><div class="bi-d">(pred − target)² 평균. 선명하지만 outlier에 민감, 안정성↓.</div></div></div>
+            <div class="bitem navy"><div class="bi-ic navy">≈</div><div><div class="bi-t">SSIM loss · 구조 유사도</div><div class="bi-d">픽셀 정확도보다 "모양 유사성"을 강조. W3에서 추가합니다.</div></div></div>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center">
+            <div class="eyebrow navy" style="font-size:18px">학습 설정 (model_utils.py)</div>
+            <div class="code" style="margin-top:22px;font-size:21px"><span class="cm"># 손실 + 최적화</span><br/>criterion = nn.<span class="or">L1Loss</span>()<br/>optimizer = <span class="or">Adam</span>(lr=<span class="gn">1e-3</span>)</div>
+            <div class="callout" style="margin-top:28px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+              <div><div class="co-t">학습률(lr)이 관건</div><div class="co-d">너무 작으면 학습이 느리고, 너무 크면 loss가 <b>NaN으로 발산</b>합니다. 보통 1e-4 ~ 5e-3.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>07</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 8 · SECTION 02 ============ -->
+  <section class="divider dark" data-label="§2 UNet 구조">
+    <div class="div-num">02</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 02</div>
+      <h2 class="div-title">UNet 구조</h2>
+      <p class="div-sub">Encoder로 압축하고, Decoder로 복원하고, Skip으로 잃어버린 detail을 되살린다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>08</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 9 · UNET ENCODER/DECODER ============ -->
+  <section data-label="UNetMini">
+    <div class="s-pad">
+      <div class="eyebrow">UNetMini · model_utils.py</div>
+      <h2 class="s-title sm">U자 모양 — 압축과 복원</h2>
+      <div class="body vcenter">
+        <div class="two l-wide">
+          <div class="chart-wrap vcenter">
+            <div class="eyebrow navy" style="font-size:18px">UNetMini(in_ch=2, base=8) · preset fast</div>
+            <svg viewBox="0 0 640 340" style="width:100%;margin-top:8px;flex:1">
+              <!-- encoder boxes -->
+              <rect x="40"  y="60"  width="70" height="140" rx="8" fill="#E2E9F1" stroke="#CBD8E6" stroke-width="2"/>
+              <rect x="140" y="90"  width="60" height="100" rx="8" fill="#CBD8E6" stroke="#9DB1CB" stroke-width="2"/>
+              <rect x="230" y="115" width="52" height="60"  rx="8" fill="#1F3A5F"/>
+              <!-- decoder boxes -->
+              <rect x="358" y="90"  width="60" height="100" rx="8" fill="#F6C994" stroke="#F2D6B2" stroke-width="2"/>
+              <rect x="448" y="60"  width="70" height="140" rx="8" fill="#FBE7CE" stroke="#F2D6B2" stroke-width="2"/>
+              <rect x="548" y="60"  width="46" height="140" rx="8" fill="#EA851B"/>
+              <!-- skip arrows -->
+              <path d="M110 80 C 250 30, 320 30, 388 80" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="6 6"/>
+              <path d="M200 92 C 280 64, 320 64, 388 92" fill="none" stroke="#EA851B" stroke-width="2.5" stroke-dasharray="6 6"/>
+              <!-- labels -->
+              <text x="75"  y="225" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">e1 · 8</text>
+              <text x="170" y="225" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">e2 · 16</text>
+              <text x="256" y="225" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">e3 · 32</text>
+              <text x="388" y="225" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">d2 · 16</text>
+              <text x="483" y="225" font-family="JetBrains Mono" font-size="15" fill="#5A6475" text-anchor="middle">d1 · 8</text>
+              <text x="571" y="225" font-family="JetBrains Mono" font-size="15" fill="#D4760F" text-anchor="middle">out · 1</text>
+              <text x="150" y="270" font-family="JetBrains Mono" font-size="16" fill="#1F3A5F" text-anchor="middle">◀ Encoder (수축)</text>
+              <text x="470" y="270" font-family="JetBrains Mono" font-size="16" fill="#D4760F" text-anchor="middle">Decoder (확장) ▶</text>
+              <text x="320" y="305" font-family="JetBrains Mono" font-size="15" fill="#EA851B" text-anchor="middle">— — skip-connection — —</text>
+            </svg>
+          </div>
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic navy">▼</div><div><div class="bi-t">Encoder — 수축 경로</div><div class="bi-d">Conv → MaxPool 반복. 크기 64→32→16, 채널 8→16→32. 높은 수준의 특징 추출.</div></div></div>
+            <div class="bitem"><div class="bi-ic">▲</div><div><div class="bi-t">Decoder — 확장 경로</div><div class="bi-d">ConvTranspose로 크기를 16→32→64로 키우고, 채널을 줄이며 픽셀 출력 생성.</div></div></div>
+            <div class="bitem"><div class="bi-ic">σ</div><div><div class="bi-t">출력 — sigmoid 0~1</div><div class="bi-d">마지막 1×1 conv + sigmoid 로 한 장의 슬라이스(가운데)를 만듭니다.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>09</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 10 · SKIP CONNECTION ============ -->
+  <section data-label="Skip-connection">
+    <div class="s-pad">
+      <div class="eyebrow">SKIP-CONNECTION</div>
+      <h2 class="s-title sm">UNet의 핵심 — detail을 건너뛰어 전달</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <p style="font-size:26px;color:var(--ink-2);line-height:1.6">Encoder가 영상을 작게 압축하면서 잃어버린 <b style="color:var(--ink)">엣지·텍스처 detail</b>을,
+              같은 크기의 Decoder 단계에 <b style="color:var(--orange-600)">직접 이어 붙여(concat)</b> 복원합니다.</p>
+            <div class="code" style="margin-top:30px;font-size:22px"><span class="cm"># UpBlock.forward</span><br/>x = self.up(x)<br/>x = torch.<span class="or">cat</span>([x, skip], dim=<span class="gn">1</span>)</div>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center;align-items:center">
+            <div style="text-align:center">
+              <div class="bignum" style="font-size:96px;color:var(--orange)">+skip</div>
+              <div style="font-size:23px;color:var(--ink-2);margin-top:14px">없으면 → 흐릿한 복원</div>
+              <div style="font-size:23px;color:var(--ink);margin-top:6px;font-weight:700">있으면 → 선명한 경계</div>
+              <div style="font-size:19px;color:var(--ink-3);margin-top:26px;font-family:var(--mono);line-height:1.5">의료 영상 segmentation에서<br/>시작 → image-to-image의 표준</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>10</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 11 · PIX2PIX ============ -->
+  <section data-label="pix2pix">
+    <div class="s-pad">
+      <div class="eyebrow">pix2pix</div>
+      <h2 class="s-title sm">조건부 image-to-image</h2>
+      <p class="s-sub">"입력 이미지 → 출력 이미지" 변환을 학습하는 프레임워크. Generator는 보통 UNet 기반입니다.</p>
+      <div class="body vcenter">
+        <div style="display:flex;align-items:center;justify-content:center;gap:34px">
+          <div class="p2-box"><div class="p2-l">입력 · 조건 (2채널)</div><div class="p2-imgs"><span>before</span><span>after</span></div></div>
+          <div class="p2-arrow">→</div>
+          <div class="p2-net">UNet<br/>Generator</div>
+          <div class="p2-arrow">→</div>
+          <div class="p2-box out"><div class="p2-l">출력 (1채널)</div><div class="p2-imgs"><span class="mid">middle</span></div></div>
+        </div>
+        <div class="callout navy" style="margin-top:44px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div><div class="co-t">W3로 가는 다리</div><div class="co-d">여기에 <b>Discriminator(적대적 학습)</b>를 더하면 pix2pix GAN — 더 선명한 복원으로 확장됩니다.</div></div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>11</b> / 21</div></div>
+    <style>.p2-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px}.p2-box.out{border-color:var(--orange-200)}
+      .p2-l{font-family:var(--mono);font-size:17px;color:var(--ink-3);margin-bottom:16px;text-align:center}
+      .p2-imgs{display:flex;gap:12px}.p2-imgs span{width:104px;height:104px;border-radius:12px;background:#1F3A5F;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px}
+      .p2-imgs span.mid{background:var(--orange)}
+      .p2-arrow{font-size:46px;color:var(--ink-3)}
+      .p2-net{background:var(--navy);color:#fff;border-radius:16px;padding:34px 30px;font-size:24px;font-weight:700;text-align:center;line-height:1.3}</style>
+  </section>
+
+  <!-- ============ 12 · SECTION 03 ============ -->
+  <section class="divider dark" data-label="§3 데이터 · 학습">
+    <div class="div-num">03</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 03</div>
+      <h2 class="div-title">데이터 &amp;<br/>학습 실행</h2>
+      <p class="div-sub">sparse triplet을 만들고, patch로 가속하고, PRESET으로 학습을 돌립니다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>12</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 13 · SLICEDATASET / TRIPLET ============ -->
+  <section data-label="SliceDataset">
+    <div class="s-pad">
+      <div class="eyebrow">SliceDataset · sparse triplet</div>
+      <h2 class="s-title sm">학습 sample의 단위 — (before, middle, after)</h2>
+      <p class="s-sub">sparse k=3 → 측정 z = 0·3·6·9…, 누락 z = 1·2·4·5… 누락 슬라이스 <b>하나마다 한 sample</b>.</p>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <div class="code" style="font-size:20px;line-height:1.7"><span class="cm"># 입력 2채널 → 가운데 1채널</span><br/>(z=0, <span class="or">z=1</span>, z=3) → in=[bb[0],bb[3]] · tg=bb[<span class="or">1</span>]<br/>(z=0, <span class="or">z=2</span>, z=3) → in=[bb[0],bb[3]] · tg=bb[<span class="or">2</span>]<br/>(z=3, <span class="or">z=4</span>, z=6) → in=[bb[3],bb[6]] · tg=bb[<span class="or">4</span>]</div>
+            <p style="font-size:20px;color:var(--ink-3);margin-top:24px;line-height:1.5">SliceDataset 클래스가 부피 전체에서 이 triplet들을 자동 생성합니다.</p>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center">
+            <div class="eyebrow navy" style="font-size:18px;text-align:center;margin-bottom:22px">한 학습 sample</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:18px">
+              <div style="text-align:center"><div class="tri-sq nav"></div><div class="tri-l">before<br/>(ch0)</div></div>
+              <div style="text-align:center"><div class="tri-sq nav"></div><div class="tri-l">after<br/>(ch1)</div></div>
+              <div style="font-size:34px;color:var(--ink-3)">→</div>
+              <div style="text-align:center"><div class="tri-sq or"></div><div class="tri-l" style="color:var(--orange-600)">middle<br/>(target)</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>13</b> / 21</div></div>
+    <style>.tri-sq{width:116px;height:116px;border-radius:12px}.tri-sq.nav{background:#1F3A5F}.tri-sq.or{background:var(--orange)}
+      .tri-l{font-family:var(--mono);font-size:16px;color:var(--ink-3);margin-top:12px;line-height:1.3}</style>
+  </section>
+
+  <!-- ============ 14 · PATCH + AUGMENT ============ -->
+  <section data-label="Patch · Augment">
+    <div class="s-pad">
+      <div class="eyebrow">patch · augmentation</div>
+      <h2 class="s-title sm">64×64 patch로 16배 빠르게</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter blist">
+            <div class="bitem"><div class="bi-ic">▢</div><div><div class="bi-t">256×256 전체 대신 64×64 patch</div><div class="bi-d">큰 슬라이스를 무작위로 잘라 학습 — 작은 영역도 충분한 학습 신호.</div></div></div>
+            <div class="bitem navy"><div class="bi-ic navy">⤺</div><div><div class="bi-t">flip augmentation</div><div class="bi-d">상하·좌우 뒤집기로 데이터를 늘려 일반화를 돕습니다.</div></div></div>
+            <div class="bitem"><div class="bi-ic">⚖</div><div><div class="bi-t">trade-off</div><div class="bi-d">patch를 키우면 메모리·시간이 비례해 늘어납니다. 기본값 patch_size=64.</div></div></div>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center;align-items:center">
+            <div style="text-align:center">
+              <div class="bignum" style="font-size:120px;color:var(--orange)">1/16</div>
+              <div style="font-size:24px;color:var(--ink-2);margin-top:12px">메모리 사용</div>
+              <div style="font-size:20px;color:var(--ink-3);margin-top:28px;font-family:var(--mono)">속도 ~16배 ↑ · 품질 비슷</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>14</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 15 · PRESET TABLE ============ -->
+  <section data-label="PRESET">
+    <div class="s-pad">
+      <div class="eyebrow">TRAINING_PRESETS</div>
+      <h2 class="s-title sm">환경에 맞춰 학습 강도를 고른다</h2>
+      <div class="body vcenter">
+        <div class="ptab">
+          <div class="pt-row pt-head"><div>preset</div><div>base 채널</div><div>epochs</div><div>시간 (CPU)</div><div>파라미터</div></div>
+          <div class="pt-row"><div class="pmono or">fast</div><div class="pmono">8</div><div class="pmono">20</div><div class="pmono">~10분</div><div class="pmono">~29K</div></div>
+          <div class="pt-row hl"><div class="pmono or">standard</div><div class="pmono">16</div><div class="pmono">50</div><div class="pmono">~30분</div><div class="pmono">~117K</div></div>
+          <div class="pt-row"><div class="pmono or">full</div><div class="pmono">16</div><div class="pmono">100</div><div class="pmono">~60분</div><div class="pmono">~117K</div></div>
+        </div>
+        <div class="callout" style="margin-top:36px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+          <div><div class="co-t">큰 모델이 항상 좋지는 않다</div><div class="co-d">base=16이 base=8보다 파라미터는 4배지만, 데이터가 적으면 <b>overfitting</b>으로 더 나쁠 수 있습니다. 과제 1에서 직접 확인.</div></div></div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>15</b> / 21</div></div>
+    <style>.ptab{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+      .pt-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr 1.2fr;gap:24px;padding:24px 40px;border-bottom:1px solid var(--line-2);align-items:center;font-size:25px}
+      .pt-row:last-child{border-bottom:0}.pt-head{background:var(--panel-2);font-family:var(--mono);font-size:19px;color:var(--ink-3);font-weight:600;letter-spacing:.04em}
+      .pt-row.hl{background:#FBE7CE}.pmono{font-family:var(--mono);font-weight:700;color:var(--navy)}.pmono.or{color:var(--orange-600)}</style>
+  </section>
+
+  <!-- ============ 16 · TRAIN CODE + CURVE ============ -->
+  <section data-label="train_quick">
+    <div class="s-pad">
+      <div class="eyebrow">train_quick()</div>
+      <h2 class="s-title sm">한 줄로 학습, 곡선으로 확인</h2>
+      <div class="body vcenter">
+        <div class="two r-wide">
+          <div class="vcenter">
+            <div class="code" style="font-size:21px;line-height:1.7"><span class="cm"># PRESET 하나로 시간/품질 trade-off 선택</span><br/>model, history = <span class="or">train_quick</span>(<br/>&nbsp;&nbsp;bb, k=<span class="gn">5</span>, preset=<span class="gn">'fast'</span>, device=DEVICE)</div>
+            <div class="callout navy" style="margin-top:30px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 4v16h16"/><path d="M8 15l3-4 3 2 4-6"/></svg></div>
+              <div><div class="co-t">학습 곡선을 읽는다</div><div class="co-d">loss가 꾸준히 내려가면 학습 정상. 들쭉날쭉하면 lr↓, 일찍 평평해지면 epoch↓도 OK.</div></div></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="eyebrow navy" style="font-size:18px">Train L1 loss · epochs</div>
+            <svg viewBox="0 0 560 320" style="width:100%;margin-top:14px;flex:1">
+              <line x1="60" y1="260" x2="540" y2="260" stroke="#E4DED2" stroke-width="2"/>
+              <line x1="60" y1="40" x2="60" y2="260" stroke="#E4DED2" stroke-width="2"/>
+              <path d="M60,70 C 140,120 200,200 300,228 C 400,248 470,252 540,254 L540,260 L60,260 Z" fill="url(#lg)"/>
+              <path d="M60,70 C 140,120 200,200 300,228 C 400,248 470,252 540,254" fill="none" stroke="#EA851B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+              <text x="60" y="32" font-family="JetBrains Mono" font-size="16" fill="#8A93A3">loss</text>
+              <text x="58" y="285" font-family="JetBrains Mono" font-size="16" fill="#8A93A3">epoch 1</text>
+              <text x="500" y="285" font-family="JetBrains Mono" font-size="16" fill="#8A93A3">20</text>
+              <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EA851B" stop-opacity=".22"/><stop offset="1" stop-color="#EA851B" stop-opacity="0"/></linearGradient></defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>16</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 17 · SECTION 04 ============ -->
+  <section class="divider dark" data-label="§4 평가">
+    <div class="div-num">04</div>
+    <div class="s-pad">
+      <div class="div-kick">Section 04</div>
+      <h2 class="div-title">평가 —<br/>Linear vs UNet</h2>
+      <p class="div-sub">같은 sparse k에서 |Δφ|와 SSIM이 얼마나 좋아졌는지, W1 베이스라인과 직접 비교합니다.</p>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>17</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 18 · RESULT: B1 vs UNet ============ -->
+  <section data-label="Linear vs UNet">
+    <div class="s-pad">
+      <div class="eyebrow">evaluate_model() · k=5</div>
+      <h2 class="s-title sm">선형 보간을 이겼나?</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="vcenter">
+            <p style="font-size:25px;color:var(--ink-2);line-height:1.6">같은 누락 슬라이스를 <b style="color:var(--ink)">B1 Linear</b>와 <b style="color:var(--orange-600)">UNet</b>으로 각각 복원해
+              <b>|Δφ|는 더 작게, SSIM은 더 크게</b> 나오는지 확인합니다.</p>
+            <div class="cmp" style="margin-top:30px">
+              <div class="cmp-row"><div class="cmp-l">|Δφ| <span>작을수록 좋음</span></div>
+                <div class="cmp-bars"><span class="cb nav" style="--w:78%">Linear</span><span class="cb or" style="--w:40%">UNet</span></div></div>
+              <div class="cmp-row"><div class="cmp-l">SSIM <span>클수록 좋음</span></div>
+                <div class="cmp-bars"><span class="cb nav" style="--w:62%">Linear</span><span class="cb or" style="--w:86%">UNet</span></div></div>
+            </div>
+            <p style="font-size:18px;color:var(--ink-3);margin-top:18px;font-family:var(--mono)">* 막대는 방향만 — 실제 수치는 노트북에서 본인 결과로 채워 넣으세요.</p>
+          </div>
+          <div class="dcard tint vcenter" style="justify-content:center">
+            <div class="eyebrow navy" style="font-size:18px;text-align:center;margin-bottom:20px">z=62 시각 비교</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div style="text-align:center"><div class="vp"><img src="assets/slices/BB_bin.png" alt=""></div><div class="vp-l">GT</div></div>
+              <div style="text-align:center"><div class="vp"><img src="assets/slices/BB_bin.png" alt="" style="filter:blur(1.5px)"></div><div class="vp-l">B1 Linear</div></div>
+              <div style="text-align:center"><div class="vp"><img src="assets/slices/BB_bin.png" alt=""></div><div class="vp-l" style="color:var(--orange-600)">UNet</div></div>
+              <div style="text-align:center"><div class="vp" style="background:#1a0e08"></div><div class="vp-l">|GT − UNet|</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>18</b> / 21</div></div>
+    <style>.cmp{display:flex;flex-direction:column;gap:22px}.cmp-row{display:flex;flex-direction:column}.cmp-l{font-size:21px;font-weight:700;margin-bottom:10px}.cmp-l span{font-family:var(--mono);font-size:16px;font-weight:400;color:var(--ink-3);margin-left:10px}
+      .cmp-bars{display:flex;flex-direction:column;gap:10px}.cb{display:flex;align-items:center;height:38px;width:var(--w);min-width:90px;border-radius:8px;padding:0 16px;color:#fff;font-family:var(--mono);font-size:17px;font-weight:600}
+      .cb.nav{background:#1F3A5F}.cb.or{background:var(--orange)}
+      .vp{height:118px;border-radius:10px;overflow:hidden;background:#111;border:1px solid var(--line)}.vp img{width:100%;height:100%;object-fit:cover}
+      .vp-l{font-family:var(--mono);font-size:15px;color:var(--ink-3);margin-top:8px}</style>
+  </section>
+
+  <!-- ============ 19 · CROSS-DOMAIN ============ -->
+  <section data-label="Cross-domain">
+    <div class="s-pad">
+      <div class="eyebrow">GENERALIZATION</div>
+      <h2 class="s-title sm">BB에서 배운 모델, 다른 암석에서도?</h2>
+      <p class="s-sub">BB로 학습한 mini UNet을 그대로(zero-shot) 세 도메인에 평가합니다. 학습 밖에서도 잘 되면 "일반화".</p>
+      <div class="body">
+        <div class="dom-row">
+          <div class="dom-c"><div class="fig"><img src="assets/slices/CastleGate_bin.png" alt=""></div><div class="dom-meta"><div class="dom-name">CastleGate</div><div class="dom-phi">φ = 0.252</div><div class="dom-note">불균질 사암</div></div></div>
+          <div class="dom-c"><div class="fig"><img src="assets/slices/Bentheimer_bin.png" alt=""></div><div class="dom-meta"><div class="dom-name">Bentheimer</div><div class="dom-phi">φ = 0.267</div><div class="dom-note">균질 사암</div></div></div>
+          <div class="dom-c"><div class="fig"><img src="assets/slices/Parker_bin.png" alt=""></div><div class="dom-meta"><div class="dom-name">Parker</div><div class="dom-phi">φ = 0.123</div><div class="dom-note">저공극 사암</div></div></div>
+        </div>
+      </div>
+      <div class="callout navy" style="margin-top:30px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 3v18"/></svg></div>
+        <div><div class="co-t">차이의 원인을 가설로</div><div class="co-d">공극률·구조·등방성이 다르면 일반화 성능도 달라집니다 — 과제 2에서 본인 가설을 세워 보세요.</div></div></div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>19</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 20 · TASKS & W3 ============ -->
+  <section data-label="과제 · W3 예고">
+    <div class="s-pad">
+      <div class="eyebrow">ASSIGNMENT · NEXT</div>
+      <h2 class="s-title sm">오늘의 과제 &amp; 다음 주</h2>
+      <div class="body vcenter">
+        <div class="two">
+          <div class="dcard vcenter">
+            <div class="eyebrow navy" style="font-size:18px">W3 전까지</div>
+            <div class="blist" style="margin-top:24px">
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:22px"><b>과제 1 (필수)</b> — fast vs standard preset 비교</div></div>
+              <div class="gc-li"><span class="b" style="background:var(--orange)"></span><div style="font-size:22px"><b>과제 2 (필수)</b> — 4개 도메인 cross-domain 평가</div></div>
+              <div class="gc-li"><span class="b" style="background:#1F3A5F"></span><div style="font-size:22px"><b>과제 3 (선택)</b> — L1 vs MSE 손실 비교</div></div>
+              <div class="gc-li"><span class="b" style="background:#1F3A5F"></span><div style="font-size:22px"><b>과제 4 (선택)</b> — learning rate sweep</div></div>
+            </div>
+            <div style="font-size:16px;color:var(--ink-3);margin-top:18px;font-family:var(--mono)">※ 핸드아웃 §5 기준 · 1조(심화)·2조(기본) 트랙별 안내는 웹 페이지 참고</div>
+          </div>
+          <div class="dcard tint vcenter">
+            <div class="chip navy" style="align-self:flex-start"><span class="dot"></span>WEEK 03</div>
+            <div style="font-size:34px;font-weight:800;margin-top:18px">적대적 학습 — pix2pix GAN</div>
+            <div class="ko-en" style="margin-top:6px">Conditional GAN</div>
+            <p style="font-size:21px;color:var(--ink-2);line-height:1.5;margin-top:18px">UNet generator에 <b>Discriminator</b>를 더해 더 선명한 복원으로. L1 + SSIM + adversarial loss 균형과 학습 안정화.</p>
+            <div class="chip ghost" style="align-self:flex-start;margin-top:20px">준비물 · 학습 체크포인트 unet_mini_*.pth</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>20</b> / 21</div></div>
+  </section>
+
+  <!-- ============ 21 · CLOSING ============ -->
+  <section class="divider dark" data-label="Q&A">
+    <div class="s-pad" style="justify-content:center">
+      <div class="mark" style="margin-bottom:40px">
+        <svg width="46" height="46" viewBox="0 0 40 40"><path d="M6 30.8 L20 24.8 L34 30.8 L20 36.8 Z" fill="#EA851B"/><path d="M6 22.4 L20 16.4 L34 22.4 L20 28.4 Z" fill="#9DB1CB"/><path d="M6 14 L20 8 L34 14 L20 20 Z" fill="#9DB1CB"/><path d="M6 5.6 L20 -0.4 L34 5.6 L20 11.6 Z" fill="#fff"/></svg>
+        <div><div class="m-name">Digital Rock</div><div class="m-sub" style="color:#9DB1CB">Sparse Slice Interpolation</div></div>
+      </div>
+      <h2 class="div-title">질문 &amp; 다음 시간에.</h2>
+      <p class="div-sub">오늘 학습한 mini UNet이 W3 pix2pix GAN의 출발점입니다. 직접 학습한 체크포인트를 꼭 보존하세요.</p>
+      <div style="display:flex;gap:16px;margin-top:44px"><span class="chip dark"><span class="dot"></span>web: 학습 UI · 데모</span><span class="chip dark"><span class="dot"></span>repo: Digital_rock_DL_Education</span></div>
+    </div>
+    <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>21</b> / 21</div></div>
+  </section>
+
+</deck-stage>
+<script src="deck/deck-stage.js"></script>
+</body>
+</html>

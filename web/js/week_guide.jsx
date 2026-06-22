@@ -11,14 +11,22 @@ const KIND_META = {
   sparse: { c:'orange', t:'Sparse' },
   interp: { c:'orange', t:'보간' },
   recon:  { c:'navy',   t:'복원' },
+  // W2 kinds
+  recap:  { c:'navy',   t:'복습' },
+  arch:   { c:'navy',   t:'구조' },
+  data:   { c:'orange', t:'데이터' },
+  train:  { c:'green',  t:'학습' },
+  cross:  { c:'orange', t:'cross-domain' },
 };
 const GROUP_COLOR = {
   '데이터 I/O':'navy', '시각화':'orange', 'Sparse':'orange', '보간':'orange', '평가':'green',
+  // W2 groups
+  '모델':'navy', '데이터셋':'orange', '학습':'green', '체크포인트':'navy',
 };
 
 /* notebook walkthrough */
-function NotebookWalk() {
-  const nb = window.COURSE.guide.notebook;
+function NotebookWalk({ guide }) {
+  const nb = guide.notebook;
   return (
     <div className="nb-wrap">
       <div className="nb-file">
@@ -52,8 +60,8 @@ function NotebookWalk() {
 }
 
 /* try-it box table */
-function TryItTable() {
-  const tt = window.COURSE.guide.notebook.tryits;
+function TryItTable({ guide }) {
+  const tt = guide.notebook.tryits;
   return (
     <div className="tryit-wrap">
       <div className="tryit-head">
@@ -108,8 +116,8 @@ function UtilCard({ u }) {
 }
 
 /* parameter mindset playbook */
-function Playbook() {
-  const pb = window.COURSE.guide.playbook;
+function Playbook({ guide }) {
+  const pb = guide.playbook;
   return (
     <div className="playbook">
       {pb.map((p, i) => (
@@ -128,8 +136,9 @@ function Playbook() {
 }
 
 /* the whole guide section */
-function GuideSection({ onNav }) {
-  const g = window.COURSE.guide;
+function GuideSection({ guide, onNav }) {
+  const g = guide || window.COURSE.guide;
+  const utilHead = `${g.utilsLabel || 'dr_utils.py'} REFERENCE`;
   return (
     <div className="guide-sec">
       <div className="guide-intro card card-pad">
@@ -140,19 +149,19 @@ function GuideSection({ onNav }) {
         </div>
       </div>
 
-      <Playbook />
+      <Playbook guide={g} />
 
       <div style={{ marginTop: 44 }}>
         <SectionHead eyebrow="NOTEBOOK WALKTHROUGH" title="실습 노트북 — 셀 단위로 따라가기"
           sub="각 셀이 무엇을 하고, 어디서 [Try-it!]으로 인자를 바꾸는지 한눈에." />
         <div className="guide-2col">
-          <NotebookWalk />
-          <TryItTable />
+          <NotebookWalk guide={g} />
+          <TryItTable guide={g} />
         </div>
       </div>
 
       <div style={{ marginTop: 44 }}>
-        <SectionHead eyebrow="dr_utils.py REFERENCE" title="유틸리티 함수 — 인자를 어떻게 다루나"
+        <SectionHead eyebrow={utilHead} title="유틸리티 함수 — 인자를 어떻게 다루나"
           sub="카드를 펼치면 시그니처·인자·실험 가이드가 나옵니다. 직접 함수를 짜기보다, 인자를 바꿔 결과 차이를 관찰하세요."
           right={<button className="btn btn-ghost btn-sm" onClick={() => onNav('demo')}><Icon name="sliders" size={15} />데모로 실험</button>} />
         <div className="util-grid">

@@ -34,6 +34,7 @@ function TermCard({ t }) {
 
 /* ---------- preview scaffold for weeks not yet released ---------- */
 function WeekPreview({ w, onNav }) {
+  const prev = window.COURSE.weeks[w.n - 2];   // previous week (w.n is 1-based); undefined for n<=1
   return (
     <div className="page page-wide">
       <div className="crumb">
@@ -56,7 +57,7 @@ function WeekPreview({ w, onNav }) {
             <b style={{ fontSize: 14 }}>준비 중인 주차</b>
           </div>
           <p className="muted" style={{ fontSize: 13, lineHeight: 1.55, margin: '0 0 16px' }}>
-            아래는 이 주차에서 다룰 내용의 미리보기입니다. W1과 동일한 템플릿으로 공개됩니다.
+            아래는 이 주차에서 다룰 내용의 미리보기입니다. 이미 공개된 주차와 동일한 템플릿으로 공개됩니다.
           </p>
           {w.prep && <>
             <div className="eyebrow muted" style={{ marginBottom: 8 }}>들어가기 전 준비물</div>
@@ -98,42 +99,50 @@ function WeekPreview({ w, onNav }) {
         </div>
       </section>
 
-      <section style={{ marginTop: 44 }}>
-        <div className="prevweek card">
-          <div>
-            <div className="eyebrow">계속하려면</div>
-            <h3 className="h2" style={{ marginTop: 8 }}>먼저 W1을 완료하세요</h3>
-            <p className="muted" style={{ marginTop: 8 }}>각 주차는 이전 주차의 결과 위에 쌓입니다.</p>
+      {prev && (
+        <section style={{ marginTop: 44 }}>
+          <div className="prevweek card">
+            <div>
+              <div className="eyebrow">계속하려면</div>
+              <h3 className="h2" style={{ marginTop: 8 }}>먼저 {prev.slug.toUpperCase()}을(를) 완료하세요</h3>
+              <p className="muted" style={{ marginTop: 8 }}>각 주차는 이전 주차의 결과 위에 쌓입니다.</p>
+            </div>
+            <button className="btn btn-navy" onClick={() => onNav(prev.slug)}><Icon name="book" size={16} />{prev.slug.toUpperCase()}로 가기</button>
           </div>
-          <button className="btn btn-navy" onClick={() => onNav('w1')}><Icon name="book" size={16} />W1로 가기</button>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
 
-/* ---------- full week page (W1) ---------- */
+/* ---------- full week page (generic, data-driven via C[w.slug]) ---------- */
 function WeekFull({ w, group, onGroup, onNav }) {
   const C = window.COURSE;
-  const gd = C.w1.groups[group];
+  const wd = C[w.slug];                 // per-week data (flow · groups · selfcheck · res · guide)
+  const gd = wd.groups[group];
   const grp = C.groups[group];
+  const r = wd.res;
+  const guide = wd.guide || C.guide;    // W1 keeps top-level C.guide; W2+ nest their own
+  const SLUG = w.slug.toUpperCase();
+  const wkNum = String(w.n).padStart(2, '0');
   // 본 자료는 그룹과 무관하게 공통 (shared/), 2조에게는 보조 노트(g2_supplement/) 추가 카드
-  const shared = `downloads/shared/w1`;
-  const supp = `downloads/g2_supplement/w1`;
+  const shared = `downloads/shared/${w.slug}`;
+  const supp = `downloads/g2_supplement/${w.slug}`;
+  const next = C.weeks[w.n];            // next week object (undefined if last)
 
   return (
     <div className="page page-wide">
       <div className="crumb">
-        <a href="#/home">홈</a><Icon name="chevron" size={13} /><span>Week 01</span>
+        <a href="#/home">홈</a><Icon name="chevron" size={13} /><span>Week {wkNum}</span>
       </div>
 
       {/* header */}
       <div className="wk-hero">
         <div>
           <div className="row center gap-12 wrap" style={{ marginBottom: 14 }}>
-            <span className="wk-hero-num font-mono">WEEK 01</span>
-            <StatusBadge status="now" />
-            <span className="badge badge-green"><span className="dot"></span>non-DL</span>
+            <span className="wk-hero-num font-mono">WEEK {wkNum}</span>
+            <StatusBadge status={w.status} />
+            {w.nonDL && <span className="badge badge-green"><span className="dot"></span>non-DL</span>}
           </div>
           <h1 className="h1" style={{ fontSize: 'clamp(28px,3.6vw,40px)' }}>{w.title}</h1>
           <div className="wk-hero-en font-mono">{w.en}</div>
@@ -159,7 +168,7 @@ function WeekFull({ w, group, onGroup, onNav }) {
             <div>
               <div className="eyebrow" style={{ color: 'var(--navy)', marginBottom: 6 }}>STEP 0 — 처음이라면</div>
               <div style={{ fontWeight: 700, fontSize: 17 }}>먼저 Python 환경부터 설정하세요 (약 5분)</div>
-              <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>conda 환경 + 필수 패키지 설치. GPU 없이 CPU만으로 W1 진행 가능.</div>
+              <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>conda 환경 + 필수 패키지 설치. GPU 없이 CPU만으로 진행 가능.</div>
             </div>
             <a href="#/setup" className="btn btn-ghost btn-lg" style={{ borderColor: 'var(--navy)' }}>
               <Icon name="terminal" size={18} />환경 설치 가이드
@@ -172,19 +181,25 @@ function WeekFull({ w, group, onGroup, onNav }) {
       <section style={{ marginTop: 36 }}>
         <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--orange-600)' }}>본 자료 · 모든 학생 공통</div>
         <div className="res-grid">
-          <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name="W1 deck"
-            meta="웹에서 바로 보기" href="W1_deck.html" primary />
+          <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name={`${SLUG} deck`}
+            meta="웹에서 바로 보기" href={r.deck} primary />
           <ResourceCard icon="external" kind="노트북 미리보기 (웹뷰)" name="실행 결과 + 그림 포함"
-            meta="다운로드 전 결과 미리 확인" href="notebooks/W1_load_and_explore.html" />
-          <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name="W1_load_and_explore.ipynb"
-            meta="클릭 시 .ipynb 다운로드" href={`${shared}/W1_load_and_explore.ipynb`} />
-          <ResourceCard icon="terminal" kind="유틸리티 (다운로드)" name="dr_utils.py"
-            meta="클릭 시 .py 다운로드" href={`${shared}/dr_utils.py`} />
-          <ResourceCard icon="book" kind="핸드아웃 (다운로드)" name="W1_handout.md"
-            meta="탐구 과제 안내" href={`${shared}/W1_handout.md`} />
+            meta="다운로드 전 결과 미리 확인" href={r.notebookHtml} />
+          <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name={r.notebook}
+            meta="클릭 시 .ipynb 다운로드" href={`${shared}/${r.notebook}`} />
+          {r.utils.map((u, i) => (
+            <ResourceCard key={i} icon="terminal" kind="유틸리티 (다운로드)" name={u.name}
+              meta={u.meta} href={`${shared}/${u.name}`} />
+          ))}
+          <ResourceCard icon="book" kind="핸드아웃 (다운로드)" name={r.handout.name}
+            meta={r.handout.meta} href={`${shared}/${r.handout.name}`} />
+          {r.pptx && (
+            <ResourceCard icon="slides" kind="강의 슬라이드 (PPTX 다운로드)" name={r.pptx}
+              meta="오프라인 발표·편집용" href={`${shared}/${r.pptx}`} />
+          )}
         </div>
         <div className="ctl-hint" style={{ marginTop: 14 }}>
-          📦 모든 코드·문서 한 번에 받기 — <a href={`downloads/shared/w1_code.zip`}><b>w1_code.zip</b></a>
+          📦 모든 코드·문서 한 번에 받기 — <a href={`downloads/shared/${r.codezip}`}><b>{r.codezip}</b></a>
         </div>
       </section>
 
@@ -194,22 +209,13 @@ function WeekFull({ w, group, onGroup, onNav }) {
         <div className="card card-pad" style={{ background: 'var(--tint)', borderColor: 'var(--orange-200)' }}>
           <div className="row between center wrap" style={{ gap: 14 }}>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>data_w1.zip — 256³ binary · 4 도메인</div>
-              <div className="muted" style={{ fontSize: 14 }}>
-                BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB).
-              </div>
+              <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{r.data.title}</div>
+              <div className="muted" style={{ fontSize: 14 }}>{r.data.desc}</div>
               <pre style={{ background: 'var(--panel)', padding: '10px 14px', marginTop: 10, fontSize: 13, borderRadius: 8, lineHeight: 1.6 }}>
-{`<본인 작업 폴더>/
-├ W1_load_and_explore.ipynb
-├ dr_utils.py
-└ data/        ← data_w1.zip의 .bin 파일을 여기에 압축 해제
-  ├ BB_256.bin
-  ├ CastleGate_256.bin
-  ├ Bentheimer_256.bin
-  └ Parker_256.bin`}
+{r.data.tree}
               </pre>
             </div>
-            <a href="downloads/data_w1.zip" className="btn btn-primary btn-lg" download>
+            <a href={`downloads/${r.data.file}`} className="btn btn-primary btn-lg" download>
               <Icon name="download" size={18} />데이터 다운로드
             </a>
           </div>
@@ -223,15 +229,13 @@ function WeekFull({ w, group, onGroup, onNav }) {
             2조 전용 보조 노트 · 본 자료를 더 친절히 설명
           </div>
           <div className="res-grid">
-            <ResourceCard icon="book" kind="개념 풀이" name="W1_concept_notes.md"
-              meta="voxel · normalize · Otsu · sparse 등" href={`${supp}/W1_concept_notes.md`} />
-            <ResourceCard icon="terminal" kind="코드 walkthrough" name="W1_code_walkthrough.md"
-              meta="셀별 코드 설명 + 인자 변경 가이드" href={`${supp}/W1_code_walkthrough.md`} />
-            <ResourceCard icon="notebook" kind="작은 예시 노트북" name="W1_extra_examples.ipynb"
-              meta="단계별 mini 예제 4개" href={`${supp}/W1_extra_examples.ipynb`} />
+            {r.supp.map((s, i) => (
+              <ResourceCard key={i} icon={s.icon} kind={s.kind} name={s.name}
+                meta={s.meta} href={`${supp}/${s.name}`} />
+            ))}
           </div>
           <div className="ctl-hint" style={{ marginTop: 14 }}>
-            📦 보조 노트 한 번에 받기 — <a href={`downloads/g2_supplement/w1_supplement.zip`}><b>w1_supplement.zip</b></a>
+            📦 보조 노트 한 번에 받기 — <a href={`downloads/g2_supplement/${r.suppzip}`}><b>{r.suppzip}</b></a>
           </div>
         </section>
       )}
@@ -241,9 +245,9 @@ function WeekFull({ w, group, onGroup, onNav }) {
         <SectionHead eyebrow="SESSION FLOW" title="학습 흐름"
           sub={`${grp.name} · ${grp.track} 권장 진행 순서입니다.`} />
         <div className="flow">
-          {C.w1.flow.map((f, i) => (
+          {wd.flow.map((f, i) => (
             <div key={i} className="flow-row noflow-time">
-              <div className="flow-line"><span className="flow-dot"></span>{i < C.w1.flow.length - 1 && <span className="flow-bar"></span>}</div>
+              <div className="flow-line"><span className="flow-dot"></span>{i < wd.flow.length - 1 && <span className="flow-bar"></span>}</div>
               <div className="flow-body">
                 <div className="flow-step font-mono">STEP {String(i + 1).padStart(2, '0')}</div>
                 <div className="flow-act">{f.a}</div>
@@ -258,7 +262,7 @@ function WeekFull({ w, group, onGroup, onNav }) {
       <section style={{ marginTop: 56 }} id="guide-anchor">
         <SectionHead eyebrow="자료 깊이 보기" title="노트북 & 유틸리티 가이드"
           sub="다운로드만으로 끝나지 않게 — 무엇을 실행하고 어떤 인자를 어떻게 바꿔야 하는지 안내합니다." />
-        <GuideSection onNav={onNav} />
+        <GuideSection guide={guide} onNav={onNav} />
       </section>
 
       {/* glossary */}
@@ -274,7 +278,7 @@ function WeekFull({ w, group, onGroup, onNav }) {
       <section style={{ marginTop: 56 }}>
         <SectionHead eyebrow="ASSIGNMENTS"
           title={`탐구 과제 · ${grp.name}`}
-          sub="W2 시작 전까지 수행하세요. 데모 페이지에서 미리 감을 잡을 수 있습니다."
+          sub={`${next ? 'W' + next.n : '다음 주차'} 시작 전까지 수행하세요. 데모 페이지에서 미리 감을 잡을 수 있습니다.`}
           right={<button className="btn btn-ghost btn-sm" onClick={() => onNav('demo')}><Icon name="sliders" size={15} />데모로 실험</button>} />
         <div className="task-list">
           {gd.tasks.map((t, i) => (
@@ -297,7 +301,7 @@ function WeekFull({ w, group, onGroup, onNav }) {
         <SectionHead eyebrow="SELF-CHECK" title="자기 점검 질문"
           sub="핸드아웃에 직접 답을 적어보세요. 답이 막히면 해당 용어·데모로 돌아가 확인합니다." />
         <div className="selfcheck">
-          {C.w1.selfcheck.map((q, i) => (
+          {wd.selfcheck.map((q, i) => (
             <div key={i} className="sc-row">
               <span className="sc-q-no font-mono">Q{i + 1}</span>
               <span className="sc-q-txt">{q}</span>
@@ -307,25 +311,27 @@ function WeekFull({ w, group, onGroup, onNav }) {
       </section>
 
       {/* next week */}
-      <section style={{ marginTop: 56 }}>
-        <div className="nextweek card">
-          <div>
-            <div className="eyebrow">NEXT · WEEK 02</div>
-            <h3 className="h2" style={{ marginTop: 8 }}>{C.weeks[1].title} <span className="muted font-mono" style={{ fontSize: 15 }}>· {C.weeks[1].en}</span></h3>
-            <p className="muted" style={{ marginTop: 8, maxWidth: 560 }}>{C.weeks[1].summary}</p>
-            <div className="wk-concepts" style={{ marginTop: 14 }}>
-              {C.weeks[1].concepts.map((c, i) => <span key={i} className="wk-chip">{c}</span>)}
+      {next && (
+        <section style={{ marginTop: 56 }}>
+          <div className="nextweek card">
+            <div>
+              <div className="eyebrow">NEXT · WEEK {String(next.n).padStart(2, '0')}</div>
+              <h3 className="h2" style={{ marginTop: 8 }}>{next.title} <span className="muted font-mono" style={{ fontSize: 15 }}>· {next.en}</span></h3>
+              <p className="muted" style={{ marginTop: 8, maxWidth: 560 }}>{next.summary}</p>
+              <div className="wk-concepts" style={{ marginTop: 14 }}>
+                {next.concepts.map((c, i) => <span key={i} className="wk-chip">{c}</span>)}
+              </div>
+            </div>
+            <div className="nextweek-prep">
+              <div className="eyebrow muted" style={{ marginBottom: 8 }}>준비물</div>
+              {(next.prep || []).map((p, i) => <div key={i} className="prep-i font-mono"><Icon name="check" size={14} />{p}</div>)}
+              <button className="btn btn-ghost btn-sm" style={{ marginTop: 14, width: '100%' }} onClick={() => onNav(next.slug)}>
+                {next.slug.toUpperCase()} {next.available ? '바로가기' : '미리보기'} <Icon name="arrow" size={14} />
+              </button>
             </div>
           </div>
-          <div className="nextweek-prep">
-            <div className="eyebrow muted" style={{ marginBottom: 8 }}>준비물</div>
-            {C.weeks[1].prep.map((p, i) => <div key={i} className="prep-i font-mono"><Icon name="check" size={14} />{p}</div>)}
-            <button className="btn btn-ghost btn-sm" style={{ marginTop: 14, width: '100%' }} onClick={() => onNav('w2')}>
-              W2 미리보기 <Icon name="arrow" size={14} />
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

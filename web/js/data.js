@@ -31,7 +31,7 @@ window.COURSE = {
       nonDL:true,
     },
     {
-      n:2, status:'next', slug:'w2', available:false,
+      n:2, status:'next', slug:'w2', available:true,
       title:'Deep Learning 입문 — UNet · pix2pix 구조',
       en:'UNet · pix2pix · Train',
       summary:'슬라이스 보간을 학습 가능한 함수로 정식화. UNet 기본 구조와 pix2pix(조건부 image-to-image) 흐름을 코드로 따라가고, mini UNet을 학생 노트북에서 직접 학습 + 평가합니다.',
@@ -112,10 +112,10 @@ window.COURSE = {
   // domains (real micro-CT samples) — 6 도메인으로 확장
   // φ 값은 본 패키지 256³ subvolume 기준 (실제 측정값)
   domains: [
-    { id:'BB',          name:'BB Sandstone',   phi:0.221, voxel_um:2.25, family:'sandstone', note:'기준 학습 도메인 (W1~W5)' },
-    { id:'CastleGate',  name:'CastleGate',     phi:0.277, voxel_um:2.25, family:'sandstone', note:'고공극·불균질 사암' },
-    { id:'Bentheimer',  name:'Bentheimer',     phi:0.234, voxel_um:2.25, family:'sandstone', note:'균질 사암 (1조용)' },
-    { id:'Parker',      name:'Parker',         phi:0.123, voxel_um:2.25, family:'sandstone', note:'저공극 사암 (W1 비교용)' },
+    { id:'BB',          name:'BB Sandstone',   phi:0.220, voxel_um:2.25, family:'sandstone', note:'기준 학습 도메인 (W1~W5)' },
+    { id:'CastleGate',  name:'CastleGate',     phi:0.252, voxel_um:2.25, family:'sandstone', note:'불균질 사암' },
+    { id:'Bentheimer',  name:'Bentheimer',     phi:0.267, voxel_um:2.25, family:'sandstone', note:'균질 사암' },
+    { id:'Parker',      name:'Parker',         phi:0.123, voxel_um:2.25, family:'sandstone', note:'저공극 사암' },
     { id:'Ketton',      name:'Ketton',         phi:0.118, voxel_um:3.00, family:'carbonate', note:'탄산염암 — W6 cross-domain' },
     { id:'Estaillades', name:'Estaillades',    phi:0.096, voxel_um:3.31, family:'carbonate', note:'탄산염암 — 원본 인코딩 invert (교육 포인트)' },
   ],
@@ -139,12 +139,13 @@ window.COURSE = {
 
   // W1 detail — per group
   w1: {
+    // flow rows are { a, src } — WeekFull renders action + source only (.noflow-time)
     flow: [
-      { t:'0–25분',  a:'강의 + 개념',                  src:'슬라이드 1–12',  g1:'0–25분', g2:'0–30분 (천천히)' },
-      { t:'25–60분', a:'노트북 실행 + [Try-it!]',       src:'W1_load_and_explore.ipynb', g1:'25–60분', g2:'30–65분' },
-      { t:'60–75분', a:'후반 강의 + 노트북',            src:'sparse + 보간',  g1:'60–75분', g2:'65–80분' },
-      { t:'75–85분', a:'자기 점검 + 탐구 과제',          src:'handout §4',     g1:'75–85분', g2:'80–88분' },
-      { t:'85–90분', a:'Q&A + W2 예고',                src:'마무리',         g1:'85–90분', g2:'88–90분' },
+      { a:'강의 + 개념',            src:'슬라이드 1–12' },
+      { a:'노트북 실행 + [Try-it!]', src:'W1_load_and_explore.ipynb' },
+      { a:'후반 강의 + 노트북',      src:'sparse + 보간' },
+      { a:'자기 점검 + 탐구 과제',   src:'handout §4' },
+      { a:'Q&A + W2 예고',          src:'마무리' },
     ],
     groups: {
       g1: {
@@ -175,6 +176,37 @@ window.COURSE = {
       'tri-axis aggregation은 어떤 가정 위에 서 있나? 깨지면?',
       '오늘의 "k vs |Δφ|" 곡선이 왜 딥러닝이 필요한지 어떻게 설명하나?',
     ],
+    // page resources (driven generically by WeekFull)
+    res: {
+      deck: 'W1_deck.html',
+      notebookHtml: 'notebooks/W1_load_and_explore.html',
+      notebook: 'W1_load_and_explore.ipynb',
+      utils: [
+        { name:'dr_utils.py', meta:'클릭 시 .py 다운로드' },
+      ],
+      handout: { name:'W1_handout.md', meta:'탐구 과제 안내' },
+      pptx: 'W1.pptx',
+      codezip: 'w1_code.zip',
+      data: {
+        file:'data_w1.zip',
+        title:'data_w1.zip — 256³ binary · 4 도메인',
+        desc:'BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB).',
+        tree:`<본인 작업 폴더>/
+├ W1_load_and_explore.ipynb
+├ dr_utils.py
+└ data/        ← data_w1.zip의 .bin 파일을 여기에 압축 해제
+  ├ BB_256.bin
+  ├ CastleGate_256.bin
+  ├ Bentheimer_256.bin
+  └ Parker_256.bin`,
+      },
+      supp: [
+        { icon:'book',     kind:'개념 풀이',        name:'W1_concept_notes.md',    meta:'voxel · normalize · Otsu · sparse 등' },
+        { icon:'terminal', kind:'코드 walkthrough', name:'W1_code_walkthrough.md',  meta:'셀별 코드 설명 + 인자 변경 가이드' },
+        { icon:'notebook', kind:'작은 예시 노트북',  name:'W1_extra_examples.ipynb', meta:'단계별 mini 예제 4개' },
+      ],
+      suppzip: 'w1_supplement.zip',
+    },
   },
 
   // ---- W1 deep-dive: notebook walkthrough + dr_utils reference ----
@@ -254,6 +286,150 @@ window.COURSE = {
     ],
   },
 
+  // ===================================================================
+  //  W2 — Deep Learning 입문 (UNet · pix2pix · mini UNet 학습)
+  // ===================================================================
+  w2: {
+    flow: [
+      { a:'강의 + 학습 원리·UNet 구조',          src:'슬라이드 1–11' },
+      { a:'노트북 실행 + 구조·데이터 분석',       src:'W2_deep_learning_intro.ipynb' },
+      { a:'mini UNet 직접 학습 + 곡선 해석',      src:'노트북 §4 학습 · PRESET' },
+      { a:'W1 baseline 대비 평가 + cross-domain', src:'노트북 §5 평가' },
+      { a:'탐구 과제 안내 + W3 예고',             src:'handout §5 탐구 과제' },
+    ],
+    groups: {
+      g1: {
+        slides:21, cells:18, tryits:4,
+        notebook:'W2_deep_learning_intro.ipynb',
+        tasks:[
+          { t:'preset 비교', req:true, d:'fast·standard 두 preset으로 학습 → 시간·파라미터·|Δφ|·SSIM과 학습 곡선을 함께 비교. 더 큰 모델이 항상 좋지 않을 수 있는 이유를 본인 해석으로.' },
+          { t:'Cross-domain 일반화', req:true, d:'BB 학습 모델을 네 도메인(BB·CastleGate·Bentheimer·Parker)에 평가 → 표 + 시각화. 차이의 원인 가설(공극률·구조·등방성 차이).' },
+          { t:'Loss 함수 비교', req:false, d:'nn.L1Loss()를 nn.MSELoss() 등으로 바꿔 같은 preset 재학습. L1과 L2가 각각 유리한 상황을 본인 해석으로.' },
+          { t:'Learning rate sensitivity', req:false, d:'Adam(lr=1e-3)의 학습률을 {1e-4,5e-4,1e-3,5e-3}로 sweep하고 학습 곡선 비교. 너무 작거나 큰 경우의 양상 관찰.' },
+        ],
+      },
+      g2: {
+        slides:21, cells:18, tryits:4,
+        notebook:'W2_deep_learning_intro.ipynb',
+        tasks:[
+          { t:'노트북 전체 실행', req:true, d:'환경 준비부터 평가까지 모든 셀을 순서대로 실행하고 결과(파라미터·학습 곡선·|Δφ|·SSIM)를 본인 말로 정리.' },
+          { t:'preset 두 개 비교', req:true, d:'fast와 standard 두 preset으로 학습해 학습 시간과 |Δφ|·SSIM을 표로 비교. 어느 쪽이 본인 환경에 맞는가?' },
+          { t:'cross-domain 관찰', req:false, d:'BB 학습 모델을 CastleGate에 평가. 같은 모델인데 왜 결과가 달라지는지 한 문장으로 설명.' },
+          { t:'학습 곡선 읽기', req:false, d:'epochs를 늘렸을 때 학습 곡선이 어떻게 바뀌는지 관찰하고 underfit / overfit 개념으로 설명.' },
+        ],
+      },
+    },
+    selfcheck: [
+      'UNet에서 skip-connection이 없으면 복원 결과에 어떤 문제가 생기나?',
+      'L1 손실과 L2(MSE) 손실은 결과 경향이 각각 어떻게 다른가?',
+      'base를 8→16으로 키우면 파라미터가 약 4배인데, 항상 더 좋을까? 왜?',
+      'learning rate가 너무 크면 학습 곡선(loss)이 어떻게 되나?',
+      'BB에서 학습한 모델이 Parker(저공극)에서 더 나쁘다면, 그 원인 가설은?',
+    ],
+    res: {
+      deck: 'W2_deck.html',
+      notebookHtml: 'notebooks/W2_deep_learning_intro.html',
+      notebook: 'W2_deep_learning_intro.ipynb',
+      utils: [
+        { name:'dr_utils.py',    meta:'W1과 동일 (평가 지표 포함)' },
+        { name:'model_utils.py', meta:'UNetMini · SliceDataset · 학습 루프' },
+      ],
+      handout: { name:'W2_handout.md', meta:'학습 목표 · PRESET · 탐구 과제' },
+      pptx: 'W2.pptx',
+      codezip: 'w2_code.zip',
+      data: {
+        file:'data_w2.zip',
+        title:'data_w2.zip — 256³ binary · 4 도메인',
+        desc:'BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB). W1과 동일한 데이터.',
+        tree:`<본인 작업 폴더>/
+├ W2_deep_learning_intro.ipynb
+├ dr_utils.py
+├ model_utils.py
+└ data/        ← data_w2.zip의 .bin 파일을 여기에 압축 해제
+  ├ BB_256.bin
+  ├ CastleGate_256.bin
+  ├ Bentheimer_256.bin
+  └ Parker_256.bin`,
+      },
+      supp: [
+        { icon:'book',     kind:'개념 풀이',        name:'W2_concept_notes.md',    meta:'신경망 학습 · UNet · pix2pix · loss 등' },
+        { icon:'terminal', kind:'코드 walkthrough', name:'W2_code_walkthrough.md',  meta:'셀별 코드 설명 + 인자 변경 가이드' },
+        { icon:'notebook', kind:'작은 예시 노트북',  name:'W2_extra_examples.ipynb', meta:'단계별 mini 예제' },
+      ],
+      suppzip: 'w2_supplement.zip',
+    },
+    // ---- W2 deep-dive: notebook walkthrough + model_utils reference ----
+    guide: {
+      utilsLabel: 'model_utils.py',
+      intro: 'W2의 핵심은 model_utils.py가 제공하는 UNet·Dataset·학습 함수를 직접 호출하고, PRESET·loss·learning rate·k 같은 인자를 바꿔가며 학습 곡선·|Δφ|·SSIM이 어떻게 달라지는지 관찰·해석하는 것입니다. 아래 가이드를 노트북 옆에 두고 따라가세요.',
+      notebook: {
+        file: 'W2_deep_learning_intro.ipynb',
+        cells: [
+          { n:'01', kind:'setup', t:'환경 & import', code:"sys.path.insert(0, '../helpers')\nfrom dr_utils import *\nfrom model_utils import *\nDEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'", d:'dr_utils와 model_utils를 불러오고 device(cpu/cuda)를 정합니다. torch 미설치 시 pip install torch torchvision.' },
+          { n:'02', kind:'recap', t:'W1 baseline 복습 (B1 k=5)', code:"bb = load_volume(DATA / 'BB_256.bin')\nrec_l = reconstruct_sparse_linear(bb, k=5)\nm_baseline = summarize_metrics(rec_l, bb, label='B1 Linear k=5')", d:'우리가 이길 대상 — W1의 선형 보간 베이스라인 |Δφ|·SSIM을 먼저 측정해 둡니다.' },
+          { n:'03', kind:'arch', t:'UNetMini 구조 · 파라미터 비교', code:"for name, p in TRAINING_PRESETS.items():\n    m = UNetMini(in_ch=2, base=p['base'])\n    print(name, count_parameters(m))", d:'세 preset의 모델 크기를 비교하고 UNetMini 구조(encoder·decoder·skip)를 출력합니다.' },
+          { n:'04', kind:'data', t:'SliceDataset — sparse triplet', code:"ds = SliceDataset(bb, k=5, patch_size=64,\n                  n_patches_per_triplet=4, augment=True)\nx, y = ds[0]   # x:(2,H,W) before·after · y:(1,H,W) middle", d:'누락 슬라이스마다 (before, middle, after) triplet을 만들어 학습 sample을 구성. 한 sample을 시각화합니다.' },
+          { n:'05', kind:'train', t:'학습 — PRESET 선택', code:"PRESET = 'fast'   # 'standard' / 'full' 도 가능\nmodel, history = train_quick(bb, k=5, preset=PRESET, device=DEVICE)", d:'한 줄로 mini UNet 학습. [Try-it! ①]에서 preset을 바꿔 시간·품질 trade-off를 관찰.' },
+          { n:'06', kind:'train', t:'학습 곡선 + 체크포인트', code:"plt.plot(history)   # Train L1 loss\nsave_ckpt(model, f'unet_mini_{PRESET}.pth', meta={'preset':PRESET})", d:'loss 곡선이 꾸준히 내려가는지 확인하고, 학습된 가중치를 저장(W3에서 재사용).' },
+          { n:'07', kind:'metric', t:'평가 — Linear vs UNet', code:"res = evaluate_model(model, bb, k=5, device=DEVICE)\nprint(res['dphi_pp'], res['ssim'])   # vs m_baseline", d:'전체 부피의 누락 슬라이스를 모델로 복원해 |Δφ|·SSIM을 B1 Linear와 직접 비교합니다.' },
+          { n:'08', kind:'view', t:'시각 비교 (GT/Linear/UNet/diff)', code:"# z=62: GT · B1 Linear · UNet · |GT−UNet|\naxes[3].imshow(np.abs(bb[z]-res['recon'][z]), cmap='hot')", d:'한 슬라이스를 네 패널로 비교 — 숫자뿐 아니라 어디서 좋아졌는지 눈으로 확인.' },
+          { n:'09', kind:'cross', t:'Cross-domain 평가', code:"for name in ['CastleGate','Bentheimer','Parker']:\n    vol = load_volume(DATA / f'{name}_256.bin')\n    evaluate_model(model, vol, k=5, device=DEVICE)", d:'BB로 학습한 모델을 다른 도메인에 zero-shot 평가. [Try-it! ②] — 일반화를 관찰.' },
+        ],
+        tryits: [
+          { n:'①', fn:'train_quick (preset)', change:"preset 'fast' → 'standard' / 'full'", observe:'시간·파라미터·|Δφ|·SSIM·학습 곡선의 변화 (큰 모델이 항상 좋은가?)' },
+          { n:'②', fn:'evaluate_model (도메인)', change:'BB 모델을 4개 도메인에 평가', observe:'학습 도메인 밖에서의 일반화 — 공극률·구조 차이의 영향' },
+          { n:'③', fn:'criterion (loss)', change:'nn.L1Loss() → nn.MSELoss()', observe:'L1 vs L2 — 결과의 선명도·안정성 차이' },
+          { n:'④', fn:'Adam (learning rate)', change:'lr ∈ {1e-4, 5e-4, 1e-3, 5e-3}', observe:'학습 곡선 — 너무 작으면 느림, 너무 크면 NaN 발산' },
+        ],
+      },
+      utils: [
+        { fn:'UNetMini', group:'모델', sig:'UNetMini(in_ch=2, base=16)',
+          ret:'nn.Module', desc:'mini UNet — encoder/decoder/skip. 입력 2채널(before·after) → 출력 1채널(middle, sigmoid).',
+          params:[
+            { p:'in_ch', d:'입력 채널 수. 본 과제는 2 (앞·뒤 슬라이스).' },
+            { p:'base', d:'첫 채널 폭 = 모델 크기', try:'base=8(~29K) vs 16(~117K). 큰 모델이 항상 더 좋은지 학습해 비교.' },
+          ] },
+        { fn:'count_parameters', group:'모델', sig:'count_parameters(model) → int',
+          ret:'학습 파라미터 수', desc:'requires_grad 파라미터 총합. 모델 크기를 한눈에 비교할 때.',
+          params:[ { p:'model', d:'nn.Module', try:'세 preset의 base별 파라미터 수를 출력해 비교.' } ] },
+        { fn:'SliceDataset', group:'데이터셋', sig:'SliceDataset(volume, k=3, patch_size=64, n_patches_per_triplet=4, augment=True)',
+          ret:'torch Dataset', desc:'sparse triplet (before, middle, after)을 자동 생성. 누락 슬라이스 하나마다 한 sample.',
+          params:[
+            { p:'k', d:'sparse 측정 간격', try:'k를 키우면 누락이 많아져 학습이 어려워집니다.' },
+            { p:'patch_size', d:'학습 patch 크기 (기본 64)', try:'None이면 전체 슬라이스. 키우면 메모리·시간↑.' },
+            { p:'augment', d:'flip 증강 on/off', try:'False로 끄면 일반화에 어떤 영향이 있나?' },
+          ] },
+        { fn:'train_quick', group:'학습', sig:'train_quick(volume, k=3, preset="fast", device="cpu")',
+          ret:'(model, history)', desc:'PRESET 하나로 mini UNet을 학습. 내부에서 SliceDataset·Adam·L1Loss를 구성.',
+          params:[
+            { p:'preset', d:"'fast' · 'standard' · 'full'", try:'시간/품질 trade-off — [Try-it! ①]의 핵심.' },
+            { p:'k', d:'sparse 간격 (W1과 동일 정의)', try:'baseline과 같은 k로 맞춰야 공정 비교.' },
+            { p:'device', d:"'cpu' 또는 'cuda'", try:'GPU가 있으면 cuda로 크게 가속.' },
+          ] },
+        { fn:'evaluate_model', group:'평가', sig:'evaluate_model(model, volume, k=3) → dict',
+          ret:'{dphi_pp, ssim, recon}', desc:'전체 부피의 누락 슬라이스를 모델로 복원하고 |Δφ|(%p)·SSIM을 계산.',
+          params:[
+            { p:'volume', d:'평가 대상 부피', try:'학습과 다른 도메인을 넣어 cross-domain 일반화 측정 — [Try-it! ②].' },
+            { p:'k', d:'평가 sparse 간격', try:'학습 때와 같은 k로 평가해야 공정합니다.' },
+          ] },
+        { fn:'ssim_3d_mean', group:'평가', sig:'ssim_3d_mean(recon, original) → float',
+          ret:'평균 SSIM', desc:'복원/원본의 슬라이스별 구조 유사도(SSIM) 평균. W2부터 추가되는 핵심 지표.',
+          params:[ { p:'recon / original', d:'복원·원본 부피', try:'|Δφ|=0이어도 SSIM이 낮을 수 있습니다 — 둘을 함께 봐야 하는 이유.' } ] },
+        { fn:'summarize_metrics', group:'평가', sig:'summarize_metrics(recon, original, label="")',
+          ret:'dict (dphi · ssim · dsa)', desc:'|Δφ|·SSIM·|ΔSA|를 한 번에 계산하고 라벨과 함께 출력. baseline 비교에 편리.',
+          params:[ { p:'label', d:'출력에 붙는 이름', try:"'B1 Linear k=5' 처럼 비교 대상을 명확히." } ] },
+        { fn:'save_ckpt / load_ckpt', group:'체크포인트', sig:'save_ckpt(model, path, meta) · load_ckpt(path)',
+          ret:'저장 / (model, meta)', desc:'학습된 모델 가중치를 저장·로드. meta에 base가 있으면 로드 시 자동 사용.',
+          params:[ { p:'path', d:'.pth 경로', try:'W3에서 이 체크포인트를 불러와 GAN으로 이어 학습합니다.' } ] },
+      ],
+      playbook: [
+        { t:'바꾼다', d:'한 번에 인자 하나(preset·loss·lr·k)만 바꿉니다. 원인이 분리되어야 관찰이 됩니다.', icon:'sliders' },
+        { t:'관찰한다', d:'학습 곡선·|Δφ|·SSIM·학습 시간이 어떻게 변하는지 기록합니다. 한 문장이면 충분합니다.', icon:'target' },
+        { t:'해석한다', d:'“왜” 그렇게 변했는지 모델 크기·손실 성질·일반화로 설명해 봅니다. 이게 진짜 학습입니다.', icon:'spark' },
+      ],
+    },
+  },
+
   setup: {
     env:'rock',
     py:'3.10+',
@@ -263,11 +439,12 @@ window.COURSE = {
       { t:'동작 확인', cmd:'python3 -c "import numpy, matplotlib; print(\'OK\')"' },
       { t:'노트북 실행', cmd:'cd week1/notebooks/\njupyter notebook W1_load_and_explore.ipynb' },
     ],
-    pkgs:['numpy','matplotlib','jupyter','scipy (W2~)'],
+    pkgs:['numpy','matplotlib','jupyter','scipy','torch · torchvision (W2~)'],
     troubles:[
       { s:'FileNotFoundError: BB_256.bin', f:'노트북 실행 위치가 notebooks/ 폴더 안인지 확인' },
       { s:'ValueError: 파일 크기 불일치', f:'load_volume의 shape / dtype 인자 확인' },
       { s:'ModuleNotFoundError: dr_utils', f:'첫 셀의 sys.path.insert(0, …) 실행 여부 확인' },
+      { s:'ModuleNotFoundError: torch (W2~)', f:'pip install torch torchvision — W2 딥러닝부터 필요' },
       { s:'matplotlib 한글 깨짐', f:'첫 셀 setup_plot_style() 실행 — Pretendard 자동 등록' },
     ],
   },
