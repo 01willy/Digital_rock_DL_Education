@@ -183,6 +183,10 @@ function WeekFull({ w, group, onGroup, onNav }) {
         <div className="res-grid">
           <ResourceCard icon="slides" kind="강의 슬라이드 (웹 슬라이드)" name={`${SLUG} deck`}
             meta="웹에서 바로 보기" href={r.deck} primary />
+          {r.deck2 && (
+            <ResourceCard icon="slides" kind="보충 슬라이드 (웹 슬라이드)" name={r.deck2Label || '보충 deck'}
+              meta={r.deck2Meta || '심화 보충 자료'} href={r.deck2} />
+          )}
           <ResourceCard icon="external" kind="노트북 미리보기 (웹뷰)" name="실행 결과 + 그림 포함"
             meta="다운로드 전 결과 미리 확인" href={r.notebookHtml} />
           <ResourceCard icon="notebook" kind="실습 노트북 (다운로드)" name={r.notebook}

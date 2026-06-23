@@ -327,6 +327,9 @@ window.COURSE = {
     ],
     res: {
       deck: 'W2_deck.html',
+      deck2: 'W2_unet_anatomy.html',
+      deck2Label: 'U-Net 완전 해부',
+      deck2Meta: 'U-Net 구조·학습·예측 원리 심화 (35슬라이드)',
       notebookHtml: 'notebooks/W2_deep_learning_intro.html',
       notebook: 'W2_deep_learning_intro.ipynb',
       utils: [
