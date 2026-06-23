@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>U-Net 완전 해부 · W2 보충 — Digital Rock</title>
+<title>U-Net 구조와 학습 원리 · W2 보충 — Digital Rock</title>
 <link rel="stylesheet" href="deck/deck.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
 <style>
-  /* U-Net 해부 덱 — 새 슬라이드 인라인 스타일 위에 얹는 보강 */
+  /* U-Net 덱 — 새 슬라이드 인라인 스타일 위에 얹는 보강 */
   .katex{ font-size:1em; }
   section b{ font-weight:600; }
 </style>
@@ -15,7 +15,7 @@
 <body>
 <deck-stage width="1920" height="1080">
 
-<section data-label="표지" data-screen-label="01" data-speaker-notes="U-Net을 그림·수식·코드 + 실제 숫자로 끝까지 따라가는 보충 자료." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;display:flex;">
+<section data-label="표지" data-screen-label="01" data-speaker-notes="U-Net을 그림·수식·코드 + 실제 숫자로 단계별로 따라가는 보충 자료." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;display:flex;">
   <div style="width:720px;height:100%;background:linear-gradient(155deg,#1f3a5f 0%,#1f3a5f 100%);position:relative;display:flex;align-items:center;justify-content:center;flex:none;">
     <svg viewBox="0 0 460 460" width="420" height="420"><g fill="none" stroke="#bfd4ec" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M80 80 L80 230 L230 380 L380 230 L380 80"/><path d="M80 96 L130 96 M80 80 L80 96 M130 80 L130 150 M380 96 L330 96 M380 80 L380 96 M330 80 L330 150"/></g><g fill="none" stroke="#bfd4ec" stroke-width="2.4" stroke-dasharray="8 8" opacity="0.7"><path d="M80 104 L380 104"/><path d="M130 158 L330 158"/></g><circle cx="230" cy="380" r="9" fill="#e6a75a"/><circle cx="80" cy="80" r="6" fill="#bfd4ec"/><circle cx="380" cy="80" r="6" fill="#bfd4ec"/></svg>
     <div style="position:absolute;bottom:52px;left:58px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;letter-spacing:0.16em;color:#9abadf;">ENCODER · DECODER · SKIP</div>
@@ -63,7 +63,7 @@
     </div>
   </div>
   <div style="margin-top:22px;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:20px 30px;font-size:26px;color:#16304e;font-family:Pretendard,sans-serif;line-height:1.45;">입력 2장과 출력 1장 모두 64×64 이미지인 image-to-image 변환이며, U-Net이 이러한 문제에 적합합니다.</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">02</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">02</b> / 35</span></div></section>
 
 <section data-label="전체 그림" data-screen-label="03" data-speaker-notes="먼저 큰 그림. 입력 2채널 → 압축(Conv·활성화·Pool로 채널↑ 크기↓) → bottleneck → 복원(ConvT) + skip → 출력 1채널. 지금부터 각 부품을 숫자로 뜯는다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 76px 54px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -108,7 +108,7 @@
     <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px 24px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><span style="color:#475067;font-weight:600;font-family:Pretendard,sans-serif;font-size:26px;">병목 (Bottleneck)</span><div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;line-height:1.45;margin-top:4px;">가장 압축된 표현 — 무엇이 있는지 요약.</div></div>
     <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px 24px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><span style="color:#ea851b;font-weight:600;font-family:Pretendard,sans-serif;font-size:26px;">복원 (Decoder)</span><div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;line-height:1.45;margin-top:4px;">크기를 키우며 skip으로 경계를 되살려 그림.</div></div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">03</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">03</b> / 35</span></div></section>
 
 <section data-label="학습 4박자" data-screen-label="04" data-speaker-notes="모델이 도는 골격은 항상 4박자: ①예측 ②손실 ③역전파 ④갱신. 이걸 먼저 외우면 부품들이 어디에 끼는지 보인다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
@@ -134,13 +134,13 @@
     </div>
     <div style="flex:1;font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">이 네 박자를 <span style="color:#1a2333;font-weight:600;">수백~수천 번</span> 반복하면 예측이 정답에 가까워집니다.<br><br>앞으로 배울 <span style="color:#1f3a5f;font-weight:600;">합성곱·활성화·BN</span> 은 ①에, <span style="color:#ea851b;font-weight:600;">손실</span> 은 ②에, <span style="color:#475067;font-weight:600;">역전파·경사하강</span> 은 ③④에 끼어듭니다.</div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">04</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">04</b> / 35</span></div></section>
 
 <section data-label="§ 부품" data-screen-label="05" data-speaker-notes="이제 부품을 하나씩 실제 숫자로 뜯어본다. 픽셀·선형·활성화·합성곱·풀링·정규화·손실·경사하강·역전파." style="background:linear-gradient(150deg,#1f3a5f,#16304e);color:#ebf2f9;font-family:Pretendard,sans-serif;padding:74px 100px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;">
   <div style="font-family:Pretendard,sans-serif;font-size:220px;font-weight:700;color:rgba(255,255,255,.14);line-height:0.8;letter-spacing:-0.02em;">PART 1</div>
   <div style="font-size:74px;font-weight:600;letter-spacing:-0.01em;margin-top:8px;font-family:Pretendard,sans-serif;">신경망의 구성 요소</div>
   <div style="font-size:32px;color:#bfd4ec;margin-top:26px;line-height:1.5;font-family:Pretendard,sans-serif;max-width:1150px;">이미지 표현, 선형 계층, 활성화, 합성곱, 풀링, 정규화, 손실, 경사하강, 역전파를 실제 수치와 함께 살펴봅니다.</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">05</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">05</b> / 35</span></div></section>
 
 <section data-label="이미지=숫자" data-screen-label="06" data-speaker-notes="이미지는 픽셀값의 격자. 0(검정)~1(흰). 우리 입력은 두 장을 채널로 쌓은 2×64×64 텐서." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
@@ -175,7 +175,7 @@
       </div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">06</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">06</b> / 35</span></div></section>
 
 <section data-label="선형 계층" data-screen-label="07" data-speaker-notes="선형계층 Wx+b. 실제 숫자로 두 출력을 모두 계산: y1=5, y2=-3. 곱하고 더하기일 뿐." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
@@ -189,7 +189,7 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.55;margin-top:auto;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">W</span> 곱하는 양, <span style="color:#1f3a5f;font-weight:600;">b</span> 더하는 양 — 이게 학습으로 정해지는 손잡이 θ.</div>
     </div>
     <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:12px;padding:32px 36px;display:flex;flex-direction:column;">
-      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:6px;">실제 숫자로 끝까지</div>
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:6px;">실제 숫자로 차근차근</div>
       <div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;margin-bottom:18px;">x=[2,0,1] 을 넣어 두 출력을 모두.</div>
       <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:24px 28px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:26px;line-height:1.85;color:#3a4250;">
         <span style="color:#1f3a5f;">y₁</span> = 1·2 + (−1)·0 + 2·1 + 1<br>
@@ -200,7 +200,7 @@
       <div style="font-size:24px;color:#5a6475;line-height:1.5;margin-top:auto;font-family:Pretendard,sans-serif;">합성곱도 결국 이 "곱해서 더하기"의 특별한 형태입니다 (부품 3).</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">07</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">07</b> / 35</span></div></section>
 
 <section data-label="활성화" data-screen-label="08" data-speaker-notes="활성화는 같은 숫자 행에 적용해 비교. ReLU는 음수 0, LeakyReLU는 음수 0.1배, Sigmoid는 0~1로 누른다. 직선만으론 못 가르는 경계를 곡선이 가른다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -227,7 +227,7 @@
       <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><svg viewBox="0 0 150 90" width="130" height="78"><line x1="14" y1="68" x2="140" y2="68" stroke="#dcd6c8" stroke-width="1.5"/><line x1="74" y1="12" x2="74" y2="78" stroke="#dcd6c8" stroke-width="1.5"/><path d="M16 66 C 55 64, 60 22, 132 20" fill="none" stroke="#ea851b" stroke-width="3.5" stroke-linecap="round"/></svg><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">Sigmoid</div><div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;">0~1 확률처럼</div></div></div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">08</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">08</b> / 35</span></div></section>
 
 <section data-label="합성곱 개념" data-screen-label="09" data-speaker-notes="3×3 커널이 한 칸씩 미끄러지며 겹친 9칸을 가중합. 같은 커널을 전체에 공유하므로 파라미터가 적고 위치가 달라도 같은 패턴을 검출." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:18px;">
@@ -254,7 +254,7 @@
     </div>
   </div>
   <div style="font-size:26px;color:#5a6475;text-align:center;font-family:Pretendard,sans-serif;">겹친 9칸을 곱해 더하면 출력 한 칸. 커널을 한 칸 옮겨 반복합니다. <span style="color:#1f3a5f;font-weight:600;">같은 커널을 전체에 공유</span> → 파라미터가 적습니다.</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">09</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">09</b> / 35</span></div></section>
 
 <section data-label="합성곱 숫자" data-screen-label="10" data-speaker-notes="실제 3×3 패치와 세로엣지 커널을 곱해 더하면 40. 밝음→어둠 경계에서 큰 값이 나온다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -286,7 +286,7 @@
       <div style="background:#dfe7f0;border-radius:8px;padding:16px 22px;font-size:26px;color:#16304e;font-family:Pretendard,sans-serif;line-height:1.4;max-width:400px;">큰 값(40) = 여기에 <span style="font-weight:600;">세로 경계</span>가 있다는 신호.</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">10</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">10</b> / 35</span></div></section>
 
 <section data-label="feature map" data-screen-label="11" data-speaker-notes="커널을 5×5 전체에 미끄러뜨리면 3×3 출력 맵이 나온다. 경계 위치에 40이 줄지어 떠서 '세로 엣지 지도'가 된다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -315,7 +315,7 @@
     </div>
   </div>
   <div style="margin-top:10px;font-size:26px;color:#5a6475;text-align:center;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">40이 줄지어</span> 뜬 곳이 바로 세로 경계의 위치. 이 출력 지도가 "여기에 세로 엣지가 있다"를 알려줍니다.</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">11</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">11</b> / 35</span></div></section>
 
 <section data-label="채널" data-screen-label="12" data-speaker-notes="커널마다 다른 패턴을 잡는다: 세로엣지·가로엣지·블러. 출력 채널 = 검출기 하나의 지도. 우리는 8채널을 만든다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -341,7 +341,7 @@
       <div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;">학습이 진행되며 이 커널들의 숫자(=θ)가 데이터에 맞게 스스로 정해집니다.</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">12</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">12</b> / 35</span></div></section>
 
 <section data-label="왜 합성곱" data-screen-label="13" data-speaker-notes="왜 합성곱을 쓰나. 완전연결은 64x64를 64x64로 바꾸려면 약 1680만 개 가중치가 필요하지만, 합성곱은 작은 커널 9개 값을 전 위치가 공유해 파라미터가 폭발하지 않는다. 지역성, 가중치 공유, 이동 불변성 세 가지가 이유." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -363,7 +363,7 @@
     <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:10px;padding:24px 28px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;margin-bottom:8px;">② 가중치 공유</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">같은 커널을 전체에 재사용 → 파라미터가 <span style="color:#1a2333;font-weight:600;">폭발하지 않고</span> 학습이 쉬워집니다.</div></div>
     <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:10px;padding:24px 28px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;margin-bottom:8px;">③ 이동 불변성</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">패턴이 <span style="color:#1a2333;font-weight:600;">어디에 있든</span> 같은 커널이 검출합니다. 위치에 무관하게 동작합니다.</div></div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">13</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">13</b> / 35</span></div></section>
 
 <section data-label="크기 규칙" data-screen-label="14" data-speaker-notes="출력 크기 = (W - K + 2P)/S + 1. padding=1, stride=1, 3x3이면 크기 보존. stride=2면 절반." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -391,7 +391,7 @@
       <div style="font-size:26px;color:#d4760f;font-family:Pretendard,sans-serif;font-weight:600;margin-top:auto;">절반으로 — 다운샘플의 원리</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">14</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">14</b> / 35</span></div></section>
 
 <section data-label="MaxPool" data-screen-label="15" data-speaker-notes="MaxPool 2×2는 각 구역의 최댓값 하나만 남겨 크기를 절반으로. 64→32. 넓게 보는 효과." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -424,7 +424,7 @@
       <div style="background:#1d2330;border-radius:8px;padding:18px 24px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:26px;color:#e6e9ef;">nn.<span style="color:#6598d2;">MaxPool2d</span>(<span style="color:#e0a762;">2</span>)</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">15</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">15</b> / 35</span></div></section>
 
 <section data-label="업샘플" data-screen-label="16" data-speaker-notes="ConvTranspose는 학습된 커널로 작은 격자를 두 배로 펼친다. 16→32. decoder가 해상도를 되살릴 때 사용." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -457,7 +457,7 @@
       <div style="background:#1d2330;border-radius:8px;padding:18px 24px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;color:#e6e9ef;">nn.<span style="color:#6598d2;">ConvTranspose2d</span>(c, c, <span style="color:#e0a762;">2</span>, stride=<span style="color:#e0a762;">2</span>)</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">16</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">16</b> / 35</span></div></section>
 
 <section data-label="BatchNorm" data-screen-label="17" data-speaker-notes="BatchNorm은 [2,4,6,8]을 평균0·분산1로. μ=5, σ=√5≈2.24, 정규화하면 [-1.34,-0.45,0.45,1.34]. 학습이 안정·가속." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -487,7 +487,7 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">매 층에서 값 크기를 맞춰 주면 학습이 <span style="color:#1f3a5f;font-weight:600;">더 빠르고 안정적</span>. <span style="font-family:'JetBrains Mono',Pretendard,monospace;color:#475067;">nn.BatchNorm2d</span></div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">17</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">17</b> / 35</span></div></section>
 
 <section data-label="손실" data-screen-label="18" data-speaker-notes="L1은 |차이| 평균, L2는 차이² 평균. pred=[.2,.9,.5], y=[0,1,.5]이면 L1=0.1, L2≈0.017. 0에 가까울수록 잘 맞춤." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -513,7 +513,7 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;"><span style="color:#1a2333;font-weight:600;">0에 가까울수록 잘 맞춘 것.</span> L2는 큰 오차를 제곱해 더 세게 벌점.</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">18</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">18</b> / 35</span></div></section>
 
 <section data-label="경사하강" data-screen-label="19" data-speaker-notes="손실을 줄이는 방향(기울기 반대)으로 한 걸음. w=0.8, 기울기 2.0, η=0.1이면 w ← 0.8 - 0.2 = 0.6." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -543,7 +543,7 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;"><span style="color:#475067;font-weight:600;font-family:'JetBrains Mono',Pretendard,monospace;">η</span> 가 걸음 크기. 너무 크면 건너뛰고, 너무 작으면 느립니다 (우리: 1e-3).</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">19</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">19</b> / 35</span></div></section>
 
 <section data-label="역전파" data-screen-label="20" data-speaker-notes="역전파는 연쇄법칙으로 출력 쪽 기울기를 입력 쪽으로 곱해 내린다. ∂L/∂ŷ=0.4, ∂ŷ/∂w=3 → ∂L/∂w=1.2. PyTorch가 자동." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -564,7 +564,7 @@
     <div style="flex:1;font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;">출력 쪽 기울기(<span style="color:#ea851b;font-family:'JetBrains Mono',Pretendard,monospace;">0.4</span>)에 국소 기울기(<span style="font-family:'JetBrains Mono',Pretendard,monospace;">3.0</span>)를 곱해 내려가며, 각 손잡이의 책임 <span style="color:#475067;font-weight:600;font-family:'JetBrains Mono',Pretendard,monospace;">∂L/∂w=1.2</span> 를 구합니다. 이 값을 부품 8(경사하강)이 사용.</div>
     <div style="flex:none;background:#1d2330;border-radius:8px;padding:22px 28px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;line-height:1.7;color:#e6e9ef;">loss.<span style="color:#6598d2;">backward</span>()&nbsp;<span style="color:#7d879b;"># 모든 기울기 자동</span><br>optimizer.<span style="color:#6598d2;">step</span>()&nbsp;&nbsp;<span style="color:#7d879b;"># w ← w − η·1.2</span></div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">20</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">20</b> / 35</span></div></section>
 
 <section data-label="종합 예시" data-screen-label="21" data-speaker-notes="앞서 본 연산을 하나로 잇는 예시. 4×4 단일 채널 입력에 세로 엣지 커널을 적용(Conv)하고 ReLU·MaxPool을 거쳐 예측을 만든 뒤, L1 손실과 경사하강으로 가중치를 갱신한다. 실제는 64×64지만 흐름은 동일." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:52px 70px 50px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:16px;margin-bottom:18px;">
@@ -612,13 +612,13 @@
     <div style="color:#8a93a3;font-size:24px;">→</div>
     <div style="font-size:24px;color:#1f3a5f;font-weight:600;font-family:Pretendard,sans-serif;">반복하면 ŷ → 1.0</div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">21</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">21</b> / 35</span></div></section>
 
 <section data-label="§ 조립" data-screen-label="22" data-speaker-notes="부품을 다 봤으니 이제 U-Net으로 조립한다. 역사적 배경부터." style="background:linear-gradient(150deg,#1f3a5f,#16304e);color:#ebf2f9;font-family:Pretendard,sans-serif;padding:74px 100px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;">
   <div style="font-family:Pretendard,sans-serif;font-size:220px;font-weight:700;color:rgba(255,255,255,.14);line-height:0.8;letter-spacing:-0.02em;">PART 2</div>
   <div style="font-size:74px;font-weight:600;letter-spacing:-0.01em;margin-top:8px;font-family:Pretendard,sans-serif;">U-Net의 구조</div>
   <div style="font-size:32px;color:#bfd4ec;margin-top:26px;line-height:1.5;font-family:Pretendard,sans-serif;max-width:1150px;">배경·활용 → 핵심 아이디어와 왜 U자인지 → 압축·복원·ConvBlock·skip으로 조립 → 숫자로 보는 예측과 학습 → 전체 과정 정리 순으로 다룹니다.</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">22</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">22</b> / 35</span></div></section>
 
 <section data-label="역사·배경" data-screen-label="23" data-speaker-notes="U-Net은 2015년 Ronneberger 등이 의료영상 분할을 위해 제안. 분류 CNN → 픽셀단위 FCN → U-Net(encoder-decoder+skip). 적은 데이터로 정밀한 경계가 강점. image-to-image라 우리 문제에 맞는다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -634,10 +634,10 @@
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 14px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:#f4f1eb;border:4px solid #475067;"></div><div style="font-family:'JetBrains Mono',Pretendard,monospace;font-size:26px;color:#475067;">오늘</div><div style="font-size:24px;color:#8a93a3;line-height:1.4;font-family:Pretendard,sans-serif;">의료·위성·물리<br>image→image</div></div>
   </div>
   <div style="display:flex;gap:24px;margin-top:42px;flex:1;">
-    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:12px;">왜 강력했나</div><div style="font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">① 적은 데이터로도</span> — 의료영상은 라벨이 귀합니다. augmentation과 함께 소수로 학습. <span style="color:#1f3a5f;font-weight:600;">② 정밀한 경계</span> — skip이 넓은 맥락과 정확한 위치를 동시에 잡습니다.</div></div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:12px;">왜 효과적이었나</div><div style="font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">① 적은 데이터로도</span> — 의료영상은 라벨이 귀합니다. augmentation과 함께 소수로 학습. <span style="color:#1f3a5f;font-weight:600;">② 정밀한 경계</span> — skip이 넓은 맥락과 정확한 위치를 동시에 잡습니다.</div></div>
     <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:12px;padding:28px 32px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:12px;">왜 우리 문제에 맞나</div><div style="font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;">입력도 이미지, 출력도 <span style="color:#ea851b;font-weight:600;">같은 크기 이미지</span> — 전형적인 image-to-image 변환. "빠진 슬라이스 그려 넣기"가 바로 이 형태입니다.</div></div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">23</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">23</b> / 35</span></div></section>
 
 <section data-label="활용 사례" data-screen-label="24" data-speaker-notes="U-Net은 입력과 출력이 같은 크기 이미지인 모든 문제에 쓰인다. 의료 분할, 위성·항공 영상, 영상 복원/노이즈 제거, 그리고 우리 디지털 록의 누락 단면 복원. 모두 image-to-image." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -667,7 +667,7 @@
     </div>
   </div>
   <div style="margin-top:22px;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:18px 30px;font-size:26px;color:#16304e;line-height:1.45;font-family:Pretendard,sans-serif;">공통점: <span style="font-weight:600;">입력과 출력이 모두 같은 크기의 이미지</span>인 image-to-image 문제. 이 형태라면 U-Net이 좋은 출발점입니다.</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">24</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">24</b> / 35</span></div></section>
 
 <section data-label="세 아이디어" data-screen-label="25" data-speaker-notes="압축(멀리서 큰 그림)·복원(가까이 그리기)·지름길(또렷한 경계 복사). 이 세 가지가 U자 구조의 전부." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -694,7 +694,7 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:auto;">압축하며 잃은 경계 detail을 decoder로 곧장 건넵니다.</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">25</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">25</b> / 35</span></div></section>
 
 <section data-label="왜 U자" data-screen-label="26" data-speaker-notes="왜 작아졌다 커지나 — 작게 봐서 무엇이 있는지(맥락) 이해하고, 크게 그려서 어디에 있는지(위치) 맞춘다. skip이 또렷한 경계를 되살린다. 이 셋이 합쳐져 예측." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;"><div style="font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">설계 직관 · 왜 U자인가</div><div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">왜 작아졌다가 다시 커질까?</div></div>
@@ -717,7 +717,7 @@
     </div>
   </div>
   <div style="margin-top:auto;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:22px 32px;font-size:26px;color:#16304e;line-height:1.5;">작게 봐서 <b>'무엇이 있는지'</b>를 알고, 크게 그려서 <b>'어디에 있는지'</b>를 맞춘다. 이 둘이 합쳐져 — 본 적 없는 새 위치에서도 빠진 슬라이스를 정확히 예측합니다.</div>
-  <div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">26</b> / 35</span></div>
+  <div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">26</b> / 35</span></div>
 </section>
 
 <section data-label="압축→복원 이유" data-screen-label="27" data-speaker-notes="왜 크기를 줄였다 키우나. 압축하면 한 뉴런이 보는 영역(수용 영역)이 넓어져 전체 맥락을 이해한다. 작은 3×3 커널만으로도 깊어질수록 넓게 본다. 출력은 입력과 같은 64×64여야 하므로 다시 키운다. 키우는 과정에서 흐려진 경계는 skip으로 보완." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
@@ -755,7 +755,7 @@
       <div style="background:#fff;border:1px solid #e4ded2;border-left:4px solid #475067;border-radius:8px;padding:22px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#475067;">skip이 필요한 이유</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:6px;">압축은 "무엇이 있는지"엔 강하지만 <span style="color:#1a2333;font-weight:600;">정확한 위치·경계</span>는 흐려집니다. encoder의 detail을 직접 가져와 보완합니다.</div></div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">27</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">27</b> / 35</span></div></section>
 
 <section data-label="ConvBlock" data-screen-label="28" data-speaker-notes="ConvBlock = Conv→BN→LeakyReLU 를 두 번. U-Net은 이 블록을 여러 개 쌓는다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -788,7 +788,7 @@
       <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:20px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;color:#ea851b;font-weight:600;font-family:Pretendard,sans-serif;">3 · LeakyReLU — 비선형 (§8)</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">음수도 0.1배로 통과.</div></div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">28</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">28</b> / 35</span></div></section>
 
 <section data-label="크기 추적" data-screen-label="29" data-speaker-notes="입력 2×64²에서 채널↑ 크기↓로 압축, bottleneck 32×16², 다시 복원해 1×64². 단계별 텐서 크기를 표로 따라간다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -821,7 +821,7 @@
       <div style="font-size:24px;color:#5a6475;text-align:center;line-height:1.5;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">높이=공간 크기</span>, <span style="color:#ea851b;font-weight:600;">줄무늬=채널</span>. 압축→복원의 U자 옆모습. <span style="font-family:'JetBrains Mono',Pretendard,monospace;color:#8a93a3;">base=8 → 총 ≈ 29,553개 파라미터</span></div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">29</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">29</b> / 35</span></div></section>
 
 <section data-label="skip 또렷함" data-screen-label="30" data-speaker-notes="skip은 encoder의 같은 크기 feature를 채널 축으로 cat. 8+8=16채널. 없으면 흐릿, 있으면 선명한 경계." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -847,10 +847,10 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">압축하며 잃은 <span style="color:#ea851b;font-weight:600;">경계 detail</span>을 decoder가 그대로 돌려받아 pore 경계가 <span style="color:#1f3a5f;font-weight:600;">또렷</span>해집니다.</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">30</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">30</b> / 35</span></div></section>
 
 <section data-label="숫자로 예측" data-screen-label="31" data-speaker-notes="입력 2채널 작은 격자가 압축(채널↑크기↓)→병목(가장 작은 요약)→복원(크기↑)+skip→1×1 Conv+Sigmoid로 0~1 예측 격자가 된다. 중간 값은 입력에 커널 θ를 곱·더해 만든 것." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
-  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;"><div style="font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">한 페이지로 끝까지 · 숫자</div><div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">입력에서 예측까지, 숫자로 따라가기</div></div>
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;"><div style="font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">한 페이지로 따라가기 · 숫자</div><div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">입력에서 예측까지, 숫자로 따라가기</div></div>
   <div style="display:flex;align-items:flex-start;justify-content:center;gap:14px;margin-top:6px;">
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
       <div style="display:flex;gap:6px;"><div style="display:grid;grid-template-columns:repeat(4,30px);"><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div></div><div style="display:grid;grid-template-columns:repeat(4,30px);"><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.9</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div><div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:14px;color:#1a2333;border:1px solid #e4ded2;background:#fff;">.1</div></div></div>
@@ -880,7 +880,7 @@
       <div style="font-size:22px;color:#5a6475;line-height:1.55;">출력 각 칸은 <b style="color:#1a2333;">그 픽셀이 pore일 확률(0~1)</b>. 0.5를 넘으면 pore로 봅니다. 이 4×4(실제는 64×64) 그림이 바로 <b style="color:#1a2333;">빠진 가운데 슬라이스의 예측</b>입니다.</div>
     </div>
   </div>
-  <div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">31</b> / 35</span></div>
+  <div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">31</b> / 35</span></div>
 </section>
 
 <section data-label="무엇을 학습" data-screen-label="32" data-speaker-notes="U-Net이 학습하는 건 모든 Conv 커널 안의 숫자 θ. 처음엔 무작위라 예측이 틀림→손실→역전파로 각 숫자의 기울기→갱신. 수백~수천 스텝 뒤 커널이 엣지/pore 검출기로 자리잡는다. mini UNet은 약 29,553개." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
@@ -903,7 +903,7 @@
     </div>
   </div>
   <div style="margin-top:20px;background:#f8ecdb;border-left:4px solid #ea851b;border-radius:4px;padding:20px 30px;font-size:24px;color:#7a440f;line-height:1.5;">우리 mini UNet은 이런 커널 숫자 약 <b>29,553개</b>(base=8)를 학습합니다. 그 결과 같은 입력에서 linear보다 정확 — BB k=1에서 <b>|Δφ| 6.87 → 0.47%p</b>.</div>
-  <div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">32</b> / 35</span></div>
+  <div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">32</b> / 35</span></div>
 </section>
 
 <section data-label="한 바퀴 통합" data-screen-label="33" data-speaker-notes="배운 모든 부품이 한 학습 스텝에서 이어진다. 입력→ConvBlock→압축→복원+skip→Sigmoid 예측→L1 손실→역전파→갱신→반복." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:54px 80px 52px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
@@ -925,7 +925,7 @@
     <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',Pretendard,monospace;">8</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">역전파·갱신 (§20·19)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;"><span style="font-family:'JetBrains Mono',Pretendard,monospace;">θ ← θ − η∇</span> → <span style="color:#1f3a5f;font-weight:600;">다시 1번.</span></div></div></div>
   </div>
   <div style="margin-top:16px;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:18px 30px;font-size:26px;color:#16304e;line-height:1.4;font-family:Pretendard,sans-serif;">이 <span style="font-weight:600;">한 바퀴(①→⑧)를 수백~수천 번</span> 돌리면 예측 ŷ가 정답 y에 점점 가까워집니다 — 그게 "학습".</div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">33</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">33</b> / 35</span></div></section>
 
 <section data-label="데이터·루프" data-screen-label="34" data-speaker-notes="각 슬라이스 t 를 양옆 이웃 t−k·t+k 로 묶어 triplet 생성 (이웃 거리 k, 경계 제외 range(k, Z−k)). 학습 루프는 4박자 코드 그대로." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -957,7 +957,7 @@
       <div style="font-size:26px;color:#5a6475;line-height:1.5;margin-top:18px;font-family:Pretendard,sans-serif;">부피 전체에서 수백 개의 triplet이 자동 생성되고, 이 루프가 그것들을 반복 학습합니다.</div>
     </div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">34</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">34</b> / 35</span></div></section>
 
 <section data-label="마무리" data-screen-label="35" data-speaker-notes="손잡이(base/epochs/lr/k)와 채점(공극률 오차, SSIM). 실제로 mini UNet(|Δφ| 0.47%p)이 linear(6.87%p)를 크게 이긴다. 이제 노트북 §6.5에서 직접 바꿔보며 확인." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
@@ -992,7 +992,7 @@
     <div><div style="font-size:34px;font-weight:600;font-family:Pretendard,sans-serif;">그림 → 숫자 → 코드, 이제 노트북에서.</div><div style="font-size:26px;color:#bfd4ec;margin-top:8px;font-family:Pretendard,sans-serif;">§6.5 심화에서 base·손실·k 를 직접 바꿔 보며 확인하세요.</div></div>
     <div style="display:flex;gap:12px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:24px;flex:none;"><span style="padding:13px 20px;border:1px solid rgba(255,255,255,.35);border-radius:4px;">W2_…intro.ipynb</span><span style="padding:13px 20px;border:1px solid rgba(255,255,255,.35);border-radius:4px;">model_utils.py</span></div>
   </div>
-<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">35</b> / 35</span></div></section>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',Pretendard,monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net</span><span><b style="color:#D4760F;">35</b> / 35</span></div></section>
 </deck-stage>
 <script src="deck/deck-stage.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
