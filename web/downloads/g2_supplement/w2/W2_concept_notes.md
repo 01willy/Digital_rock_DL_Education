@@ -51,19 +51,17 @@ W3 에서는 여기에 Discriminator (적대적 학습) 를 더해 더 선명한
 
 ---
 
-## 4. Sparse triplet — 학습 데이터의 단위
+## 4. 이웃 입력 — 학습 데이터의 단위
 
-본 데이터에서 sparse k=3 일 때:
-- 측정된 z: 0, 3, 6, 9, ...
-- 누락된 z: 1, 2, 4, 5, 7, 8, ...
+이웃 거리 k 일 때, 각 슬라이스 t 를 두 이웃 `t−k`, `t+k` 로부터 예측합니다.
 
-한 triplet 학습 sample:
-- (z=0, z=1, z=3) → 입력 `[bb[0], bb[3]]`, target `bb[1]`
-- (z=0, z=2, z=3) → 입력 `[bb[0], bb[3]]`, target `bb[2]`
-- (z=3, z=4, z=6) → 입력 `[bb[3], bb[6]]`, target `bb[4]`
+한 학습 sample (이웃 거리 k=1 예시):
+- t=1 → 입력 `[bb[0], bb[2]]`, target `bb[1]`
+- t=2 → 입력 `[bb[1], bb[3]]`, target `bb[2]`
+- t=3 → 입력 `[bb[2], bb[4]]`, target `bb[3]`
 - ...
 
-즉, **누락된 슬라이스 하나마다 한 sample**. SliceDataset 클래스가 이를 자동 생성합니다.
+즉, **예측 대상 슬라이스 t(∈ [k, Z−k)) 하나마다 한 sample** — 입력은 2채널 `[vol[t−k], vol[t+k]]`, target 은 가운데 슬라이스 `vol[t]`. SliceDataset 클래스가 이를 자동 생성합니다.
 
 ---
 
@@ -125,7 +123,7 @@ W3 에서는 여기에 Discriminator (적대적 학습) 를 더해 더 선명한
 ## 9. 평가 — 학습 후 무엇을 보나
 
 W1 의 baseline (Linear) 결과와 직접 비교:
-- 같은 sparse k 에서 |Δφ| 가 얼마나 작아졌는가
+- 같은 이웃 거리 k 에서 |Δφ| 가 얼마나 작아졌는가
 - SSIM 이 얼마나 올라갔는가
 - 시각 비교: 원본 vs Linear vs UNet vs 오차맵
 

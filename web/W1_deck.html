@@ -81,8 +81,8 @@
             <div class="bitem anim d1"><div class="bi-ic navy">2</div><div><div class="bi-t">공극률 φ를 계산한다</div><div class="bi-d">numpy 한 줄로 φ를 구하고 도메인별로 비교</div></div></div>
           </div>
           <div class="blist">
-            <div class="bitem anim d2"><div class="bi-ic">3</div><div><div class="bi-t">Sparse 측정을 시뮬레이션한다</div><div class="bi-d">간격 k로 일부만 측정 → 시간 절감과 trade-off 관찰</div></div></div>
-            <div class="bitem anim d3"><div class="bi-ic">4</div><div><div class="bi-t">선형 보간으로 복원하고 평가한다</div><div class="bi-d">B1 베이스라인을 만들고 |Δφ|로 한계를 측정</div></div></div>
+            <div class="bitem anim d2"><div class="bi-ic">3</div><div><div class="bi-t">슬라이스를 이웃에서 예측한다</div><div class="bi-d">슬라이스 t 를 양옆 이웃 t±k 로 복원 → 이웃 거리 k 의 trade-off 관찰</div></div></div>
+            <div class="bitem anim d3"><div class="bi-ic">4</div><div><div class="bi-t">선형 보간으로 예측하고 평가한다</div><div class="bi-d">B1 베이스라인을 만들고 |Δφ|로 한계를 측정</div></div></div>
           </div>
         </div>
       </div>
@@ -231,14 +231,14 @@
             <p style="font-size:27px;color:var(--ink-2);line-height:1.6">Micro-CT는 <b style="color:var(--ink)">높은 해상도</b>와 <b style="color:var(--ink)">좁은 슬라이스 간격</b>을 함께 요구할수록 촬영이 느려집니다.</p>
             <div class="callout navy" style="margin-top:34px">
               <div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.5"/></svg></div>
-              <div><div class="co-t">핵심 아이디어</div><div class="co-d">k장 중 1장만 측정하면 촬영 시간이 거의 <b>1/k</b>로 줄어듭니다. 문제는 "나머지를 어떻게 복원하느냐".</div></div>
+              <div><div class="co-t">핵심 아이디어</div><div class="co-d">슬라이스를 <b>(k+1)칸 간격</b>으로 듬성듬성 측정하면 촬영량이 거의 <b>1/(k+1)</b>로 줄어듭니다. 문제는 "사이를 어떻게 복원하느냐".</div></div>
             </div>
           </div>
           <div class="dcard tint vcenter" style="justify-content:center;align-items:center">
             <div style="text-align:center">
-              <div class="bignum" style="font-size:120px;color:var(--orange)">1/k</div>
+              <div class="bignum" style="font-size:96px;color:var(--orange)">1/(k+1)</div>
               <div style="font-size:24px;color:var(--ink-2);margin-top:12px">측정량 → 시간</div>
-              <div style="font-size:20px;color:var(--ink-3);margin-top:28px;font-family:var(--mono)">k=3 → 67% 시간 절감<br/>k=5 → 80% 시간 절감</div>
+              <div style="font-size:20px;color:var(--ink-3);margin-top:28px;font-family:var(--mono)">k=3 → 75% 측정 절감<br/>k=5 → 83% 측정 절감</div>
             </div>
           </div>
         </div>
@@ -248,11 +248,11 @@
   </section>
 
   <!-- ============ 13 · SPARSE CONCEPT ============ -->
-  <section data-label="make_sparse">
+  <section data-label="이웃 거리 k">
     <div class="s-pad">
-      <div class="eyebrow">make_sparse(vol, k)</div>
-      <h2 class="s-title sm">측정된 슬라이스 vs 누락된 슬라이스</h2>
-      <p class="s-sub">간격 k로 known / missing 인덱스를 나눕니다. 아래는 k=3일 때의 측정 패턴.</p>
+      <div class="eyebrow">이웃 거리 k</div>
+      <h2 class="s-title sm">슬라이스 t 를 양옆 이웃에서 예측</h2>
+      <p class="s-sub">슬라이스 t 를 이웃 t−k·t+k 로 예측합니다. k = 이웃 거리 — 클수록 이웃이 멀어집니다. 아래는 k=3.</p>
       <div class="body vcenter">
         <div style="display:flex;gap:7px;align-items:flex-end;margin-bottom:40px">
           <!-- 18 slices, k=3 measured -->
@@ -266,9 +266,9 @@
           </div>
         </div>
         <div style="display:flex;gap:40px;align-items:center">
-          <div style="display:flex;align-items:center;gap:12px;font-size:22px;color:var(--ink-2)"><span style="width:22px;height:40px;background:var(--orange);border-radius:5px;display:inline-block"></span>측정됨 (known)</div>
-          <div style="display:flex;align-items:center;gap:12px;font-size:22px;color:var(--ink-2)"><span style="width:22px;height:28px;background:#D8DCE3;border-radius:5px;display:inline-block"></span>누락 (missing) → 보간으로 복원</div>
-          <div class="chip ghost" style="margin-left:auto">k=3 → 6장 측정 / 18장</div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:22px;color:var(--ink-2)"><span style="width:22px;height:40px;background:var(--orange);border-radius:5px;display:inline-block"></span>이웃 (입력)</div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:22px;color:var(--ink-2)"><span style="width:22px;height:28px;background:#D8DCE3;border-radius:5px;display:inline-block"></span>예측 대상 → 이웃에서 복원</div>
+          <div class="chip ghost" style="margin-left:auto">k=3 → 이웃이 3칸 떨어짐</div>
         </div>
       </div>
     </div>
@@ -280,15 +280,15 @@
   <section data-label="k의 효과">
     <div class="s-pad">
       <div class="eyebrow">TRADE-OFF</div>
-      <h2 class="s-title sm">k를 키우면 — 빨라지지만 어려워진다</h2>
+      <h2 class="s-title sm">k를 키우면 — 덜 측정하지만 어려워진다</h2>
       <div class="body vcenter">
         <div class="ktab">
-          <div class="kt-row kt-head"><div>k (간격)</div><div>측정 슬라이스 (256축)</div><div>시간 절감</div><div>복원 난이도</div></div>
-          <div class="kt-row"><div class="kmono">1</div><div class="kmono">256 (전부)</div><div class="kmono">0%</div><div><span class="kbar" style="--w:6%"></span></div></div>
-          <div class="kt-row"><div class="kmono">3</div><div class="kmono">86</div><div class="kmono">67%</div><div><span class="kbar" style="--w:28%"></span></div></div>
-          <div class="kt-row hl"><div class="kmono">5</div><div class="kmono">52</div><div class="kmono">80%</div><div><span class="kbar" style="--w:48%"></span></div></div>
-          <div class="kt-row"><div class="kmono">7</div><div class="kmono">37</div><div class="kmono">86%</div><div><span class="kbar" style="--w:70%"></span></div></div>
-          <div class="kt-row"><div class="kmono">10</div><div class="kmono">26</div><div class="kmono">90%</div><div><span class="kbar" style="--w:92%"></span></div></div>
+          <div class="kt-row kt-head"><div>k (이웃 거리)</div><div>샘플링 비율 (k+1)×</div><div>측정 절감</div><div>복원 난이도</div></div>
+          <div class="kt-row"><div class="kmono">1</div><div class="kmono">2×</div><div class="kmono">50%</div><div><span class="kbar" style="--w:6%"></span></div></div>
+          <div class="kt-row"><div class="kmono">3</div><div class="kmono">4×</div><div class="kmono">75%</div><div><span class="kbar" style="--w:28%"></span></div></div>
+          <div class="kt-row hl"><div class="kmono">5</div><div class="kmono">6×</div><div class="kmono">83%</div><div><span class="kbar" style="--w:48%"></span></div></div>
+          <div class="kt-row"><div class="kmono">7</div><div class="kmono">8×</div><div class="kmono">88%</div><div><span class="kbar" style="--w:70%"></span></div></div>
+          <div class="kt-row"><div class="kmono">10</div><div class="kmono">11×</div><div class="kmono">91%</div><div><span class="kbar" style="--w:92%"></span></div></div>
         </div>
         <div class="callout" style="margin-top:36px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10z"/></svg></div>
           <div><div class="co-t">어느 k까지 버틸 수 있을까?</div><div class="co-d">이 질문의 답이 다음 섹션의 <b>선형 보간</b>과 |Δφ| 곡선에 있습니다.</div></div></div>
@@ -308,7 +308,7 @@
     <div class="s-pad">
       <div class="div-kick">Section 03</div>
       <h2 class="div-title">선형 보간<br/>— 첫 베이스라인</h2>
-      <p class="div-sub">누락된 슬라이스를 가장 단순한 방법으로 복원하고, 그 한계를 측정합니다. (연구의 B1)</p>
+      <p class="div-sub">각 슬라이스를 가장 단순한 방법으로 이웃에서 복원하고, 그 한계를 측정합니다. (베이스라인 B1)</p>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W1</div><div class="pg"><b>15</b> / 21</div></div>
   </section>
@@ -317,7 +317,7 @@
   <section data-label="Linear interp">
     <div class="s-pad">
       <div class="eyebrow">linear_interpolate_slice(a, b, α)</div>
-      <h2 class="s-title sm">두 측정 사이를 α로 섞는다</h2>
+      <h2 class="s-title sm">두 이웃 사이를 α로 섞는다</h2>
       <div class="body vcenter">
         <div class="two">
           <div class="vcenter">
@@ -348,16 +348,16 @@
   <!-- ============ 17 · B1 RECONSTRUCT ============ -->
   <section data-label="B1 reconstruct">
     <div class="s-pad">
-      <div class="eyebrow">reconstruct_sparse_linear() · B1</div>
-      <h2 class="s-title sm">부피 전체를 복원하는 3단계</h2>
+      <div class="eyebrow">predict_linear_k() · B1</div>
+      <h2 class="s-title sm">각 슬라이스를 이웃에서 예측하는 3단계</h2>
       <div class="body vcenter">
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px">
-          <div class="dcard"><div class="step-n">01</div><div class="step-t">측정 슬라이스는 그대로 복사</div><div class="step-d">known 인덱스의 평면은 원본을 손대지 않습니다.</div></div>
-          <div class="dcard"><div class="step-n">02</div><div class="step-t">누락 슬라이스는 선형 보간</div><div class="step-d">가장 가까운 앞·뒤 known 사이를 α로 보간.</div></div>
-          <div class="dcard"><div class="step-n">03</div><div class="step-t">0.5 임계로 이진화</div><div class="step-d">interp &gt; 0.5 → pore. 다시 0/1 부피 완성.</div></div>
+          <div class="dcard"><div class="step-n">01</div><div class="step-t">각 슬라이스 t 마다</div><div class="step-d">양옆 이웃 t−k, t+k 두 평면을 입력으로 가져옵니다.</div></div>
+          <div class="dcard"><div class="step-n">02</div><div class="step-t">두 이웃을 평균</div><div class="step-d">0.5·(vol[t−k] + vol[t+k]) — 가장 단순한 선형 예측.</div></div>
+          <div class="dcard"><div class="step-n">03</div><div class="step-t">0.5 임계로 이진화</div><div class="step-d">평균 &gt; 0.5 → pore. 예측 슬라이스 0/1 완성.</div></div>
         </div>
         <div class="callout navy" style="margin-top:40px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/></svg></div>
-          <div><div class="co-t">이것이 연구의 베이스라인 B1</div><div class="co-d">선형(B1)에 Cubic 보간(B2·B3)까지 더한 것이 W1의 Classical 베이스라인. W2부터 딥러닝으로 확장합니다.</div></div></div>
+          <div><div class="co-t">평가는 예측한 슬라이스만 대상</div><div class="co-d">eval_targets 로 t∈[k, Z−k) 슬라이스에서 |Δφ|·SSIM 측정. 여기에 Cubic(B2)을 더한 것이 W1 Classical 베이스라인 — W2부터 딥러닝으로 확장합니다.</div></div></div>
       </div>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W1 데이터 탐색 &amp; 문제 정의</div><div class="pg"><b>17</b> / 21</div></div>
@@ -372,7 +372,7 @@
       <div class="body vcenter">
         <div class="two r-wide">
           <div class="vcenter">
-            <p style="font-size:25px;color:var(--ink-2);line-height:1.6">측정량을 줄일수록(k↑) 공극률 오차 |Δφ|가 커집니다. 오차가 <b style="color:var(--red)">급격히 꺾이는 지점</b>이 선형 보간의 실용 한계입니다.</p>
+            <p style="font-size:25px;color:var(--ink-2);line-height:1.6">이웃이 멀어질수록(k↑) 공극률 오차 |Δφ|가 커집니다. 오차가 <b style="color:var(--red)">급격히 꺾이는 지점</b>이 선형 보간의 실용 한계입니다.</p>
             <div class="callout" style="margin-top:30px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
               <div><div class="co-t">웹 데모에서 직접 움직여 보기</div><div class="co-d">k·축·임계값을 바꾸며 |Δφ| 곡선을 실시간으로 확인하세요.</div></div></div>
           </div>

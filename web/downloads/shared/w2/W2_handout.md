@@ -5,7 +5,7 @@
 ## 1. 사전 준비
 
 - 패키지: `pip install torch torchvision` (GPU 없이 CPU만으로도 동작 — PRESET `fast` 기준 ~10분)
-- W1 baseline 결과 (특히 BB k=5의 |Δφ|·SSIM) 메모
+- W1 baseline 결과 (특히 BB k=1의 |Δφ|·SSIM) 메모
 - 폴더 구성: `w2_code.zip` 을 푼 폴더에 `data/`(=`data_w2.zip` 압축 해제)가 함께 있어야 합니다. 노트북은 `data/` 가 같은 폴더 또는 `../data` 둘 다 자동 인식합니다.
 
 ```
@@ -23,11 +23,11 @@ jupyter notebook W2_deep_learning_intro.ipynb
 
 1. UNet의 encoder/decoder/skip-connection 구조 분석
 2. pix2pix 흐름 — 조건부 image-to-image 학습의 구조적 핵심
-3. SliceDataset — sparse triplet (before, middle, after) 학습 데이터 구성
+3. SliceDataset — 이웃 입력 (t±k → 가운데 t) 학습 데이터 구성
 4. mini UNet (~30K–120K params) 학습 + 학습 곡선·평가 지표 해석
 5. W1 Linear baseline 대비 정량 비교, cross-domain 일반화 평가
 6. **(심화)** 학습 루프·손실·모델 크기를 *직접 수정*하고 그 영향을 정량 분석 (§6.5)
-7. **(심화)** k 일반화·per-slice 실패 모드 분석으로 모델의 *한계*를 서술
+7. **(심화)** 이웃 거리 일반화·per-slice 실패 모드 분석으로 모델의 *한계*를 서술
 
 ## 3. 핵심 용어
 
@@ -36,7 +36,7 @@ jupyter notebook W2_deep_learning_intro.ipynb
 | Encoder / Decoder | UNet 입력 압축 / 출력 복원 경로 |
 | Skip-connection | Encoder의 detail을 Decoder에 직접 전달 — UNet의 핵심 |
 | pix2pix | 조건부 image-to-image 학습 프레임. Generator는 UNet 기반 |
-| Sparse triplet | (before, middle, after) 형태의 학습 sample 단위 |
+| 이웃 입력 | (t−k, t, t+k): 양옆 이웃 t±k 를 입력, 가운데 t 를 정답으로 하는 학습 sample 단위 |
 | Patch | 큰 이미지에서 잘라낸 작은 영역. 학습 가속 목적 |
 | Augmentation | flip/rotate 등으로 데이터 변형 |
 | L1 / L2 loss | 픽셀 절대값 / 제곱 오차 |
@@ -67,9 +67,9 @@ jupyter notebook W2_deep_learning_intro.ipynb
 
 §6.5-B 확장: `nn.L1Loss()` / `nn.MSELoss()` 비교에 더해 **L1 + λ·(1−SSIM) 복합 손실을 직접 구현**하고, λ 를 바꿔 가며 선명도와 |Δφ| 의 trade-off를 분석합니다.
 
-### 과제 4 (선택, 심화) — k-regime crossover & 실패 모드
+### 과제 4 (선택, 심화) — 이웃 거리별 비교 & 실패 모드
 
-§6.5-C/D 확장: 각 k(2·3·5)에서 UNet과 linear를 같은 조건으로 비교해 **UNet이 이기는 k 영역**을 지도로 만들고(작은 k=UNet 우세, 큰 k=linear 우세인 crossover를 확인), per-slice 오차가 큰 슬라이스들의 **구조적 공통점**으로 한계를 서술합니다. (도전: lr sweep `{1e-4, 5e-4, 1e-3, 5e-3}` 으로 발산/수렴도.)
+§6.5-C/D 확장: 각 이웃 거리 k(1·2·3·5)에서 UNet과 linear를 같은 조건으로 비교해 **이웃이 멀어질수록(k↑) UNet 우위가 어떻게 변하는지** 지도로 만들고, per-slice 오차가 큰 슬라이스들의 **구조적 공통점**으로 한계를 서술합니다. (도전: lr sweep `{1e-4, 5e-4, 1e-3, 5e-3}` 으로 발산/수렴도.)
 
 ## 6. 다음 주차 사전 준비
 

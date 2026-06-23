@@ -122,42 +122,44 @@ prof_z = porosity_profile(vol, axis=0, n_slabs=16)
 
 ---
 
-## §5 Sparse 시뮬레이션
+## §5 이웃 거리 k 설정
 
 ```python
 k = 3
-known_idx, missing_idx = make_sparse(vol, k=k, axis=0)
+targets = neighbor_targets(len(vol), k)   # 예측 대상 슬라이스 인덱스
 ```
 
+**핵심 아이디어**: 슬라이스 `t` 를 두 이웃 슬라이스 `t−k`, `t+k` 로부터 예측합니다. `k` 가 이웃까지의 **거리** 입니다.
+
 **바꿔볼 수 있는 인자**:
-- `k` — 측정 간격
-  - **1** → 모든 슬라이스 측정 (sparse 아님)
-  - **3** → 3장 중 1장만 측정 (가운데 2장 누락)
-  - **5** → 5장 중 1장만 측정 (가운데 4장 누락)
-  - **10** → 10장 중 1장만 (9장 누락) — 매우 어려운 시나리오
-- `axis` — sparse 방향. 기본은 0 (z축)
+- `k` — 이웃 거리
+  - **1** → 바로 옆 슬라이스(t±1)로 예측 (가장 쉬움)
+  - **3** → t±3 으로 예측 (이웃이 멀어짐)
+  - **5** → t±5 으로 예측 (더 어려움)
+  - **10** → t±10 으로 예측 — 매우 어려운 시나리오
+- 한 칸 간격이 (k+1)배로 듬성해지는 셈이라, 측정 부담은 `1/(k+1)` 로 줄어듭니다 (k=3 → 75% 절감, k=5 → 83% 절감)
 
 **무엇을 관찰**:
-- `len(known_idx)` 가 k에 따라 어떻게 줄어드는가
-- 시간 절감률 = `(1 − 1/k) × 100%`
-- 연속 슬라이스 시각화에서 \"측정됨\" / \"누락\" 패턴
+- `targets = neighbor_targets(len(vol), k)` 는 `range(k, len(vol)−k)` — 예측 가능한 슬라이스 인덱스
+- k가 커질수록 예측 대상 구간의 양 끝이 더 잘려나감
+- 이웃이 멀어질수록 가운데 슬라이스를 맞히기 어려워짐
 
 ---
 
 ## §6 Linear / Cubic 보간
 
 ```python
-recon_l = reconstruct_sparse_linear(vol, k=k)
-recon_c = reconstruct_sparse_cubic(vol, k=k)
+recon_l = predict_linear_k(vol, k)
+recon_c = predict_cubic_k(vol, k)
 ```
 
 **바꿔볼 수 있는 인자**:
-- `k` — sparse 간격 (위와 같음)
-- `axis` — 보간 방향
-- 함수 내부의 `> 0.5` 이진화 임계값 — 함수 코드를 복사해서 수정 가능
+- `k` — 이웃 거리 (위와 같음)
+- `predict_linear_k` 는 각 슬라이스 t 를 `0.5·(vol[t−k] + vol[t+k])` 로 예측 후 0.5에서 이진화
+- `predict_cubic_k` 는 t±k, t±3k 의 4개 슬라이스를 통과하는 3차 곡선으로 예측
 
 **무엇을 관찰**:
-- 두 baseline의 |Δφ|·|ΔSA|·SSIM 비교
+- 두 baseline의 |Δφ|·SSIM 비교 (`eval_targets(rec, vol, k)` 가 dict로 반환)
 - 시각: 원본 vs Linear vs Cubic + 오차맵
 - k가 커질수록 두 baseline 모두 악화
 
@@ -166,15 +168,16 @@ recon_c = reconstruct_sparse_cubic(vol, k=k)
 ## §7 k Sweep — 도메인별 비교
 
 ```python
-k_list = [2, 3, 5, 7]
+k_list = [1, 2, 3, 5, 7]
 for name, vol in domains.items():
     for k in k_list:
-        rec = reconstruct_sparse_linear(vol, k=k)
+        rec = predict_linear_k(vol, k)
+        m = eval_targets(rec, vol, k)   # {'dphi_pp', 'ssim', 'n_targets'}
         ...
 ```
 
 **바꿔볼 수 있는 인자**:
-- `k_list` — 측정 간격 리스트. `[1, 2, 3, 5, 7, 10]` 등 확장 가능
+- `k_list` — 이웃 거리 리스트. `[1, 2, 3, 5, 7, 10]` 등 확장 가능
 - 두 baseline (Linear, Cubic) 모두 비교하려면 한 번 더 loop
 
 **무엇을 관찰**:
@@ -186,8 +189,8 @@ for name, vol in domains.items():
 ## 종합 — 본 노트북에서 직접 시도해볼 만한 것
 
 1. **다른 도메인 추가**: COMMON/data_extra/ 에 있는 Ketton, Estaillades, Berea로도 같은 분석을 반복
-2. **k 범위 확장**: `[1, 2, 3, 5, 7, 10, 15, 20]` 까지 sweep — 어디서 |Δφ| 가 30%p를 넘는가
-3. **다른 축으로 sparse**: `axis=1` 또는 `axis=2` 로 같은 sweep
+2. **k 범위 확장**: `[1, 2, 3, 5, 7, 10]` 까지 sweep — 이웃 거리가 멀어질수록 |Δφ| 가 어떻게 커지는가
+3. **Linear vs Cubic 직접 비교**: 같은 k에서 `predict_linear_k` 와 `predict_cubic_k` 의 |Δφ|·SSIM 차이
 4. **인공 grayscale 다양화**: 가우시안 노이즈 대신 salt-and-pepper 노이즈 등 다른 패턴 시도
 
 ---

@@ -84,15 +84,15 @@ def count_parameters(model):
 
 
 # ──────────────────────────────────────────────────────────────
-# Dataset — sparse triplet (before, middle, after)
+# Dataset — 이웃 입력 (t±k → 가운데 t)
 # ──────────────────────────────────────────────────────────────
 class SliceDataset(Dataset):
     """
-    Sparse triplet 학습 데이터.
+    이웃 입력 학습 데이터.
 
     각 sample: (input_2ch, target_1ch)
-      input  = [slice_before, slice_after]  (앞·뒤 measured slice)
-      target = slice_middle                 (가운데 GT)
+      input  = [vol[t-k], vol[t+k]]  (양옆 이웃 슬라이스)
+      target = vol[t]                (가운데 GT)
     """
     def __init__(self, volume, k=3, patch_size=64, n_patches_per_triplet=4, augment=True):
         self.vol = (volume.astype(np.float32) if volume.max() <= 1
@@ -102,15 +102,9 @@ class SliceDataset(Dataset):
         self.n_patches = n_patches_per_triplet
         self.augment = augment
         Z = volume.shape[0]
-        self.triplets = []
-        for z in range(Z):
-            if z % k == 0:
-                continue
-            before = z - (z % k)
-            after = min(before + k, Z - 1)
-            if before == after:
-                continue
-            self.triplets.append((before, z, after))
+        # 이웃 거리 k: 슬라이스 t 를 t±k 에서 예측.
+        #   input = [vol[t-k], vol[t+k]],  target = vol[t].  (경계는 제외)
+        self.triplets = [(t - k, t, t + k) for t in range(k, Z - k)]
 
     def __len__(self):
         return len(self.triplets) * self.n_patches
@@ -158,31 +152,22 @@ def train_one_epoch(model, loader, optimizer, criterion, device='cpu'):
     return total / n
 
 
-def evaluate_model(model, volume, k=3, device='cpu'):
-    """전체 부피 누락 슬라이스를 모델로 복원 → |Δφ|, SSIM."""
+def evaluate_model(model, volume, k=1, device='cpu'):
+    """슬라이스 t 를 [vol[t−k], vol[t+k]] 에서 예측 → 예측 슬라이스 대상 |Δφ|·SSIM."""
     model.eval()
     vol = (volume.astype(np.float32) if volume.max() <= 1
            else volume.astype(np.float32) / 255.0)
     Z = vol.shape[0]
-    recon = np.zeros_like(vol)
-    for z in range(0, Z, k):
-        recon[z] = vol[z]
+    recon = vol.copy()          # 경계는 GT 유지 (지표에서 제외됨)
     with torch.no_grad():
-        for z in range(Z):
-            if z % k == 0:
-                continue
-            before = z - (z % k)
-            after = min(before + k, Z - 1)
-            x = np.stack([vol[before], vol[after]], axis=0)[None]
+        for t in range(k, Z - k):
+            x = np.stack([vol[t - k], vol[t + k]], axis=0)[None]
             x_t = torch.from_numpy(x).to(device)
             pred = model(x_t).cpu().numpy()[0, 0]
-            recon[z] = (pred > 0.5).astype(np.float32)
-    from dr_utils import porosity_error, ssim_3d_mean
-    return {
-        'dphi_pp': porosity_error(recon, vol) * 100,
-        'ssim': ssim_3d_mean(recon, vol),
-        'recon': recon,
-    }
+            recon[t] = (pred > 0.5).astype(np.float32)
+    from dr_utils import eval_targets
+    r = eval_targets(recon, vol, k)
+    return {'dphi_pp': r['dphi_pp'], 'ssim': r['ssim'], 'recon': recon}
 
 
 # ──────────────────────────────────────────────────────────────

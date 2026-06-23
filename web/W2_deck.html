@@ -79,7 +79,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px 56px">
           <div class="bitem anim"><div class="bi-ic navy">1</div><div><div class="bi-t">신경망이 학습하는 원리를 설명한다</div><div class="bi-d">forward · loss · backward · 경사하강을 한 사이클로 이해</div></div></div>
           <div class="bitem anim d1"><div class="bi-ic navy">2</div><div><div class="bi-t">UNet 구조를 읽는다</div><div class="bi-d">합성곱 · encoder · decoder · skip-connection 의 역할</div></div></div>
-          <div class="bitem anim d1"><div class="bi-ic">3</div><div><div class="bi-t">학습 데이터를 구성한다</div><div class="bi-d">SliceDataset 으로 sparse triplet (before·middle·after)</div></div></div>
+          <div class="bitem anim d1"><div class="bi-ic">3</div><div><div class="bi-t">학습 데이터를 구성한다</div><div class="bi-d">SliceDataset 으로 이웃 입력 (t±k → 가운데 t)</div></div></div>
           <div class="bitem anim d2"><div class="bi-ic">4</div><div><div class="bi-t">직접 학습하고 비교한다</div><div class="bi-d">mini UNet 학습 → W1 Linear 대비 |Δφ|·SSIM</div></div></div>
           <div class="bitem anim d2"><div class="bi-ic" style="background:#E1F0E8;color:#2E8B57">5</div><div><div class="bi-t">손실·구조를 직접 바꾼다 <span class="adv-tag">심화</span></div><div class="bi-d">학습 루프를 펼쳐 L1/MSE/복합 손실·모델 크기 실험</div></div></div>
           <div class="bitem anim d3"><div class="bi-ic" style="background:#E1F0E8;color:#2E8B57">6</div><div><div class="bi-t">일반화와 실패 모드를 분석한다 <span class="adv-tag">심화</span></div><div class="bi-d">k 일반화 · per-slice 오차로 모델의 한계를 서술</div></div></div>
@@ -520,7 +520,7 @@
     <div class="s-pad">
       <div class="div-kick">Section 03</div>
       <h2 class="div-title">데이터 &amp;<br/>학습 실행</h2>
-      <p class="div-sub">sparse triplet을 만들고, patch로 가속하고, PRESET으로 학습을 돌립니다.</p>
+      <p class="div-sub">이웃 입력 sample을 만들고, patch로 가속하고, PRESET으로 학습을 돌립니다.</p>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>16</b> / 26</div></div>
   </section>
@@ -528,14 +528,14 @@
   <!-- ============ 17 · SLICEDATASET / TRIPLET ============ -->
   <section data-label="SliceDataset">
     <div class="s-pad">
-      <div class="eyebrow">SliceDataset · sparse triplet</div>
-      <h2 class="s-title sm">학습 sample의 단위 — (before, middle, after)</h2>
-      <p class="s-sub">sparse k=3 → 측정 z = 0·3·6·9…, 누락 z = 1·2·4·5… 누락 슬라이스 <b>하나마다 한 sample</b>.</p>
+      <div class="eyebrow">SliceDataset · 이웃 입력</div>
+      <h2 class="s-title sm">학습 sample의 단위 — (t−k, t, t+k)</h2>
+      <p class="s-sub">이웃 거리 <b>k=1</b> → 슬라이스마다 한 sample. 입력 = 양옆 이웃 [t−k, t+k], 정답 = 가운데 t.</p>
       <div class="body vcenter">
         <div class="two">
           <div class="vcenter">
-            <div class="code" style="font-size:20px;line-height:1.7"><span class="cm"># 입력 2채널 → 가운데 1채널</span><br/>(z=0, <span class="or">z=1</span>, z=3) → in=[bb[0],bb[3]] · tg=bb[<span class="or">1</span>]<br/>(z=0, <span class="or">z=2</span>, z=3) → in=[bb[0],bb[3]] · tg=bb[<span class="or">2</span>]<br/>(z=3, <span class="or">z=4</span>, z=6) → in=[bb[3],bb[6]] · tg=bb[<span class="or">4</span>]</div>
-            <p style="font-size:20px;color:var(--ink-3);margin-top:24px;line-height:1.5">SliceDataset 클래스가 부피 전체에서 이 triplet들을 자동 생성합니다.</p>
+            <div class="code" style="font-size:20px;line-height:1.7"><span class="cm"># 입력 2채널 [t−k, t+k] → 가운데 1채널 t</span><br/>(z=60, <span class="or">z=61</span>, z=62) → in=[bb[60],bb[62]] · tg=bb[<span class="or">61</span>]<br/>(z=61, <span class="or">z=62</span>, z=63) → in=[bb[61],bb[63]] · tg=bb[<span class="or">62</span>]<br/>(z=62, <span class="or">z=63</span>, z=64) → in=[bb[62],bb[64]] · tg=bb[<span class="or">63</span>]</div>
+            <p style="font-size:20px;color:var(--ink-3);margin-top:24px;line-height:1.5">SliceDataset 클래스가 부피 전체에서 이 (이웃→가운데) sample 들을 자동 생성합니다.</p>
           </div>
           <div class="dcard tint vcenter" style="justify-content:center">
             <div class="eyebrow navy" style="font-size:18px;text-align:center;margin-bottom:22px">한 학습 sample</div>
@@ -639,7 +639,7 @@
     <div class="s-pad">
       <div class="div-kick">Section 04</div>
       <h2 class="div-title">평가 —<br/>Linear vs UNet</h2>
-      <p class="div-sub">같은 sparse k에서 |Δφ|와 SSIM이 얼마나 좋아졌는지, W1 베이스라인과 직접 비교합니다.</p>
+      <p class="div-sub">같은 이웃 거리 k에서 |Δφ|와 SSIM이 얼마나 좋아졌는지, W1 베이스라인과 직접 비교합니다.</p>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W2</div><div class="pg"><b>21</b> / 26</div></div>
   </section>
@@ -647,31 +647,33 @@
   <!-- ============ 22 · RESULT: B1 vs UNet ============ -->
   <section data-label="Linear vs UNet">
     <div class="s-pad">
-      <div class="eyebrow">evaluate_model() · k-regime crossover</div>
-      <h2 class="s-title sm">선형 보간을 이겼나? — k에 따라 다르다</h2>
+      <div class="eyebrow">evaluate_model() · 이웃 거리 k 별 비교</div>
+      <h2 class="s-title sm">선형 보간을 이겼나? — UNet 우세, 이웃 멀수록 격차 ↓</h2>
       <div class="body vcenter">
         <div class="two">
           <div class="reg-card win">
-            <div class="reg-h"><span class="reg-k">k = 2</span><span class="reg-tag win">UNet 승</span></div>
-            <div class="reg-sub">측정 간격 좁음 · 50% 측정</div>
+            <div class="reg-h"><span class="reg-k">k = 1</span><span class="reg-tag win">UNet 승</span></div>
+            <div class="reg-sub">가까운 이웃 · 바로 옆 t±1 에서 예측</div>
             <div class="reg-rows">
-              <div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 3.40</span><span class="v-unet">UNet 0.76</span></div>
-              <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.803</span><span class="v-unet">UNet 0.862</span></div>
+              <div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 6.87</span><span class="v-unet">UNet 0.47</span></div>
+              <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.605</span><span class="v-unet">UNet 0.731</span></div>
             </div>
-            <div class="reg-note">pore 구조를 학습한 UNet이 <b>양 지표 모두 우세</b></div>
+            <div class="reg-note">pore 구조를 학습한 UNet이 <b>양 지표 모두 크게 우세</b></div>
           </div>
-          <div class="reg-card lose">
-            <div class="reg-h"><span class="reg-k">k = 5</span><span class="reg-tag lose">linear 승</span></div>
-            <div class="reg-sub">측정 간격 넓음 · 20% 측정</div>
-            <div class="reg-rows">
-              <div class="reg-row"><span>|Δφ|</span><span class="v-lin">linear 0.03</span><span class="v-unet">UNet 3.04</span></div>
-              <div class="reg-row"><span>SSIM</span><span class="v-lin">linear 0.613</span><span class="v-unet">UNet 0.595</span></div>
+          <div class="dcard tint vcenter" style="justify-content:center">
+            <div class="eyebrow navy" style="font-size:18px;text-align:center;margin-bottom:16px">이웃 거리 k 별 SSIM (k마다 재학습)</div>
+            <div class="ks-tab">
+              <div class="ks-row ks-head"><div>k</div><div>linear</div><div>UNet</div><div>승자</div></div>
+              <div class="ks-row"><div>1</div><div>0.605</div><div class="w">0.733</div><div>UNet</div></div>
+              <div class="ks-row"><div>2</div><div>0.456</div><div class="w">0.561</div><div>UNet</div></div>
+              <div class="ks-row"><div>3</div><div>0.393</div><div class="w">0.469</div><div>UNet</div></div>
+              <div class="ks-row"><div>5</div><div>0.332</div><div class="w">0.364</div><div>UNet</div></div>
             </div>
-            <div class="reg-note">sparse가 심하면 <b>단순 보간의 전역 평균 보존</b>이 강함</div>
+            <div style="font-size:18px;color:var(--ink-2);margin-top:16px;line-height:1.5">이웃이 멀어질수록(k↑) 둘 다 어려워지고 <b>UNet 우위 격차가 좁아집니다</b> (SSIM +0.13 → +0.03).</div>
           </div>
         </div>
         <div class="callout navy" style="margin-top:26px"><div class="co-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 4v16h16"/><path d="M8 14l3-3 3 2 4-6"/></svg></div>
-          <div><div class="co-t">k-regime crossover — 작은 k = UNet 영역, 큰 k = linear 영역</div><div class="co-d">대표 측정값(fast preset). "딥러닝이 <b>어디서</b> 이기나"가 핵심 — §6.5-C 에서 직접 확인하고, W3 GAN으로 더 넓은 영역을 정복합니다.</div></div></div>
+          <div><div class="co-t">딥러닝이 어디서 강한가</div><div class="co-d">대표 측정값(fast preset). 가까운 이웃일수록 UNet 우위가 큽니다 — 이웃이 멀어질 때의 한계는 §6.5-C 에서 k=1·2·3·5 로 직접 재현하고, W3 GAN으로 더 넓은 영역을 정복합니다.</div></div></div>
       </div>
     </div>
     <div class="foot"><div class="brand">Digital Rock · W2 딥러닝 입문</div><div class="pg"><b>22</b> / 26</div></div>
@@ -689,7 +691,12 @@
       .reg-row>span:first-child{color:var(--ink-3);font-weight:700}
       .reg-card.win .v-unet{color:#2E8B57;font-weight:700}.reg-card.win .v-lin{color:var(--ink-3)}
       .reg-card.lose .v-lin{color:var(--navy);font-weight:700}.reg-card.lose .v-unet{color:var(--ink-3)}
-      .reg-note{font-size:19px;color:var(--ink-2);line-height:1.45}</style>
+      .reg-note{font-size:19px;color:var(--ink-2);line-height:1.45}
+      .ks-tab{width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+      .ks-row{display:grid;grid-template-columns:.7fr 1fr 1fr .9fr;gap:10px;padding:13px 22px;border-bottom:1px solid var(--line-2);align-items:center;font-family:var(--mono);font-size:21px;text-align:center}
+      .ks-row:last-child{border-bottom:0}
+      .ks-head{background:var(--panel-2);font-size:17px;color:var(--ink-3);font-weight:700;letter-spacing:.04em}
+      .ks-row .w{color:#2E8B57;font-weight:700}</style>
   </section>
 
   <!-- ============ 23 · CROSS-DOMAIN ============ -->
@@ -721,7 +728,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
           <div class="adv-card"><div class="adv-k">A</div><div><div class="adv-t">학습 루프 직접 제어</div><div class="adv-d">train_custom 으로 base·epochs·lr 을 펼쳐 모델 크기 ↔ 성능 ↔ 과적합 관찰</div></div></div>
           <div class="adv-card"><div class="adv-k">B</div><div><div class="adv-t">손실 함수 비교</div><div class="adv-d">L1 vs MSE, 나아가 L1 + λ·(1−SSIM) 복합 손실을 직접 구현</div></div></div>
-          <div class="adv-card"><div class="adv-k">C</div><div><div class="adv-t">k 일반화</div><div class="adv-d">k=3 학습 → k∈{2,3,5,7} 평가. sparsity 일반화의 한계 측정</div></div></div>
+          <div class="adv-card"><div class="adv-k">C</div><div><div class="adv-t">이웃 거리 일반화</div><div class="adv-d">k∈{1,2,3,5} 각각 학습·평가 → 이웃이 멀어질 때 UNet·linear crossover 관찰</div></div></div>
           <div class="adv-card"><div class="adv-k">D</div><div><div class="adv-t">per-slice 실패 분석</div><div class="adv-d">슬라이스별 |Δφ| 를 그려 모델이 '어디서' 실패하는지 구조적 원인 탐색</div></div></div>
         </div>
         <div class="callout" style="margin-top:28px;background:#E1F0E8;border-color:#BFE0CD"><div class="co-ic" style="background:#2E8B57"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>

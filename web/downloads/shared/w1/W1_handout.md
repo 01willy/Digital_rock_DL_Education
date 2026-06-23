@@ -19,7 +19,7 @@ jupyter notebook W1_load_and_explore.ipynb
 1. 256³ binary 부피의 로딩·정규화·시각화
 2. Otsu 임계값과 binary 데이터에서의 한계 이해
 3. 네 도메인(BB, CastleGate, Bentheimer, Parker)의 통계 비교 + 등방성 검토
-4. Sparse imaging 시뮬레이션과 평가 지표(|Δφ|, |ΔSA|, SSIM)
+4. 슬라이스 보간 문제 정의(이웃 거리 k)와 평가 지표(|Δφ|, SSIM)
 5. Linear / Cubic spline 보간을 도메인·k에 걸쳐 평가 → 학습 기반 방법이 필요한 지점 도출
 
 ## 3. 핵심 용어
@@ -28,10 +28,10 @@ jupyter notebook W1_load_and_explore.ipynb
 |------|------|
 | Normalization | uint8 → float [0,1] 변환. 학습 기반 모델 입력의 표준 전처리 |
 | Otsu threshold | 클래스 간 분산을 최대화하는 자동 임계값 |
-| Linear / Cubic interpolation | 두 측정 슬라이스 사이를 1차 직선·3차 곡선으로 채우는 고전 방법 |
+| 이웃 거리 k | 슬라이스 t 를 양옆 이웃 t−k·t+k 로 예측. k 가 클수록 이웃이 멀어짐 |
+| Linear / Cubic interpolation | 양옆 이웃 슬라이스로 가운데를 1차 직선·3차 곡선으로 예측하는 고전 방법 |
 | φ (porosity) | 공극 voxel 비율. 본 연구의 핵심 물리량 |
-| \|Δφ\| | 보간 결과의 공극률 오차 |
-| \|ΔSA\| | 표면적 오차 (per megavoxel). 공극 모양 보존 여부 |
+| \|Δφ\| | 예측 슬라이스의 공극률 오차 = \|φ(예측) − φ(원본)\| |
 | SSIM | 구조 유사도. 0–1 범위 |
 | Isotropy (등방성) | 세 축 통계가 비슷한 성질. 부피가 방향별로 균질한지 점검할 때 사용 |
 
@@ -41,21 +41,20 @@ jupyter notebook W1_load_and_explore.ipynb
 
 ### 과제 1 (필수) — 도메인 × 방법 × k 전수 비교
 
-네 도메인 × {Linear, Cubic} × k ∈ {2, 3, 5, 7} → 32 조합에 대해 (|Δφ|, |ΔSA|, SSIM)을 측정하고 pandas DataFrame으로 정리합니다.
+네 도메인 × {Linear, Cubic} × k ∈ {1, 2, 3, 5, 7} → 40 조합에 대해 (|Δφ|, SSIM)을 측정하고 pandas DataFrame으로 정리합니다.
 
 ```python
 import pandas as pd
 rows = []
 for name, vol in domains.items():
-    for k in [2, 3, 5, 7]:
-        for method, fn in [('Linear', reconstruct_sparse_linear),
-                            ('Cubic',  reconstruct_sparse_cubic)]:
-            rec = fn(vol, k=k)
+    for k in [1, 2, 3, 5, 7]:
+        for method, fn in [('Linear', predict_linear_k),
+                            ('Cubic',  predict_cubic_k)]:
+            rec = fn(vol, k)
+            m = eval_targets(rec, vol, k)
             rows.append({
                 'domain': name, 'method': method, 'k': k,
-                'dphi_pp': porosity_error(rec, vol) * 100,
-                'dsa':     surface_area_error(rec, vol),
-                'ssim':    ssim_3d_mean(rec, vol),
+                'dphi_pp': m['dphi_pp'], 'ssim': m['ssim'],
             })
 df = pd.DataFrame(rows)
 ```
@@ -64,7 +63,13 @@ df = pd.DataFrame(rows)
 
 ### 과제 2 (필수) — 세 축 보간 비교
 
-`reconstruct_sparse_linear(vol, k=3, axis=...)`의 `axis`를 0/1/2로 sweep하여 동일 부피의 세 축 보간 오차를 비교합니다. 본 데이터의 등방성 가정을 정량적으로 검토합니다.
+동일 부피를 세 축(z·y·x)으로 각각 보간해 비교합니다. `np.transpose`로 축을 바꿔 `predict_linear_k`를 적용하고 `eval_targets`로 |Δφ|·SSIM 을 비교합니다.
+
+```python
+for axis, vol_ax in [('z', vol), ('y', vol.transpose(1, 0, 2)), ('x', vol.transpose(2, 0, 1))]:
+    rec = predict_linear_k(vol_ax, 3)
+    print(axis, eval_targets(rec, vol_ax, 3))
+```
 
 심화 질문 — 세 축 결과의 차이가 어디서 비롯되는지, W5의 세 축 정보 융합(2.5D 접근)이 어떤 동기에서 출발하는지 본인 해석.
 
@@ -74,17 +79,26 @@ df = pd.DataFrame(rows)
 
 심화 질문 — Otsu가 실용적으로 신뢰할 수 있는 노이즈 범위는? 실제 micro-CT의 노이즈 수준과 비교하면 어떤 결론이 나오는지.
 
-### 과제 4 (선택, 심화) — Random sparse 시나리오
+### 과제 4 (선택, 심화) — 이웃 거리 한계 탐색
 
-`numpy.random.choice`로 무작위 33% 측정 마스크를 생성하고, 누락 슬라이스를 가장 가까운 두 측정 슬라이스의 선형 보간으로 복원합니다.
+이웃 거리 k 를 1→10 까지 키우며 |Δφ| 곡선을 그리고, 오차가 급격히 꺾이는 "실용 한계 k"를 도메인별로 찾습니다.
 
-심화 질문 — Deterministic k=3과 random 33%는 평균 측정 간격이 같으나 결과는 다릅니다. 차이의 원인은 무엇이며, 실제 실험 설계에서 어떤 패턴이 더 실용적일지 본인 의견.
+```python
+import matplotlib.pyplot as plt
+for name, vol in domains.items():
+    ks = list(range(1, 11))
+    dphi = [eval_targets(predict_linear_k(vol, k), vol, k)['dphi_pp'] for k in ks]
+    plt.plot(ks, dphi, marker='o', label=name)
+plt.xlabel('이웃 거리 k'); plt.ylabel('|Δφ| (%p)'); plt.legend(); plt.show()
+```
+
+심화 질문 — 도메인마다 "실용 한계 k"가 다른 이유는 무엇이며, 각 도메인의 공극률·구조와 어떤 관계가 있는지 본인 해석.
 
 ## 5. 다음 주차 사전 준비
 
 - W2: Deep Learning 입문 — UNet / pix2pix 구조와 학습 루프
 - 추가 패키지: `pip install torch torchvision pytorch-msssim`
-- 본 주차 baseline 결과(특히 BB k=5의 |Δφ|·SSIM)를 메모해 두면 W2에서 직접 비교 가능합니다.
+- 본 주차 baseline 결과(특히 BB k=1의 |Δφ|·SSIM)를 메모해 두면 W2에서 직접 비교 가능합니다.
 
 ## 6. 자주 발생하는 문제
 

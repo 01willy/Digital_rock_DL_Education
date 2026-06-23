@@ -18,15 +18,15 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 ## §1 W1 baseline 복습
 
 ```python
-K = 5
-rec_l = reconstruct_sparse_linear(bb, k=K)
-m_baseline = summarize_metrics(rec_l, bb, label=f'Linear k={K}')
+K = 1
+rec_l = predict_linear_k(bb, K)
+m_baseline = eval_targets(rec_l, bb, K)   # {'dphi_pp', 'ssim', 'n_targets'}
 ```
 
 **해설**: W1의 결과를 다시 측정해 \"이길 대상\" 설정. W2 결과는 이 baseline 대비 얼마나 좋아졌는지로 평가.
 
 **바꿔볼 인자**:
-- `K` — sparse 간격. 3, 5, 7 등으로 바꿔 baseline 의 변화를 확인
+- `K` — 이웃 거리. 본 노트북 기본은 1 (슬라이스 t 를 t±1 로 예측). 2, 3, 5 등으로 바꿔 baseline 의 변화를 확인
 
 ---
 
@@ -54,13 +54,15 @@ print(UNetMini(in_ch=2, base=16))
 ds = SliceDataset(bb, k=K, patch_size=64, n_patches_per_triplet=4, augment=True)
 ```
 
+각 sample 은 **이웃 입력 → 가운데 출력**: 입력은 2채널 `[vol[t−k], vol[t+k]]`, target 은 1채널 `vol[t]`.
+
 **바꿔볼 인자**:
 - `patch_size` — random crop 크기
   - **32** → 학습 더 빠름, 작은 패턴만 학습
   - **64** → 기본 (균형)
   - **128** → 더 큰 문맥, 메모리·시간 4배
   - **None** → 전체 슬라이스 (메모리 많이 필요)
-- `n_patches_per_triplet` — 한 triplet에서 뽑을 random patch 수
+- `n_patches_per_triplet` — 한 입력-출력 묶음에서 뽑을 random patch 수
   - **2** → 데이터 양 적음 (빠른 학습)
   - **4~8** → 더 다양한 patch, 일반화 ↑
 - `augment` — flip 증강 on/off
@@ -101,14 +103,14 @@ model, history = train_quick(bb, k=K, preset=PRESET, device=DEVICE)
 
 ```python
 res_unet = evaluate_model(model, bb, k=K, device=DEVICE)
-print(f'Linear      |Δφ|={m_baseline[\"dphi\"]:.2f}%p')
+print(f'Linear      |Δφ|={m_baseline[\"dphi_pp\"]:.2f}%p')
 print(f'UNet        |Δφ|={res_unet[\"dphi_pp\"]:.2f}%p')
 ```
 
-**해설**: 학습 모델로 전체 BB 부피의 누락 슬라이스를 모두 복원하고 |Δφ|·SSIM 측정. Linear baseline과 직접 비교.
+**해설**: 학습 모델로 BB 부피의 모든 예측 대상 슬라이스(t ∈ [k, Z−k))를 t±k 이웃에서 예측하고 |Δφ|·SSIM 측정. Linear baseline과 직접 비교.
 
 ```python
-improvement = (m_baseline['dphi'] - res_unet['dphi_pp']) / m_baseline['dphi'] * 100
+improvement = (m_baseline['dphi_pp'] - res_unet['dphi_pp']) / m_baseline['dphi_pp'] * 100
 ```
 
 **개선률** — 양수면 UNet이 baseline 보다 좋음. 음수면 baseline 이 오히려 좋음 (이런 경우 학습 부족 또는 모델 너무 작음).
@@ -133,7 +135,7 @@ for name in ['CastleGate', 'Bentheimer', 'Parker']:
 ## 종합 — 시도해볼 만한 것
 
 1. **세 preset 모두 학습** → 시간 vs 성능 표
-2. **K 변경**: K=3 (쉬움) vs K=7 (어려움) 에서 학습된 모델의 안정성
+2. **K 변경**: K=1 (쉬움) vs K=5 (어려움) 에서 학습된 모델의 안정성 — 이웃이 멀수록 어려워짐
 3. **patch_size 변경**: 32 vs 64 vs 128 의 학습 곡선·결과 비교
 4. **Loss 변경**: L1 vs L2 의 결과 차이 (특히 시각 차이)
 5. **다른 도메인에서 학습**: BB 대신 Parker (저공극) 로 학습 → BB 에 평가하면?

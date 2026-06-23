@@ -155,19 +155,6 @@ def porosity_profile(volume, axis=0, n_slabs=16):
     return out
 
 
-def make_sparse(volume, k=3, axis=0):
-    """Sparse 시뮬레이션 — axis 방향 k개마다 1개 측정."""
-    L = volume.shape[axis]
-    known_idx = np.arange(0, L, k)
-    missing_idx = np.setdiff1d(np.arange(L), known_idx)
-    return known_idx, missing_idx
-
-
-def time_saving_ratio(k):
-    """Sparse k에서의 시간 절감률 (%)."""
-    return (1 - 1.0 / k) * 100
-
-
 def linear_interpolate_slice(slice_before, slice_after, alpha):
     """선형 보간: (1-α)·before + α·after."""
     a = slice_before.astype(np.float32)
@@ -175,45 +162,55 @@ def linear_interpolate_slice(slice_before, slice_after, alpha):
     return (1 - alpha) * a + alpha * b
 
 
-def reconstruct_sparse_linear(volume, k=3, axis=0):
-    """Sparse 측정 후 누락 슬라이스를 모두 선형 보간으로 복원."""
-    L = volume.shape[axis]
-    known = np.arange(0, L, k)
-    recon = np.zeros_like(volume, dtype=np.float32)
-    for i in known:
-        sl = [slice(None)] * 3; sl[axis] = i
-        recon[tuple(sl)] = volume[tuple(sl)]
-    for i in range(L):
-        if i in known:
-            continue
-        before = known[known < i].max() if (known < i).any() else known.min()
-        after = known[known > i].min() if (known > i).any() else known.max()
-        if before == after:
-            sl_i = [slice(None)] * 3; sl_i[axis] = i
-            sl_b = [slice(None)] * 3; sl_b[axis] = before
-            recon[tuple(sl_i)] = volume[tuple(sl_b)]
-            continue
-        alpha = (i - before) / (after - before)
-        sl_b = [slice(None)] * 3; sl_b[axis] = before
-        sl_a = [slice(None)] * 3; sl_a[axis] = after
-        sl_i = [slice(None)] * 3; sl_i[axis] = i
-        interp = linear_interpolate_slice(volume[tuple(sl_b)], volume[tuple(sl_a)], alpha)
-        recon[tuple(sl_i)] = (interp > 0.5).astype(np.float32)
+# ──────────────────────────────────────────────────────────────
+# 슬라이스 보간 — 이웃 거리 k
+#   슬라이스 t 를 양옆 이웃 t−k, t+k 로 예측. k 가 클수록 먼 이웃 → 더 어려움.
+# ──────────────────────────────────────────────────────────────
+def neighbor_targets(L, k):
+    """예측 대상 슬라이스 인덱스 = [k, L−k). (경계는 이웃이 없어 제외)"""
+    return list(range(k, L - k))
+
+
+def predict_linear_k(volume, k):
+    """B1 Linear: 슬라이스 t 를 t±k 가운데로 예측.
+       recon[t] = ( 0.5·(vol[t−k] + vol[t+k]) > 0.5 ),  t ∈ [k, Z−k). 경계는 원본 유지."""
+    vol = volume.astype(np.float32)
+    if vol.max() > 1:
+        vol = vol / 255.0
+    recon = vol.copy()
+    Z = vol.shape[0]
+    for t in range(k, Z - k):
+        recon[t] = (0.5 * (vol[t - k] + vol[t + k]) > 0.5).astype(np.float32)
     return recon
 
 
-def reconstruct_sparse_cubic(volume, k=3, axis=0):
-    """scipy cubic spline 보간으로 sparse 부피 복원."""
-    from scipy.interpolate import interp1d
-    L = volume.shape[axis]
-    known = np.arange(0, L, k)
-    vol_t = np.moveaxis(volume, axis, 0).astype(np.float32)
-    known_data = vol_t[known]
-    f = interp1d(known, known_data, axis=0, kind='cubic',
-                 bounds_error=False, fill_value='extrapolate')
-    recon_t = f(np.arange(L))
-    recon_t = (recon_t > 0.5).astype(np.float32)
-    return np.moveaxis(recon_t, 0, axis)
+def predict_cubic_k(volume, k):
+    """B2 Cubic: 4-knot cubic at z = t±k, t±3k. (경계는 linear 사용)"""
+    from scipy.interpolate import CubicSpline
+    vol = volume.astype(np.float32)
+    if vol.max() > 1:
+        vol = vol / 255.0
+    recon = vol.copy()
+    Z = vol.shape[0]
+    for t in range(k, Z - k):
+        xs = [t - 3 * k, t - k, t + k, t + 3 * k]
+        if xs[0] < 0 or xs[-1] >= Z:                       # 경계 → linear fallback
+            recon[t] = (0.5 * (vol[t - k] + vol[t + k]) > 0.5).astype(np.float32)
+            continue
+        stack = np.stack([vol[x] for x in xs], axis=0)
+        cs = CubicSpline(xs, stack, axis=0)
+        recon[t] = (np.clip(cs(t), 0, 1) > 0.5).astype(np.float32)
+    return recon
+
+
+def eval_targets(recon, original, k):
+    """예측한 슬라이스(t ∈ [k, Z−k)) 만 대상으로 평가.
+       |Δφ| = 슬라이스별 |φ(pred) − φ(GT)| 평균 (%p),  SSIM = 슬라이스별 평균."""
+    Z = original.shape[0]
+    tgt = neighbor_targets(Z, k)
+    dphi = float(np.mean([abs(recon[t].mean() - original[t].mean()) for t in tgt])) * 100
+    ssim = float(np.mean([ssim_2d(recon[t], original[t]) for t in tgt]))
+    return {'dphi_pp': dphi, 'ssim': ssim, 'n_targets': len(tgt)}
 
 
 def porosity_error(reconstructed, original):
@@ -242,30 +239,3 @@ def ssim_3d_mean(recon, original):
     """3D 부피의 z-slice별 SSIM 평균."""
     Z = recon.shape[0]
     return float(np.mean([ssim_2d(recon[z], original[z]) for z in range(Z)]))
-
-
-def surface_area_voxel(binary_volume):
-    """6-연결 voxel 표면적."""
-    v = binary_volume.astype(np.int8)
-    sa = 0
-    for ax in range(3):
-        diff = np.diff(v, axis=ax)
-        sa += int((diff != 0).sum())
-    return sa
-
-
-def surface_area_error(reconstructed, original):
-    """|ΔSA| = |SA(복원) − SA(원본)|, per megavoxel."""
-    sa_r = surface_area_voxel(reconstructed > 0.5)
-    sa_o = surface_area_voxel(original > 0.5)
-    N = original.size / 1e6
-    return abs(sa_r - sa_o) / N
-
-
-def summarize_metrics(reconstructed, original, label=''):
-    """주요 3개 지표 출력 + dict 반환."""
-    dphi = porosity_error(reconstructed, original) * 100
-    dsa = surface_area_error(reconstructed, original)
-    ssim = ssim_3d_mean(reconstructed, original)
-    print(f'  {label:12s}  |Δφ|={dphi:5.2f}%p   |ΔSA|={dsa:6.1f}/Mvox   SSIM={ssim:.4f}')
-    return dict(dphi=dphi, dsa=dsa, ssim=ssim)
