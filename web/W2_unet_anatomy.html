@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>U-Net 완전 해부 · W2 보충 — Digital Rock</title>
+<link rel="stylesheet" href="deck/deck.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<style>
+  /* U-Net 해부 덱 — 새 슬라이드 인라인 스타일 위에 얹는 보강 */
+  .katex{ font-size:1em; }
+  section b{ font-weight:600; }
+</style>
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+<section data-label="표지" data-screen-label="01" data-speaker-notes="U-Net을 그림·수식·코드 + 실제 숫자로 끝까지 따라가는 보충 자료." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;display:flex;">
+  <div style="width:720px;height:100%;background:linear-gradient(155deg,#1f3a5f 0%,#1f3a5f 100%);position:relative;display:flex;align-items:center;justify-content:center;flex:none;">
+    <svg viewBox="0 0 460 460" width="420" height="420"><g fill="none" stroke="#bfd4ec" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M80 80 L80 230 L230 380 L380 230 L380 80"/><path d="M80 96 L130 96 M80 80 L80 96 M130 80 L130 150 M380 96 L330 96 M380 80 L380 96 M330 80 L330 150"/></g><g fill="none" stroke="#bfd4ec" stroke-width="2.4" stroke-dasharray="8 8" opacity="0.7"><path d="M80 104 L380 104"/><path d="M130 158 L330 158"/></g><circle cx="230" cy="380" r="9" fill="#e6a75a"/><circle cx="80" cy="80" r="6" fill="#bfd4ec"/><circle cx="380" cy="80" r="6" fill="#bfd4ec"/></svg>
+    <div style="position:absolute;bottom:52px;left:58px;font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.16em;color:#9abadf;">ENCODER · DECODER · SKIP</div>
+    <div style="position:absolute;top:52px;left:58px;font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.16em;color:rgba(255,255,255,.55);">U / NET</div>
+  </div>
+  <div style="flex:1;padding:0 96px;display:flex;flex-direction:column;justify-content:center;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:26px;letter-spacing:0.18em;color:#1f3a5f;margin-bottom:30px;">DIGITAL ROCK · W2 보충 자료</div>
+    <div style="font-size:104px;font-weight:600;letter-spacing:-0.02em;line-height:0.98;">U-Net<br><span style="color:#1f3a5f;">구조와 학습 원리</span></div>
+    <div style="font-size:32px;color:#5a6475;margin-top:34px;line-height:1.5;font-family:Pretendard,sans-serif;">신경망의 기본 연산부터 U-Net의 구조와 학습 과정까지,<br>실제 수치 예시와 함께 단계별로 설명합니다.</div>
+    <div style="display:flex;gap:12px;margin-top:46px;font-family:'JetBrains Mono',monospace;font-size:24px;">
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:3px;color:#5a6475;">그림</span>
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:3px;color:#5a6475;">수식</span>
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:3px;color:#5a6475;">숫자</span>
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:3px;color:#5a6475;">코드</span>
+    </div>
+  </div>
+</section>
+
+<section data-label="풀 문제" data-screen-label="02" data-speaker-notes="CT를 듬성듬성(이웃 거리 k=1) 측정하면 빠진 슬라이스가 생긴다. 빠진 z=5를 바로 양옆 이웃 z=4·z=6 두 장으로 예측. 한 묶음(triplet) = {z4, z6} → 정답 z5." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">문제 정의</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">인접한 두 단면으로 누락된 단면을 예측</div>
+  </div>
+  <div style="display:flex;gap:40px;flex:1;">
+    <div style="flex:1.5;display:flex;flex-direction:column;">
+      <div style="font-size:26px;color:#5a6475;font-family:Pretendard,sans-serif;margin-bottom:20px;">CT를 비용 때문에 듬성듬성 측정하면 빠진 슬라이스가 생깁니다. 빠진 슬라이스를 바로 양옆 이웃에서 예측합니다 — <span style="color:#1f3a5f;font-weight:600;">이웃 거리 k=1</span>.</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><img src="assets/slices/BB_bin.png" alt="" style="width:118px;height:118px;border-radius:6px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">z=0</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div style="width:118px;height:118px;border-radius:6px;background:#f6e7d5;border:2px dashed #ea851b;display:flex;align-items:center;justify-content:center;font-size:44px;color:#b5650c;font-family:'JetBrains Mono',monospace;">?</div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">z=1</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><img src="assets/slices/BB_bin.png" alt="" style="width:118px;height:118px;border-radius:6px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">z=2</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div style="width:118px;height:118px;border-radius:6px;background:#f6e7d5;border:2px dashed #ea851b;display:flex;align-items:center;justify-content:center;font-size:44px;color:#b5650c;font-family:'JetBrains Mono',monospace;">?</div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">z=3</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><img src="assets/slices/BB_bin.png" alt="" style="width:118px;height:118px;border-radius:6px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">z=4</div></div>
+      </div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:30px 34px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:16px;">학습 한 묶음 = triplet</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;">
+        <div style="text-align:center;"><img src="assets/slices/BB_bin.png" alt="" style="width:88px;height:88px;border-radius:5px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;margin-top:6px;">z=4</div></div>
+        <div style="font-size:26px;color:#8a93a3;">+</div>
+        <div style="text-align:center;"><img src="assets/slices/BB_bin.png" alt="" style="width:88px;height:88px;border-radius:5px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;margin-top:6px;">z=6</div></div>
+        <div style="font-size:26px;color:#8a93a3;">→</div>
+        <div style="text-align:center;"><div style="width:88px;height:88px;border-radius:5px;background:#f6e7d5;border:2px solid #ea851b;display:flex;align-items:center;justify-content:center;font-size:30px;color:#b5650c;font-family:'JetBrains Mono',monospace;">z5</div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;margin-top:6px;">정답</div></div>
+      </div>
+      <div style="background:#fbf7f2;border:1px solid #f1e5d6;border-radius:8px;padding:18px 22px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#3a4250;line-height:1.6;margin-top:auto;">입력 = [ <span style="color:#1f3a5f;">slice₄</span>, <span style="color:#1f3a5f;">slice₆</span> ]<br>정답 = <span style="color:#ea851b;">slice₅</span></div>
+    </div>
+  </div>
+  <div style="margin-top:22px;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:20px 30px;font-size:26px;color:#16304e;font-family:Pretendard,sans-serif;line-height:1.45;">입력 2장과 출력 1장 모두 64×64 이미지인 image-to-image 변환이며, U-Net이 이러한 문제에 적합합니다.</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">02</b> / 32</span></div></section>
+
+<section data-label="전체 그림" data-screen-label="03" data-speaker-notes="먼저 큰 그림. 입력 2채널 → 압축(Conv·활성화·Pool로 채널↑ 크기↓) → bottleneck → 복원(ConvT) + skip → 출력 1채널. 지금부터 각 부품을 숫자로 뜯는다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 76px 54px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">먼저 큰 그림부터</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">전체 구조 개요</div>
+  </div>
+  <div style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;">
+   <div style="position:relative;width:1180px;height:430px;flex:none;">
+    <svg viewBox="0 0 1180 430" width="1180" height="430" style="position:absolute;inset:0;">
+      <defs><marker id="poh" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#475067"/></marker></defs>
+      <g stroke="#475067" stroke-width="2.4" fill="none" marker-end="url(#poh)">
+        <path d="M132 180 L194 208"/><path d="M288 214 L354 240"/><path d="M440 244 L514 266"/>
+        <path d="M640 264 L714 242"/><path d="M800 240 L864 214"/><path d="M958 208 L1024 182"/>
+      </g>
+      <g stroke="#ea851b" stroke-width="2.4" fill="none" stroke-dasharray="9 7"><path d="M244 135 L244 64 L914 64 L914 135"/><path d="M400 185 L400 108 L760 108 L760 185"/></g>
+      <text x="579" y="50" fill="#ea851b" font-size="24" font-family="'JetBrains Mono',monospace" text-anchor="middle">skip · 경계 정보 직접 전달</text>
+      <text x="400" y="100" fill="#ea851b" font-size="24" font-family="'JetBrains Mono',monospace" text-anchor="middle">skip</text>
+    </svg>
+    <div style="position:absolute;left:40px;top:80px;width:92px;height:200px;border-top:4px solid #1f3a5f;background:repeating-linear-gradient(#cfdbe9 0 5px,#e7edf4 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:26px;top:288px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">2×64²</div>
+    <div style="position:absolute;left:26px;top:316px;width:120px;text-align:center;font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;">입력 [앞,뒤]</div>
+    <div style="position:absolute;left:200px;top:135px;width:88px;height:150px;border-top:4px solid #1f3a5f;background:repeating-linear-gradient(#cfdbe9 0 5px,#e7edf4 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:184px;top:293px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">8×64²</div>
+    <div style="position:absolute;left:360px;top:185px;width:80px;height:110px;border-top:4px solid #1f3a5f;background:repeating-linear-gradient(#cfdbe9 0 5px,#e7edf4 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:340px;top:303px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">16×32²</div>
+    <div style="position:absolute;left:520px;top:230px;width:120px;height:70px;border-top:4px solid #475067;background:repeating-linear-gradient(#d4d8e1 0 5px,#e9ebf0 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:520px;top:200px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">bottleneck</div>
+    <div style="position:absolute;left:510px;top:308px;width:140px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">32×16²</div>
+    <div style="position:absolute;left:720px;top:185px;width:80px;height:110px;border-top:4px solid #ea851b;background:repeating-linear-gradient(#f0dac0 0 5px,#f8ebdb 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:700px;top:303px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">16×32²</div>
+    <div style="position:absolute;left:870px;top:135px;width:88px;height:150px;border-top:4px solid #ea851b;background:repeating-linear-gradient(#f0dac0 0 5px,#f8ebdb 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:854px;top:293px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">8×64²</div>
+    <div style="position:absolute;left:1030px;top:80px;width:60px;height:200px;border-top:4px solid #1a2333;background:repeating-linear-gradient(#d7dae1 0 5px,#eaecf0 5px 10px);border-radius:2px;"></div>
+    <div style="position:absolute;left:1000px;top:288px;width:120px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">1×64²</div>
+    <div style="position:absolute;left:1000px;top:316px;width:120px;text-align:center;font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;">출력 sigmoid</div>
+    <div style="position:absolute;left:150px;top:384px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">◀ Encoder · 압축</div>
+    <div style="position:absolute;left:820px;top:384px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">Decoder · 복원 ▶</div>
+   </div>
+  </div>
+  <div style="display:flex;gap:18px;margin-top:14px;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px 24px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><span style="color:#1f3a5f;font-weight:600;font-family:Pretendard,sans-serif;font-size:26px;">압축 (Encoder)</span><div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;line-height:1.45;margin-top:4px;">크기를 줄여 넓은 영역을 한눈에 — 전체 맥락 파악.</div></div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px 24px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><span style="color:#475067;font-weight:600;font-family:Pretendard,sans-serif;font-size:26px;">병목 (Bottleneck)</span><div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;line-height:1.45;margin-top:4px;">가장 압축된 표현 — 무엇이 있는지 요약.</div></div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px 24px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><span style="color:#ea851b;font-weight:600;font-family:Pretendard,sans-serif;font-size:26px;">복원 (Decoder)</span><div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;line-height:1.45;margin-top:4px;">크기를 키우며 skip으로 경계를 되살려 그림.</div></div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">03</b> / 32</span></div></section>
+
+<section data-label="학습 4박자" data-screen-label="04" data-speaker-notes="모델이 도는 골격은 항상 4박자: ①예측 ②손실 ③역전파 ④갱신. 이걸 먼저 외우면 부품들이 어디에 끼는지 보인다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">학습의 골격</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">학습 과정: 네 단계의 반복</div>
+  </div>
+  <div style="display:flex;gap:18px;margin-top:6px;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #1f3a5f;border-radius:10px;padding:26px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">STEP 1</div><div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin:8px 0;">예측 (Forward)</div><div style="font-size:24px;color:#5a6475;line-height:1.45;font-family:Pretendard,sans-serif;">입력 x를 모델에 통과시켜 <span style="font-family:'JetBrains Mono',monospace;">ŷ</span> 를 얻는다.</div></div>
+    <div style="display:flex;align-items:center;font-size:30px;color:#8a93a3;">→</div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #ea851b;border-radius:10px;padding:26px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">STEP 2</div><div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin:8px 0;">채점 (Loss)</div><div style="font-size:24px;color:#5a6475;line-height:1.45;font-family:Pretendard,sans-serif;">정답 y와 얼마나 다른지 <span style="font-family:'JetBrains Mono',monospace;">L</span> 로 잰다.</div></div>
+    <div style="display:flex;align-items:center;font-size:30px;color:#8a93a3;">→</div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #475067;border-radius:10px;padding:26px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">STEP 3</div><div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin:8px 0;">책임 (Backward)</div><div style="font-size:24px;color:#5a6475;line-height:1.45;font-family:Pretendard,sans-serif;">각 손잡이의 기울기 <span style="font-family:'JetBrains Mono',monospace;">∂L/∂θ</span> 를 구한다.</div></div>
+    <div style="display:flex;align-items:center;font-size:30px;color:#8a93a3;">→</div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #1f3a5f;border-radius:10px;padding:26px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">STEP 4</div><div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin:8px 0;">갱신 (Update)</div><div style="font-size:24px;color:#5a6475;line-height:1.45;font-family:Pretendard,sans-serif;"><span style="font-family:'JetBrains Mono',monospace;">θ ← θ − η·기울기</span> 로 조금 움직인다.</div></div>
+  </div>
+  <div style="display:flex;gap:30px;margin-top:30px;flex:1;align-items:center;">
+    <div style="flex:1;background:#1d2330;border-radius:10px;padding:28px 34px;font-family:'JetBrains Mono',monospace;font-size:26px;line-height:1.8;color:#e6e9ef;">
+      <span style="color:#b3a7ef;">for</span> x, y <span style="color:#b3a7ef;">in</span> loader:<br>
+      &nbsp;&nbsp;pred = model(x)<span style="color:#7d879b;"> &nbsp;&nbsp;# ① 예측</span><br>
+      &nbsp;&nbsp;loss = criterion(pred, y)<span style="color:#7d879b;"> # ② 채점</span><br>
+      &nbsp;&nbsp;loss.backward()<span style="color:#7d879b;"> &nbsp;&nbsp;# ③ 책임</span><br>
+      &nbsp;&nbsp;optimizer.step()<span style="color:#7d879b;"> &nbsp;&nbsp;# ④ 갱신</span>
+    </div>
+    <div style="flex:1;font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">이 네 박자를 <span style="color:#1a2333;font-weight:600;">수백~수천 번</span> 반복하면 예측이 정답에 가까워집니다.<br><br>앞으로 배울 <span style="color:#1f3a5f;font-weight:600;">합성곱·활성화·BN</span> 은 ①에, <span style="color:#ea851b;font-weight:600;">손실</span> 은 ②에, <span style="color:#475067;font-weight:600;">역전파·경사하강</span> 은 ③④에 끼어듭니다.</div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">04</b> / 32</span></div></section>
+
+<section data-label="§ 부품" data-screen-label="05" data-speaker-notes="이제 부품을 하나씩 실제 숫자로 뜯어본다. 픽셀·선형·활성화·합성곱·풀링·정규화·손실·경사하강·역전파." style="background:linear-gradient(150deg,#1f3a5f,#16304e);color:#ebf2f9;font-family:Pretendard,sans-serif;padding:74px 100px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;">
+  <div style="font-family:Pretendard,sans-serif;font-size:220px;font-weight:700;color:rgba(255,255,255,.14);line-height:0.8;letter-spacing:-0.02em;">PART 1</div>
+  <div style="font-size:74px;font-weight:600;letter-spacing:-0.01em;margin-top:8px;font-family:Pretendard,sans-serif;">신경망의 구성 요소</div>
+  <div style="font-size:32px;color:#bfd4ec;margin-top:26px;line-height:1.5;font-family:Pretendard,sans-serif;max-width:1150px;">이미지 표현, 선형 계층, 활성화, 합성곱, 풀링, 정규화, 손실, 경사하강, 역전파를 실제 수치와 함께 살펴봅니다.</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">05</b> / 32</span></div></section>
+
+<section data-label="이미지=숫자" data-screen-label="06" data-speaker-notes="이미지는 픽셀값의 격자. 0(검정)~1(흰). 우리 입력은 두 장을 채널로 쌓은 2×64×64 텐서." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">데이터 표현</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">이미지의 수치 표현</div>
+  </div>
+  <div style="display:flex;gap:44px;flex:1;align-items:center;">
+    <div style="display:flex;align-items:center;gap:24px;">
+      <div style="position:relative;width:230px;height:230px;border-radius:6px;overflow:hidden;border:1px solid #d4d0c6;background:url(assets/slices/BB_bin.png) center/cover;">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 35% 38%,rgba(0,0,0,.08),transparent 40%),radial-gradient(circle at 68% 66%,rgba(0,0,0,.14),transparent 44%);"></div>
+        <div style="position:absolute;left:115px;top:0;width:115px;height:115px;border:3px solid #ea851b;"></div>
+      </div>
+      <svg width="44" height="40"><path d="M2 20 L40 20 M32 12 L42 20 L32 28" fill="none" stroke="#8a93a3" stroke-width="2.5"/></svg>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:3px;">
+          <div style="background:rgb(242,242,242);color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.95</div><div style="background:rgb(230,230,230);color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.90</div><div style="background:rgb(38,38,38);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.15</div>
+          <div style="background:rgb(235,235,235);color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.92</div><div style="background:rgb(224,224,224);color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.88</div><div style="background:rgb(26,26,26);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.10</div>
+          <div style="background:rgb(230,230,230);color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.90</div><div style="background:rgb(217,217,217);color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.85</div><div style="background:rgb(31,31,31);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;">.12</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">확대한 3×3 픽셀값</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:22px;">
+      <div style="font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">각 픽셀은 <span style="color:#1a2333;font-weight:600;">0(검정) ~ 1(흰)</span> 사이의 숫자 하나. 밝을수록 1에 가깝습니다. 신경망은 이 숫자들만 보고 계산합니다.</div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:26px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+        <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:14px;">우리 입력의 모양 (shape)</div>
+        <div style="display:flex;align-items:center;gap:18px;">
+          <div style="position:relative;width:96px;height:90px;"><div style="position:absolute;left:16px;top:0;width:80px;height:74px;border:1.5px solid #1f3a5f;background:#e7edf4;border-radius:3px;"></div><div style="position:absolute;left:0;top:14px;width:80px;height:74px;border:1.5px solid #1f3a5f;background:#cfdbe9;border-radius:3px;"></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:30px;color:#1f3a5f;">2 × 64 × 64</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;margin-top:12px;">채널(C) × 높이(H) × 너비(W) · 앞·뒤 슬라이스 = 2채널</div>
+      </div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">06</b> / 32</span></div></section>
+
+<section data-label="선형 계층" data-screen-label="07" data-speaker-notes="선형계층 Wx+b. 실제 숫자로 두 출력을 모두 계산: y1=5, y2=-3. 곱하고 더하기일 뿐." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:24px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">선형 계층</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">선형 계층</div>
+  </div>
+  <div style="display:flex;gap:40px;flex:1;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:32px 36px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-size:44px;text-align:center;margin:6px 0 18px;">$y = W x + b$</div>
+      <div style="font-size:28px;text-align:center;color:#3a4250;">$\begin{bmatrix} y_1 \\ y_2 \end{bmatrix} = \begin{bmatrix} 1 & -1 & 2 \\ 0 & 3 & -1 \end{bmatrix}\!\begin{bmatrix} 2 \\ 0 \\ 1 \end{bmatrix} + \begin{bmatrix} 1 \\ -2 \end{bmatrix}$</div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.55;margin-top:auto;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">W</span> 곱하는 양, <span style="color:#1f3a5f;font-weight:600;">b</span> 더하는 양 — 이게 학습으로 정해지는 손잡이 θ.</div>
+    </div>
+    <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:12px;padding:32px 36px;display:flex;flex-direction:column;">
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:6px;">실제 숫자로 끝까지</div>
+      <div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;margin-bottom:18px;">x=[2,0,1] 을 넣어 두 출력을 모두.</div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:24px 28px;font-family:'JetBrains Mono',monospace;font-size:26px;line-height:1.85;color:#3a4250;">
+        <span style="color:#1f3a5f;">y₁</span> = 1·2 + (−1)·0 + 2·1 + 1<br>
+        &nbsp;&nbsp;&nbsp;= <span style="color:#1f3a5f;font-weight:600;">5</span><br>
+        <span style="color:#ea851b;">y₂</span> = 0·2 + 3·0 + (−1)·1 + (−2)<br>
+        &nbsp;&nbsp;&nbsp;= <span style="color:#ea851b;font-weight:600;">−3</span>
+      </div>
+      <div style="font-size:24px;color:#5a6475;line-height:1.5;margin-top:auto;font-family:Pretendard,sans-serif;">합성곱도 결국 이 "곱해서 더하기"의 특별한 형태입니다 (부품 3).</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">07</b> / 32</span></div></section>
+
+<section data-label="활성화" data-screen-label="08" data-speaker-notes="활성화는 같은 숫자 행에 적용해 비교. ReLU는 음수 0, LeakyReLU는 음수 0.1배, Sigmoid는 0~1로 누른다. 직선만으론 못 가르는 경계를 곡선이 가른다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">활성화</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">활성화 함수</div>
+  </div>
+  <div style="display:flex;gap:36px;flex:1;">
+    <div style="flex:1.35;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+      <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:0;font-family:'JetBrains Mono',monospace;font-size:26px;">
+        <div style="padding:14px 10px;color:#8a93a3;border-bottom:2px solid #e4ded2;">입력 x</div>
+        <div style="padding:14px 10px;text-align:center;border-bottom:2px solid #e4ded2;">−3.0</div><div style="padding:14px 10px;text-align:center;border-bottom:2px solid #e4ded2;">−0.4</div><div style="padding:14px 10px;text-align:center;border-bottom:2px solid #e4ded2;">1.5</div><div style="padding:14px 10px;text-align:center;border-bottom:2px solid #e4ded2;">4.0</div>
+        <div style="padding:14px 10px;color:#1f3a5f;border-bottom:1px solid #f2e5d6;">ReLU</div>
+        <div style="padding:14px 10px;text-align:center;color:#1f3a5f;border-bottom:1px solid #f2e5d6;">0</div><div style="padding:14px 10px;text-align:center;color:#1f3a5f;border-bottom:1px solid #f2e5d6;">0</div><div style="padding:14px 10px;text-align:center;border-bottom:1px solid #f2e5d6;">1.5</div><div style="padding:14px 10px;text-align:center;border-bottom:1px solid #f2e5d6;">4.0</div>
+        <div style="padding:14px 10px;color:#1f3a5f;border-bottom:1px solid #f2e5d6;">LeakyReLU</div>
+        <div style="padding:14px 10px;text-align:center;color:#1f3a5f;border-bottom:1px solid #f2e5d6;">−.3</div><div style="padding:14px 10px;text-align:center;color:#1f3a5f;border-bottom:1px solid #f2e5d6;">−.04</div><div style="padding:14px 10px;text-align:center;border-bottom:1px solid #f2e5d6;">1.5</div><div style="padding:14px 10px;text-align:center;border-bottom:1px solid #f2e5d6;">4.0</div>
+        <div style="padding:14px 10px;color:#ea851b;">Sigmoid</div>
+        <div style="padding:14px 10px;text-align:center;color:#ea851b;">.05</div><div style="padding:14px 10px;text-align:center;color:#ea851b;">.40</div><div style="padding:14px 10px;text-align:center;color:#ea851b;">.82</div><div style="padding:14px 10px;text-align:center;color:#ea851b;">.98</div>
+      </div>
+      <div style="font-size:24px;color:#5a6475;line-height:1.5;margin-top:18px;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">ReLU</span> 음수→0 · <span style="color:#1f3a5f;font-weight:600;">LeakyReLU</span> 음수→0.1배(우리 ConvBlock) · <span style="color:#ea851b;font-weight:600;">Sigmoid</span> 0~1로 누름(U-Net 마지막).</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><svg viewBox="0 0 150 90" width="130" height="78"><line x1="14" y1="68" x2="140" y2="68" stroke="#dcd6c8" stroke-width="1.5"/><line x1="74" y1="12" x2="74" y2="78" stroke="#dcd6c8" stroke-width="1.5"/><path d="M14 68 L74 68 L132 20" fill="none" stroke="#1f3a5f" stroke-width="3.5" stroke-linecap="round"/></svg><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">ReLU</div><div style="font-size:24px;color:#8a93a3;font-family:'JetBrains Mono',monospace;">max(0,x)</div></div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><svg viewBox="0 0 150 90" width="130" height="78"><line x1="14" y1="68" x2="140" y2="68" stroke="#dcd6c8" stroke-width="1.5"/><line x1="74" y1="12" x2="74" y2="78" stroke="#dcd6c8" stroke-width="1.5"/><path d="M14 76 L74 68 L132 20" fill="none" stroke="#1f3a5f" stroke-width="3.5" stroke-linecap="round"/></svg><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">LeakyReLU</div><div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;">음수도 조금 통과</div></div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:18px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><svg viewBox="0 0 150 90" width="130" height="78"><line x1="14" y1="68" x2="140" y2="68" stroke="#dcd6c8" stroke-width="1.5"/><line x1="74" y1="12" x2="74" y2="78" stroke="#dcd6c8" stroke-width="1.5"/><path d="M16 66 C 55 64, 60 22, 132 20" fill="none" stroke="#ea851b" stroke-width="3.5" stroke-linecap="round"/></svg><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">Sigmoid</div><div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;">0~1 확률처럼</div></div></div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">08</b> / 32</span></div></section>
+
+<section data-label="합성곱 개념" data-screen-label="09" data-speaker-notes="3×3 커널이 한 칸씩 미끄러지며 겹친 9칸을 가중합. 같은 커널을 전체에 공유하므로 파라미터가 적고 위치가 달라도 같은 패턴을 검출." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:18px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">합성곱</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">합성곱 연산</div>
+  </div>
+  <div style="font-size:34px;text-align:center;margin:6px 0 8px;">$(I * K)(i,j) = \sum_{m}\sum_{n} I(i{+}m,\, j{+}n)\,K(m,n)$</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex:1;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+      <div style="position:relative;width:300px;height:300px;border-radius:6px;background:url(assets/slices/BB_bin.png) center/cover;border:1px solid #d4d0c6;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 34% 36%,rgba(0,0,0,.08),transparent 40%),radial-gradient(circle at 70% 66%,rgba(0,0,0,.14),transparent 44%);"></div>
+        <div style="position:absolute;left:60px;top:60px;width:96px;height:96px;border:3px solid #ea851b;box-shadow:0 0 0 9999px rgba(241,239,233,.6);"></div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력 이미지</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div style="display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:5px;"><div style="background:#ea851b;border-radius:3px;"></div><div style="background:#e8c79f;border-radius:3px;"></div><div style="background:#ea851b;border-radius:3px;"></div><div style="background:#e8c79f;border-radius:3px;"></div><div style="background:#ea851b;border-radius:3px;"></div><div style="background:#e8c79f;border-radius:3px;"></div><div style="background:#ea851b;border-radius:3px;"></div><div style="background:#e8c79f;border-radius:3px;"></div><div style="background:#ea851b;border-radius:3px;"></div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">커널 K · 3×3</div>
+    </div>
+    <div style="font-size:36px;color:#8a93a3;">▶</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div style="width:72px;height:72px;background:#1f3a5f;border-radius:6px;box-shadow:0 6px 18px rgba(15,125,119,.3);"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;text-align:center;">출력 한 칸</div>
+    </div>
+  </div>
+  <div style="font-size:26px;color:#5a6475;text-align:center;font-family:Pretendard,sans-serif;">겹친 9칸을 곱해 더하면 출력 한 칸. 커널을 한 칸 옮겨 반복합니다. <span style="color:#1f3a5f;font-weight:600;">같은 커널을 전체에 공유</span> → 파라미터가 적습니다.</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">09</b> / 32</span></div></section>
+
+<section data-label="합성곱 숫자" data-screen-label="10" data-speaker-notes="실제 3×3 패치와 세로엣지 커널을 곱해 더하면 40. 밝음→어둠 경계에서 큰 값이 나온다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">합성곱 · 단일 출력</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">합성곱: 단일 출력 계산</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:26px;flex:1;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div style="display:grid;grid-template-columns:repeat(3,62px);grid-template-rows:repeat(3,62px);gap:4px;">
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#1a2333;border-radius:3px;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#1a2333;border-radius:3px;">10</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#fff;border-radius:3px;">0</div>
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#1a2333;border-radius:3px;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#1a2333;border-radius:3px;">10</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#fff;border-radius:3px;">0</div>
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#1a2333;border-radius:3px;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#1a2333;border-radius:3px;">10</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#fff;border-radius:3px;">0</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력 패치 (밝음→어둠)</div>
+    </div>
+    <div style="font-size:32px;color:#8a93a3;">⊙</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div style="display:grid;grid-template-columns:repeat(3,62px);grid-template-rows:repeat(3,62px);gap:4px;">
+        <div style="background:#f6e7d5;border:1px solid #e3b883;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#9a5408;border-radius:3px;">1</div><div style="background:#faf2e8;border:1px solid #ecd7bd;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#9c5a12;border-radius:3px;">0</div><div style="background:#ea851b;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#fff;border-radius:3px;">−1</div>
+        <div style="background:#f6e7d5;border:1px solid #e3b883;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#9a5408;border-radius:3px;">2</div><div style="background:#faf2e8;border:1px solid #ecd7bd;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#9c5a12;border-radius:3px;">0</div><div style="background:#ea851b;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#fff;border-radius:3px;">−2</div>
+        <div style="background:#f6e7d5;border:1px solid #e3b883;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#9a5408;border-radius:3px;">1</div><div style="background:#faf2e8;border:1px solid #ecd7bd;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#9c5a12;border-radius:3px;">0</div><div style="background:#ea851b;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;color:#fff;border-radius:3px;">−1</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">세로 엣지 커널</div>
+    </div>
+    <div style="font-size:32px;color:#8a93a3;">=</div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:22px 26px;font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.65;color:#3a4250;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+        (10·1 + 10·0 + 0·−1)<br>+(10·2 + 10·0 + 0·−2)<br>+(10·1 + 10·0 + 0·−1)<br><span style="color:#9a9384;">─────────────</span><br>= <span style="color:#1f3a5f;font-weight:600;font-size:32px;">40</span></div>
+      <div style="background:#dfe7f0;border-radius:8px;padding:16px 22px;font-size:26px;color:#16304e;font-family:Pretendard,sans-serif;line-height:1.4;max-width:400px;">큰 값(40) = 여기에 <span style="font-weight:600;">세로 경계</span>가 있다는 신호.</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">10</b> / 32</span></div></section>
+
+<section data-label="feature map" data-screen-label="11" data-speaker-notes="커널을 5×5 전체에 미끄러뜨리면 3×3 출력 맵이 나온다. 경계 위치에 40이 줄지어 떠서 '세로 엣지 지도'가 된다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">합성곱 · 특징 지도</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">합성곱: 전체 특징 지도</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:40px;flex:1;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div style="display:grid;grid-template-columns:repeat(5,58px);grid-template-rows:repeat(5,58px);gap:3px;">
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:#3a3d44;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:#3a3d44;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:#3a3d44;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:#3a3d44;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:rgb(240,240,240);border:1px solid #d4d0c6;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">10</div><div style="background:#3a3d44;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#26282d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력 5×5</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">세로엣지 K</div><svg width="60" height="40"><path d="M4 20 L54 20 M46 12 L56 20 L46 28" fill="none" stroke="#8a93a3" stroke-width="2.5"/></svg><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#8a93a3;">미끄러뜨림</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div style="display:grid;grid-template-columns:repeat(3,72px);grid-template-rows:repeat(3,72px);gap:4px;">
+        <div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">40</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">40</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">0</div>
+        <div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">40</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">40</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">0</div>
+        <div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">40</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">40</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:3px;">0</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">출력 맵 3×3 (feature map)</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:26px;color:#5a6475;text-align:center;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">40이 줄지어</span> 뜬 곳이 바로 세로 경계의 위치. 이 출력 지도가 "여기에 세로 엣지가 있다"를 알려줍니다.</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">11</b> / 32</span></div></section>
+
+<section data-label="채널" data-screen-label="12" data-speaker-notes="커널마다 다른 패턴을 잡는다: 세로엣지·가로엣지·블러. 출력 채널 = 검출기 하나의 지도. 우리는 8채널을 만든다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">채널</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">채널과 특징 지도</div>
+  </div>
+  <div style="display:flex;gap:30px;flex:1;align-items:stretch;">
+    <div style="flex:1;display:flex;gap:24px;align-items:center;justify-content:center;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;"><div style="width:140px;height:140px;border-radius:6px;background:linear-gradient(90deg,#e9ebef 0 50%,#33363d 50% 100%);border:1px solid #d4d0c6;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력</div></div>
+      <div style="font-size:28px;color:#8a93a3;">→</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;"><div style="width:96px;height:60px;border-radius:5px;background:linear-gradient(90deg,#e6eaef 0 42%,#1f3a5f 42% 58%,#e6eaef 58% 100%);border:1px solid #cfd3da;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">세로엣지</div></div>
+        <div style="display:flex;align-items:center;gap:14px;"><div style="width:96px;height:60px;border-radius:5px;background:#eef0f3;border:1px solid #cfd3da;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">가로엣지 (없음)</div></div>
+        <div style="display:flex;align-items:center;gap:14px;"><div style="width:96px;height:60px;border-radius:5px;background:linear-gradient(90deg,#e9ebef,#9aa0ab,#33363d);border:1px solid #cfd3da;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">블러(평균)</div></div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:20px;justify-content:center;">
+      <div style="font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">커널 하나가 만든 출력 지도 한 장 = <span style="color:#ea851b;font-weight:600;">채널(feature map)</span> 하나. 서로 다른 커널 여러 개를 쓰면 다양한 패턴을 동시에 봅니다.</div>
+      <div style="background:#1d2330;border-radius:10px;padding:26px 32px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#e6e9ef;">nn.<span style="color:#6598d2;">Conv2d</span>(<span style="color:#e0a762;">2</span>, <span style="color:#e0a762;">8</span>, <span style="color:#e0a762;">3</span>, padding=<span style="color:#e0a762;">1</span>)</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#7d879b;margin-top:12px;">입력 2채널 → 출력 <span style="color:#e0a762;">8채널</span>, 즉 검출기 8개를 한꺼번에.</div>
+      </div>
+      <div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;">학습이 진행되며 이 커널들의 숫자(=θ)가 데이터에 맞게 스스로 정해집니다.</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">12</b> / 32</span></div></section>
+
+<section data-label="왜 합성곱" data-screen-label="13" data-speaker-notes="왜 합성곱을 쓰나. 완전연결은 64x64를 64x64로 바꾸려면 약 1680만 개 가중치가 필요하지만, 합성곱은 작은 커널 9개 값을 전 위치가 공유해 파라미터가 폭발하지 않는다. 지역성, 가중치 공유, 이동 불변성 세 가지가 이유." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">Conv vs Fully-Connected</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">왜 합성곱을 쓰는가</div>
+  </div>
+  <div style="display:flex;gap:28px;margin-bottom:22px;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:24px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;align-items:center;gap:24px;">
+      <svg viewBox="0 0 150 110" width="150" height="110" style="flex:none;"><g><circle cx="22" cy="20" r="7" fill="#c83a3a"/><circle cx="22" cy="55" r="7" fill="#c83a3a"/><circle cx="22" cy="90" r="7" fill="#c83a3a"/><circle cx="128" cy="20" r="7" fill="#8a93a0"/><circle cx="128" cy="55" r="7" fill="#8a93a0"/><circle cx="128" cy="90" r="7" fill="#8a93a0"/></g><g stroke="#c83a3a" stroke-width="1" opacity="0.4"><path d="M29 20 L121 20"/><path d="M29 20 L121 55"/><path d="M29 20 L121 90"/><path d="M29 55 L121 20"/><path d="M29 55 L121 55"/><path d="M29 55 L121 90"/><path d="M29 90 L121 20"/><path d="M29 90 L121 55"/><path d="M29 90 L121 90"/></g></svg>
+      <div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#c83a3a;">완전연결 (FC)</div><div style="font-size:24px;color:#5a6475;line-height:1.45;font-family:Pretendard,sans-serif;margin-top:6px;">모든 픽셀이 모든 픽셀과 연결.<br>64×64→64×64 = 약 <span style="color:#1a2333;font-weight:600;font-family:'JetBrains Mono',monospace;">1,680만</span> 개 가중치</div></div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #9eb7d3;border-radius:12px;padding:24px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;align-items:center;gap:24px;">
+      <svg viewBox="0 0 150 110" width="150" height="110" style="flex:none;"><g><rect x="14" y="14" width="82" height="82" fill="none" stroke="#cfd3da" stroke-width="2"/><rect x="14" y="14" width="28" height="28" fill="#cfdbe9" stroke="#1f3a5f" stroke-width="2.5"/><rect x="112" y="40" width="24" height="24" rx="3" fill="#1f3a5f"/></g><path d="M46 28 L108 50" stroke="#1f3a5f" stroke-width="2" marker-end="url(#wc)"/><defs><marker id="wc" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="#1f3a5f"/></marker></defs></svg>
+      <div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;">합성곱 (Conv)</div><div style="font-size:24px;color:#5a6475;line-height:1.45;font-family:Pretendard,sans-serif;margin-top:6px;">작은 3×3 커널을 전 위치가 공유.<br>채널당 단 <span style="color:#1a2333;font-weight:600;font-family:'JetBrains Mono',monospace;">9</span> 개 가중치</div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:18px;flex:1;">
+    <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:10px;padding:24px 28px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;margin-bottom:8px;">① 지역성</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">엣지·질감 같은 특징은 <span style="color:#1a2333;font-weight:600;">가까운 픽셀</span> 사이에서 생깁니다. 작은 창만 봐도 충분합니다.</div></div>
+    <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:10px;padding:24px 28px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;margin-bottom:8px;">② 가중치 공유</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">같은 커널을 전체에 재사용 → 파라미터가 <span style="color:#1a2333;font-weight:600;">폭발하지 않고</span> 학습이 쉬워집니다.</div></div>
+    <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:10px;padding:24px 28px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;margin-bottom:8px;">③ 이동 불변성</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">패턴이 <span style="color:#1a2333;font-weight:600;">어디에 있든</span> 같은 커널이 검출합니다. 위치에 무관하게 동작합니다.</div></div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">13</b> / 32</span></div></section>
+
+<section data-label="크기 규칙" data-screen-label="14" data-speaker-notes="출력 크기 = (W - K + 2P)/S + 1. padding=1, stride=1, 3x3이면 크기 보존. stride=2면 절반." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">출력 크기</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">출력 크기: 패딩과 스트라이드</div>
+  </div>
+  <div style="background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:24px 36px;text-align:center;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+    <div style="font-size:38px;">$\text{출력} = \left\lfloor \dfrac{W - K + 2P}{S} \right\rfloor + 1$</div>
+    <div style="font-size:24px;color:#8a93a3;font-family:'JetBrains Mono',monospace;margin-top:6px;">W 입력크기 · K 커널 · P 패딩 · S 스트라이드</div>
+  </div>
+  <div style="display:flex;gap:20px;margin-top:26px;flex:1;">
+    <div style="flex:1;background:#dfe7f0;border:1px solid #b6c8dd;border-radius:10px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">K=3, P=1, S=1</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#3a4250;margin:14px 0;line-height:1.5;">(64−3+2)/1 + 1<br>= <span style="color:#1f3a5f;font-weight:600;font-size:30px;">64</span></div>
+      <div style="font-size:26px;color:#16304e;font-family:Pretendard,sans-serif;font-weight:600;margin-top:auto;">크기 보존 — ConvBlock 기본</div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:26px 28px;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">K=3, P=0, S=1</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#3a4250;margin:14px 0;line-height:1.5;">(64−3+0)/1 + 1<br>= <span style="color:#475067;font-weight:600;font-size:30px;">62</span></div>
+      <div style="font-size:26px;color:#5a6475;font-family:Pretendard,sans-serif;margin-top:auto;">패딩 없으면 가장자리만큼 줄어듦</div>
+    </div>
+    <div style="flex:1;background:#f6e7d5;border:1px solid #e3b883;border-radius:10px;padding:26px 28px;display:flex;flex-direction:column;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">K=2, P=0, S=2</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#3a4250;margin:14px 0;line-height:1.5;">(64−2+0)/2 + 1<br>= <span style="color:#ea851b;font-weight:600;font-size:30px;">32</span></div>
+      <div style="font-size:26px;color:#d4760f;font-family:Pretendard,sans-serif;font-weight:600;margin-top:auto;">절반으로 — 다운샘플의 원리</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">14</b> / 32</span></div></section>
+
+<section data-label="MaxPool" data-screen-label="15" data-speaker-notes="MaxPool 2×2는 각 구역의 최댓값 하나만 남겨 크기를 절반으로. 64→32. 넓게 보는 효과." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">다운샘플링</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">다운샘플링: Max Pooling</div>
+  </div>
+  <div style="display:flex;gap:44px;flex:1;align-items:center;">
+    <div style="display:flex;align-items:center;gap:34px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(4,56px);grid-template-rows:repeat(4,56px);gap:3px;">
+          <div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">7</div><div style="background:#cfdbe9;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">2</div><div style="background:#f6e7d5;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">1</div><div style="background:#ea851b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">8</div>
+          <div style="background:#cfdbe9;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">3</div><div style="background:#cfdbe9;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">5</div><div style="background:#f6e7d5;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">4</div><div style="background:#f6e7d5;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div>
+          <div style="background:#dfe2e7;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">2</div><div style="background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">9</div><div style="background:#c7ccd5;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">7</div><div style="background:#eef0f3;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">3</div>
+          <div style="background:#dfe2e7;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">4</div><div style="background:#dfe2e7;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">1</div><div style="background:#eef0f3;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">5</div><div style="background:#eef0f3;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">2</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력 4×4</div>
+      </div>
+      <div style="font-size:32px;color:#8a93a3;">▶</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(2,64px);grid-template-rows:repeat(2,64px);gap:5px;">
+          <div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">7</div><div style="background:#ea851b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">8</div>
+          <div style="background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">9</div><div style="background:#5a6373;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">7</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">출력 2×2</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">각 <span style="color:#1a2333;font-weight:600;">2×2 구역</span>에서 가장 큰 값 하나만 남깁니다. 왼쪽 위 구역 {7,2,3,5} → <span style="color:#1f3a5f;font-weight:600;">7</span>.</div>
+      <div style="font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">크기가 절반(예시는 4→2, 모델에선 <span style="font-family:'JetBrains Mono',monospace;">64→32</span>)이 되어 계산이 줄고, 한 번에 더 <span style="color:#1f3a5f;font-weight:600;">넓은 영역</span>을 보게 됩니다.</div>
+      <div style="background:#1d2330;border-radius:8px;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:26px;color:#e6e9ef;">nn.<span style="color:#6598d2;">MaxPool2d</span>(<span style="color:#e0a762;">2</span>)</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">15</b> / 32</span></div></section>
+
+<section data-label="업샘플" data-screen-label="16" data-speaker-notes="ConvTranspose는 학습된 커널로 작은 격자를 두 배로 펼친다. 16→32. decoder가 해상도를 되살릴 때 사용." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#ea851b;margin-bottom:10px;">업샘플링</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">업샘플링: Transposed Convolution</div>
+  </div>
+  <div style="display:flex;gap:44px;flex:1;align-items:center;">
+    <div style="display:flex;align-items:center;gap:34px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(2,64px);grid-template-rows:repeat(2,64px);gap:5px;">
+          <div style="background:#ea851b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">8</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">7</div>
+          <div style="background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">9</div><div style="background:#5a6373;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">7</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력 2×2</div>
+      </div>
+      <div style="font-size:32px;color:#8a93a3;">▶</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(4,56px);grid-template-rows:repeat(4,56px);gap:3px;">
+          <div style="background:#ea851b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">8</div><div style="background:#e2b783;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#a9bfd8;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">7</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">7</div>
+          <div style="background:#e2b783;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">5</div><div style="background:#f0dac0;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">4</div><div style="background:#cfdbe9;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">4</div><div style="background:#a9bfd8;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">3</div>
+          <div style="background:#9aa0ab;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#c7ccd5;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">5</div><div style="background:#dfe2e7;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">4</div><div style="background:#eef0f3;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">3</div>
+          <div style="background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">9</div><div style="background:#818999;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#c7ccd5;color:#1a2333;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">5</div><div style="background:#5a6373;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;border-radius:2px;">7</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;">출력 4×4</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">학습된 커널로 한 칸을 여러 칸으로 <span style="color:#ea851b;font-weight:600;">펼쳐</span> 크기를 두 배로 (예시는 2→4, 모델에선 <span style="font-family:'JetBrains Mono',monospace;">16→32</span>). MaxPool의 반대 방향입니다.</div>
+      <div style="font-size:28px;color:#5a6475;line-height:1.6;font-family:Pretendard,sans-serif;">decoder가 압축된 표현에서 다시 <span style="color:#ea851b;font-weight:600;">원래 해상도</span>를 그려낼 때 씁니다.</div>
+      <div style="background:#1d2330;border-radius:8px;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#e6e9ef;">nn.<span style="color:#6598d2;">ConvTranspose2d</span>(c, c, <span style="color:#e0a762;">2</span>, stride=<span style="color:#e0a762;">2</span>)</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">16</b> / 32</span></div></section>
+
+<section data-label="BatchNorm" data-screen-label="17" data-speaker-notes="BatchNorm은 [2,4,6,8]을 평균0·분산1로. μ=5, σ=√5≈2.24, 정규화하면 [-1.34,-0.45,0.45,1.34]. 학습이 안정·가속." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">정규화</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">정규화: Batch Normalization</div>
+  </div>
+  <div style="display:flex;gap:36px;flex:1;align-items:stretch;">
+    <div style="flex:1.1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:28px 34px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:8px;">실제 숫자로</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#3a4250;line-height:1.9;">
+        x = [ 2, 4, 6, 8 ]<br>
+        <span style="color:#1f3a5f;">μ</span> = (2+4+6+8)/4 = <span style="color:#1f3a5f;font-weight:600;">5</span><br>
+        <span style="color:#1f3a5f;">σ</span> = √5 ≈ <span style="color:#1f3a5f;font-weight:600;">2.24</span><br>
+        <span style="color:#9a9384;">─────────────────</span><br>
+        x̂ = (x − 5) / 2.24<br>
+        &nbsp;&nbsp;= [ <span style="color:#ea851b;">−1.34, −.45, .45, 1.34</span> ]
+      </div>
+      <div style="margin-top:18px;font-size:32px;text-align:center;">$\hat{x} = \dfrac{x - \mu}{\sqrt{\sigma^2 + \epsilon}}$</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:18px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:24px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;align-items:flex-end;justify-content:space-around;">
+        <div style="text-align:center;"><svg viewBox="0 0 180 120" width="170" height="116"><line x1="10" y1="96" x2="170" y2="96" stroke="#dcd6c8" stroke-width="1.5"/><g fill="#ea851b"><rect x="30" y="76" width="22" height="20"/><rect x="62" y="56" width="22" height="40"/><rect x="94" y="36" width="22" height="60"/><rect x="126" y="16" width="22" height="80"/></g></svg><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;margin-top:4px;">전 [2,4,6,8]</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:24px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;align-items:flex-end;justify-content:space-around;">
+        <div style="text-align:center;"><svg viewBox="0 0 180 120" width="170" height="116"><line x1="10" y1="58" x2="170" y2="58" stroke="#dcd6c8" stroke-width="1.5"/><g fill="#1f3a5f"><rect x="30" y="58" width="22" height="34"/><rect x="62" y="58" width="22" height="12"/><rect x="94" y="46" width="22" height="12"/><rect x="126" y="24" width="22" height="34"/></g></svg><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;margin-top:4px;">후 (평균0 중심)</div></div>
+      </div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">매 층에서 값 크기를 맞춰 주면 학습이 <span style="color:#1f3a5f;font-weight:600;">더 빠르고 안정적</span>. <span style="font-family:'JetBrains Mono',monospace;color:#475067;">nn.BatchNorm2d</span></div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">17</b> / 32</span></div></section>
+
+<section data-label="손실" data-screen-label="18" data-speaker-notes="L1은 |차이| 평균, L2는 차이² 평균. pred=[.2,.9,.5], y=[0,1,.5]이면 L1=0.1, L2≈0.017. 0에 가까울수록 잘 맞춤." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#ea851b;margin-bottom:10px;">손실 함수</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">손실 함수</div>
+  </div>
+  <div style="display:flex;gap:36px;flex:1;">
+    <div style="flex:1.15;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:26px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+      <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:0;font-family:'JetBrains Mono',monospace;font-size:26px;">
+        <div style="padding:12px 8px;color:#8a93a3;border-bottom:2px solid #e4ded2;">픽셀</div><div style="padding:12px 8px;text-align:center;border-bottom:2px solid #e4ded2;">1</div><div style="padding:12px 8px;text-align:center;border-bottom:2px solid #e4ded2;">2</div><div style="padding:12px 8px;text-align:center;border-bottom:2px solid #e4ded2;">3</div>
+        <div style="padding:12px 8px;color:#ea851b;">예측 ŷ</div><div style="padding:12px 8px;text-align:center;color:#ea851b;">0.2</div><div style="padding:12px 8px;text-align:center;color:#ea851b;">0.9</div><div style="padding:12px 8px;text-align:center;color:#ea851b;">0.5</div>
+        <div style="padding:12px 8px;color:#1f3a5f;">정답 y</div><div style="padding:12px 8px;text-align:center;color:#1f3a5f;">0</div><div style="padding:12px 8px;text-align:center;color:#1f3a5f;">1</div><div style="padding:12px 8px;text-align:center;color:#1f3a5f;">0.5</div>
+        <div style="padding:12px 8px;color:#475067;border-top:1px solid #f2e5d6;">차이</div><div style="padding:12px 8px;text-align:center;border-top:1px solid #f2e5d6;">0.2</div><div style="padding:12px 8px;text-align:center;border-top:1px solid #f2e5d6;">−0.1</div><div style="padding:12px 8px;text-align:center;border-top:1px solid #f2e5d6;">0</div>
+      </div>
+      <div style="margin-top:24px;display:flex;gap:18px;">
+        <div style="flex:1;background:#dfe7f0;border-radius:8px;padding:18px 22px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#16304e;line-height:1.5;">L1 = (.2+.1+0)/3<br>= <span style="font-weight:600;font-size:28px;">0.10</span></div>
+        <div style="flex:1;background:#f6e7d5;border-radius:8px;padding:18px 22px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#9a5408;line-height:1.5;">L2 = (.04+.01+0)/3<br>≈ <span style="font-weight:600;font-size:28px;">0.017</span></div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:22px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:24px;color:#1f3a5f;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:10px;">L1 (절대오차) — 우리 기본</div><div style="font-size:30px;text-align:center;">$L_1 = \tfrac{1}{N}\sum_i \lvert \hat{y}_i - y_i \rvert$</div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:22px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:24px;color:#ea851b;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:10px;">L2 (제곱오차, MSE)</div><div style="font-size:30px;text-align:center;">$L_2 = \tfrac{1}{N}\sum_i (\hat{y}_i - y_i)^2$</div></div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;"><span style="color:#1a2333;font-weight:600;">0에 가까울수록 잘 맞춘 것.</span> L2는 큰 오차를 제곱해 더 세게 벌점.</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">18</b> / 32</span></div></section>
+
+<section data-label="경사하강" data-screen-label="19" data-speaker-notes="손실을 줄이는 방향(기울기 반대)으로 한 걸음. w=0.8, 기울기 2.0, η=0.1이면 w ← 0.8 - 0.2 = 0.6." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#475067;margin-bottom:10px;">경사하강법</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">경사하강법</div>
+  </div>
+  <div style="display:flex;gap:40px;flex:1;align-items:center;">
+    <div style="flex:1.1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:24px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+      <svg viewBox="0 0 540 250" width="100%" height="216">
+        <path d="M40 30 C 160 320, 380 320, 500 30" fill="none" stroke="#cdc6b6" stroke-width="3"/>
+        <g font-family="'JetBrains Mono',monospace" font-size="24" fill="#8a93a3"><text x="42" y="26">손실 L</text><text x="430" y="40">가중치 w</text></g>
+        <circle cx="108" cy="120" r="11" fill="#ea851b"/><text x="118" y="112" font-size="24" fill="#ea851b" font-family="'JetBrains Mono'">w=0.8</text>
+        <circle cx="262" cy="206" r="13" fill="#1f3a5f"/><text x="214" y="240" font-size="24" fill="#1f3a5f" font-family="'JetBrains Mono'">w=0.6</text>
+        <path d="M120 132 L238 196" stroke="#475067" stroke-width="2.4" fill="none" marker-end="url(#gdh)"/>
+        <defs><marker id="gdh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475067"/></marker></defs>
+      </svg>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:18px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:10px;padding:22px 28px;text-align:center;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:34px;">$w \leftarrow w - \eta\,\dfrac{\partial L}{\partial w}$</div></div>
+      <div style="background:#1d2330;border-radius:10px;padding:24px 30px;font-family:'JetBrains Mono',monospace;font-size:26px;line-height:1.8;color:#e6e9ef;">
+        w = <span style="color:#e0a762;">0.80</span>, 기울기 = <span style="color:#e0a762;">2.0</span><br>
+        η = <span style="color:#e0a762;">0.1</span><br>
+        <span style="color:#7d879b;">────────────────</span><br>
+        w ← 0.80 − 0.1·2.0<br>
+        &nbsp;&nbsp;= <span style="color:#6598d2;font-weight:600;">0.60</span>
+      </div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;"><span style="color:#475067;font-weight:600;font-family:'JetBrains Mono',monospace;">η</span> 가 걸음 크기. 너무 크면 건너뛰고, 너무 작으면 느립니다 (우리: 1e-3).</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">19</b> / 32</span></div></section>
+
+<section data-label="역전파" data-screen-label="20" data-speaker-notes="역전파는 연쇄법칙으로 출력 쪽 기울기를 입력 쪽으로 곱해 내린다. ∂L/∂ŷ=0.4, ∂ŷ/∂w=3 → ∂L/∂w=1.2. PyTorch가 자동." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#475067;margin-bottom:10px;">역전파</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">역전파</div>
+  </div>
+  <div style="background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:30px 44px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="width:120px;height:78px;border-radius:8px;background:#dfe7f0;border:1.5px solid #1f3a5f;display:flex;align-items:center;justify-content:center;font-size:30px;">w</div>
+      <div style="display:flex;flex-direction:column;align-items:center;font-family:'JetBrains Mono',monospace;font-size:24px;"><span style="color:#1f3a5f;">순전파 ▶</span><svg width="130" height="20"><line x1="6" y1="10" x2="116" y2="10" stroke="#1f3a5f" stroke-width="2.5"/><path d="M112 5 L122 10 L112 15 Z" fill="#1f3a5f"/></svg><span style="color:#ea851b;">◀ ∂L/∂ŷ=0.4</span></div>
+      <div style="width:150px;height:78px;border-radius:8px;background:#fbf7f2;border:1.5px solid #d8d2c4;display:flex;align-items:center;justify-content:center;font-size:26px;">h → ŷ</div>
+      <div style="display:flex;flex-direction:column;align-items:center;font-family:'JetBrains Mono',monospace;font-size:24px;"><span style="color:#1f3a5f;">▶</span><svg width="130" height="20"><line x1="6" y1="10" x2="116" y2="10" stroke="#1f3a5f" stroke-width="2.5"/><path d="M112 5 L122 10 L112 15 Z" fill="#1f3a5f"/></svg><span style="color:#ea851b;">손실</span></div>
+      <div style="width:120px;height:78px;border-radius:8px;background:#c83a3a;border:1.5px solid #c83a3a;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;">L</div>
+    </div>
+    <div style="text-align:center;margin-top:30px;font-size:36px;">$\dfrac{\partial L}{\partial w} = \dfrac{\partial L}{\partial \hat{y}} \cdot \dfrac{\partial \hat{y}}{\partial w} = 0.4 \times 3.0 = \mathbf{1.2}$</div>
+  </div>
+  <div style="display:flex;gap:28px;margin-top:24px;align-items:center;flex:1;">
+    <div style="flex:1;font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;">출력 쪽 기울기(<span style="color:#ea851b;font-family:'JetBrains Mono',monospace;">0.4</span>)에 국소 기울기(<span style="font-family:'JetBrains Mono',monospace;">3.0</span>)를 곱해 내려가며, 각 손잡이의 책임 <span style="color:#475067;font-weight:600;font-family:'JetBrains Mono',monospace;">∂L/∂w=1.2</span> 를 구합니다. 이 값을 부품 8(경사하강)이 사용.</div>
+    <div style="flex:none;background:#1d2330;border-radius:8px;padding:22px 28px;font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.7;color:#e6e9ef;">loss.<span style="color:#6598d2;">backward</span>()&nbsp;<span style="color:#7d879b;"># 모든 기울기 자동</span><br>optimizer.<span style="color:#6598d2;">step</span>()&nbsp;&nbsp;<span style="color:#7d879b;"># w ← w − η·1.2</span></div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">20</b> / 32</span></div></section>
+
+<section data-label="종합 예시" data-screen-label="21" data-speaker-notes="앞서 본 연산을 하나로 잇는 예시. 4×4 단일 채널 입력에 세로 엣지 커널을 적용(Conv)하고 ReLU·MaxPool을 거쳐 예측을 만든 뒤, L1 손실과 경사하강으로 가중치를 갱신한다. 실제는 64×64지만 흐름은 동일." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:52px 70px 50px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:16px;margin-bottom:18px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:8px;">종합 예시</div>
+    <div style="font-size:44px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">수치로 따라가는 한 번의 학습 스텝</div>
+    <div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;margin-top:8px;">실제 입력은 64×64이지만, 흐름을 보기 위해 단일 채널 4×4로 축소했습니다. 앞서 본 연산이 그대로 이어집니다.</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex:1;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="display:grid;grid-template-columns:repeat(4,44px);grid-template-rows:repeat(4,44px);gap:2px;">
+        <div style="background:#e6e9ee;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">2</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:#e6e9ee;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">2</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:#e6e9ee;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">2</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+        <div style="background:#e6e9ee;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#1a2333;">2</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div><div style="background:#33363d;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'JetBrains Mono',monospace;color:#fff;">0</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">입력 4×4</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#1f3a5f;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;">Conv</div><svg width="50" height="26"><path d="M4 13 L44 13 M36 7 L46 13 L36 19" fill="none" stroke="#8a93a3" stroke-width="2.4"/></svg><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#8a93a3;">세로엣지 K</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="display:grid;grid-template-columns:repeat(2,52px);grid-template-rows:repeat(2,52px);gap:3px;"><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">0</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">0</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">특징 2×2</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#ea851b;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;">ReLU</div><svg width="50" height="26"><path d="M4 13 L44 13 M36 7 L46 13 L36 19" fill="none" stroke="#8a93a3" stroke-width="2.4"/></svg><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#8a93a3;">음수→0</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="display:grid;grid-template-columns:repeat(2,52px);grid-template-rows:repeat(2,52px);gap:3px;"><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">0</div><div style="background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">6</div><div style="background:#e6eaef;color:#475067;display:flex;align-items:center;justify-content:center;font-size:26px;font-family:'JetBrains Mono',monospace;border-radius:2px;">0</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">활성화 2×2</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#1f3a5f;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;">MaxPool</div><svg width="50" height="26"><path d="M4 13 L44 13 M36 7 L46 13 L36 19" fill="none" stroke="#8a93a3" stroke-width="2.4"/></svg></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="width:56px;height:56px;background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-family:'JetBrains Mono',monospace;border-radius:3px;">6</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#5a6475;">대표값</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#ea851b;"><svg width="50" height="26"><path d="M4 13 L44 13 M36 7 L46 13 L36 19" fill="none" stroke="#8a93a3" stroke-width="2.4"/></svg></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="padding:14px 16px;border:1.5px solid #ea851b;border-radius:6px;background:#f8ebdb;text-align:center;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#d4760f;">1×1 Conv</div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#d4760f;">+ Sigmoid</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#ea851b;font-weight:600;">ŷ = 0.85</div>
+    </div>
+  </div>
+  <div style="margin-top:14px;display:flex;align-items:center;gap:18px;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:22px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">예측 ŷ=<span style="color:#ea851b;">0.85</span>, 정답 y=<span style="color:#1f3a5f;">1.0</span></div>
+    <div style="color:#8a93a3;font-size:24px;">→</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">L1 = |0.85 − 1.0| = <span style="color:#c83a3a;font-weight:600;">0.15</span></div>
+    <div style="color:#8a93a3;font-size:24px;">→</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1a2333;">역전파로 기울기 → <span style="color:#475067;">w ← w − η·∂L/∂w</span></div>
+    <div style="color:#8a93a3;font-size:24px;">→</div>
+    <div style="font-size:24px;color:#1f3a5f;font-weight:600;font-family:Pretendard,sans-serif;">반복하면 ŷ → 1.0</div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">21</b> / 32</span></div></section>
+
+<section data-label="§ 조립" data-screen-label="22" data-speaker-notes="부품을 다 봤으니 이제 U-Net으로 조립한다. 역사적 배경부터." style="background:linear-gradient(150deg,#1f3a5f,#16304e);color:#ebf2f9;font-family:Pretendard,sans-serif;padding:74px 100px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;">
+  <div style="font-family:Pretendard,sans-serif;font-size:220px;font-weight:700;color:rgba(255,255,255,.14);line-height:0.8;letter-spacing:-0.02em;">PART 2</div>
+  <div style="font-size:74px;font-weight:600;letter-spacing:-0.01em;margin-top:8px;font-family:Pretendard,sans-serif;">U-Net의 구조</div>
+  <div style="font-size:32px;color:#bfd4ec;margin-top:26px;line-height:1.5;font-family:Pretendard,sans-serif;max-width:1150px;">배경, 핵심 구조, 전체 아키텍처, ConvBlock, 텐서 크기, 스킵 연결, 전체 과정 정리 순으로 다룹니다.</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">22</b> / 32</span></div></section>
+
+<section data-label="역사·배경" data-screen-label="23" data-speaker-notes="U-Net은 2015년 Ronneberger 등이 의료영상 분할을 위해 제안. 분류 CNN → 픽셀단위 FCN → U-Net(encoder-decoder+skip). 적은 데이터로 정밀한 경계가 강점. image-to-image라 우리 문제에 맞는다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">Background · 2015</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">U-Net의 배경</div>
+  </div>
+  <div style="font-size:26px;color:#5a6475;font-family:Pretendard,sans-serif;line-height:1.5;max-width:1560px;">2015년 Ronneberger 등이 <span style="color:#1f3a5f;font-weight:600;">의료(세포) 현미경 영상 분할</span>을 위해 제안했습니다. "한 장당 라벨 한 개"인 분류에서 "<span style="color:#ea851b;font-weight:600;">픽셀마다 예측</span>"으로 가는 흐름 위에 서 있습니다.</div>
+  <div style="position:relative;margin-top:36px;display:flex;">
+    <div style="position:absolute;left:9%;right:9%;top:17px;height:3px;background:#d8d2c4;"></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 14px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:#f4f1eb;border:4px solid #8a93a3;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#5a6475;">CNN · 분류</div><div style="font-size:24px;color:#8a93a3;line-height:1.4;font-family:Pretendard,sans-serif;">이미지 1장 → 라벨 1개</div></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 14px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:#f4f1eb;border:4px solid #ea851b;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#ea851b;">FCN · 2015</div><div style="font-size:24px;color:#8a93a3;line-height:1.4;font-family:Pretendard,sans-serif;">합성곱만으로<br>픽셀마다 예측</div></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 14px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:#1f3a5f;border:4px solid #1f3a5f;box-shadow:0 0 0 4px #cfdbe9;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#1f3a5f;font-weight:600;">U-Net · 2015</div><div style="font-size:24px;color:#8a93a3;line-height:1.4;font-family:Pretendard,sans-serif;">encoder–decoder<br>+ skip</div></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 14px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:#f4f1eb;border:4px solid #475067;"></div><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#475067;">오늘</div><div style="font-size:24px;color:#8a93a3;line-height:1.4;font-family:Pretendard,sans-serif;">의료·위성·물리<br>image→image</div></div>
+  </div>
+  <div style="display:flex;gap:24px;margin-top:42px;flex:1;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:12px;">왜 강력했나</div><div style="font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">① 적은 데이터로도</span> — 의료영상은 라벨이 귀합니다. augmentation과 함께 소수로 학습. <span style="color:#1f3a5f;font-weight:600;">② 정밀한 경계</span> — skip이 넓은 맥락과 정확한 위치를 동시에 잡습니다.</div></div>
+    <div style="flex:1;background:#fbf7f2;border:1px solid #f1e5d6;border-radius:12px;padding:28px 32px;"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:12px;">왜 우리 문제에 맞나</div><div style="font-size:26px;color:#5a6475;line-height:1.55;font-family:Pretendard,sans-serif;">입력도 이미지, 출력도 <span style="color:#ea851b;font-weight:600;">같은 크기 이미지</span> — 전형적인 image-to-image 변환. "빠진 슬라이스 그려 넣기"가 바로 이 형태입니다.</div></div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">23</b> / 32</span></div></section>
+
+<section data-label="활용 사례" data-screen-label="24" data-speaker-notes="U-Net은 입력과 출력이 같은 크기 이미지인 모든 문제에 쓰인다. 의료 분할, 위성·항공 영상, 영상 복원/노이즈 제거, 그리고 우리 디지털 록의 누락 단면 복원. 모두 image-to-image." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">Where U-Net is used</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">U-Net의 활용 — 이미지를 이미지로</div>
+  </div>
+  <div style="display:flex;gap:20px;flex:1;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:26px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <svg viewBox="0 0 80 80" width="64" height="64" style="margin-bottom:16px;"><rect x="6" y="6" width="68" height="68" rx="8" fill="#dfe7f0"/><path d="M40 22 L40 58 M22 40 L58 40" stroke="#1f3a5f" stroke-width="7" stroke-linecap="round"/></svg>
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">의료영상 분할</div>
+      <div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:8px;">세포·장기·종양의 경계를 픽셀 단위로 구분. U-Net이 처음 제안된 분야입니다.</div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:26px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <svg viewBox="0 0 80 80" width="64" height="64" style="margin-bottom:16px;"><rect x="6" y="6" width="68" height="68" rx="8" fill="#f8ebdb"/><path d="M16 50 L32 30 L44 44 L56 26 L66 38" fill="none" stroke="#ea851b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">위성·항공 영상</div>
+      <div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:8px;">도로·건물·농지·수역을 자동으로 추출하는 토지 분류에 널리 쓰입니다.</div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:26px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <svg viewBox="0 0 80 80" width="64" height="64" style="margin-bottom:16px;"><rect x="6" y="6" width="68" height="68" rx="8" fill="#e9ebf0"/><path d="M16 52 Q28 18 40 40 T64 30" fill="none" stroke="#475067" stroke-width="6" stroke-linecap="round"/></svg>
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">영상 복원·노이즈 제거</div>
+      <div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:8px;">흐릿하거나 노이즈가 낀 영상을 선명하게. 초해상도(super-resolution)에도 사용됩니다.</div>
+    </div>
+    <div style="flex:1;background:#1f3a5f;border-radius:12px;padding:26px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;color:#ebf2f9;">
+      <svg viewBox="0 0 80 80" width="64" height="64" style="margin-bottom:16px;"><rect x="6" y="6" width="68" height="68" rx="8" fill="rgba(255,255,255,.16)"/><circle cx="30" cy="32" r="9" fill="#ebf2f9"/><circle cx="52" cy="48" r="13" fill="#bfd4ec"/><circle cx="28" cy="56" r="6" fill="#9abadf"/></svg>
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">디지털 록 — 우리 문제</div>
+      <div style="font-size:24px;color:#cddcee;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:8px;">측정하지 못한 단면을 위·아래 단면으로부터 복원해 pore 구조를 채웁니다.</div>
+    </div>
+  </div>
+  <div style="margin-top:22px;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:18px 30px;font-size:26px;color:#16304e;line-height:1.45;font-family:Pretendard,sans-serif;">공통점: <span style="font-weight:600;">입력과 출력이 모두 같은 크기의 이미지</span>인 image-to-image 문제. 이 형태라면 U-Net이 좋은 출발점입니다.</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">24</b> / 32</span></div></section>
+
+<section data-label="세 아이디어" data-screen-label="25" data-speaker-notes="압축(멀리서 큰 그림)·복원(가까이 그리기)·지름길(또렷한 경계 복사). 이 세 가지가 U자 구조의 전부." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">핵심 아이디어</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">핵심 구조: 인코더, 디코더, 스킵</div>
+  </div>
+  <div style="display:flex;gap:24px;flex:1;">
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #1f3a5f;border-radius:12px;padding:32px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;margin-bottom:18px;">압축 · Encoder</div>
+      <svg viewBox="0 0 170 90" width="170" height="90" style="margin-bottom:20px;"><g fill="none" stroke="#1f3a5f" stroke-width="3"><rect x="10" y="18" width="44" height="56" rx="3"/><rect x="72" y="30" width="32" height="32" rx="3"/><rect x="120" y="40" width="20" height="12" rx="2"/></g><path d="M56 46 L70 46 M106 46 L118 46" stroke="#1f3a5f" stroke-width="3" marker-end="url(#i3)"/><defs><marker id="i3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="#1f3a5f"/></marker></defs></svg>
+      <div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:8px;">멀리서 큰 그림</div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:auto;">Conv→Pool 반복으로 크기↓ 채널↑. 전체 맥락을 파악합니다.</div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #ea851b;border-radius:12px;padding:32px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;margin-bottom:18px;">복원 · Decoder</div>
+      <svg viewBox="0 0 170 90" width="170" height="90" style="margin-bottom:20px;"><g fill="none" stroke="#ea851b" stroke-width="3"><rect x="14" y="40" width="20" height="12" rx="2"/><rect x="52" y="30" width="32" height="32" rx="3"/><rect x="100" y="18" width="44" height="56" rx="3"/></g><path d="M36 46 L50 46 M86 46 L98 46" stroke="#ea851b" stroke-width="3" marker-end="url(#i4)"/><defs><marker id="i4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="#ea851b"/></marker></defs></svg>
+      <div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:8px;">다시 가까이서 그리기</div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:auto;">ConvTranspose로 크기↑. 원래 해상도로 픽셀을 채웁니다.</div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-top:4px solid #475067;border-radius:12px;padding:32px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;margin-bottom:18px;">지름길 · Skip</div>
+      <svg viewBox="0 0 170 90" width="170" height="90" style="margin-bottom:20px;"><g fill="none" stroke="#475067" stroke-width="3"><rect x="16" y="36" width="34" height="40" rx="3"/><rect x="120" y="36" width="34" height="40" rx="3"/></g><path d="M33 36 L33 14 L137 14 L137 36" fill="none" stroke="#475067" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#i5)"/><defs><marker id="i5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="#475067"/></marker></defs></svg>
+      <div style="font-size:30px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:8px;">또렷한 경계 복사</div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:auto;">압축하며 잃은 경계 detail을 decoder로 곧장 건넵니다.</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">25</b> / 32</span></div></section>
+
+<section data-label="압축→복원 이유" data-screen-label="26" data-speaker-notes="왜 크기를 줄였다 키우나. 압축하면 한 뉴런이 보는 영역(수용 영역)이 넓어져 전체 맥락을 이해한다. 작은 3×3 커널만으로도 깊어질수록 넓게 본다. 출력은 입력과 같은 64×64여야 하므로 다시 키운다. 키우는 과정에서 흐려진 경계는 skip으로 보완." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">설계 이유</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">왜 크기를 줄였다가 다시 키우는가</div>
+  </div>
+  <div style="display:flex;gap:40px;flex:1;">
+    <div style="flex:1.05;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;">
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:6px;">핵심: 한 뉴런이 보는 영역(수용 영역)</div>
+      <div style="font-size:24px;color:#8a93a3;font-family:Pretendard,sans-serif;margin-bottom:20px;">같은 3×3 커널도, 압축할수록 원본의 더 넓은 영역을 본다.</div>
+      <div style="display:flex;align-items:center;justify-content:space-around;flex:1;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div style="position:relative;width:212px;height:212px;">
+            <div style="position:absolute;inset:0;background:url(assets/slices/BB_bin.png) center/cover;border-radius:3px;"></div>
+            <div style="position:absolute;left:0;top:0;width:81px;height:81px;border:3px solid #1f3a5f;border-radius:3px;box-shadow:0 0 0 4px rgba(15,125,119,.12);"></div>
+          </div>
+          <div style="font-size:24px;color:#1f3a5f;font-family:'JetBrains Mono',monospace;">압축 전 · 좁게</div>
+          <div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;text-align:center;">3×3 커널이<br>원본 3칸만 본다</div>
+        </div>
+        <div style="font-size:34px;color:#8a93a3;">▶</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div style="position:relative;width:212px;height:212px;">
+            <div style="position:absolute;inset:0;background:url(assets/slices/BB_bin.png) center/cover;border-radius:3px;"></div>
+            <div style="position:absolute;left:0;top:0;width:162px;height:162px;border:3px solid #ea851b;border-radius:3px;box-shadow:0 0 0 4px rgba(192,106,31,.12);"></div>
+          </div>
+          <div style="font-size:24px;color:#ea851b;font-family:'JetBrains Mono',monospace;">압축 후 · 넓게</div>
+          <div style="font-size:24px;color:#5a6475;font-family:Pretendard,sans-serif;text-align:center;">같은 3×3 커널이<br>원본 6칸을 본다</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:0.95;display:flex;flex-direction:column;gap:16px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-left:4px solid #1f3a5f;border-radius:8px;padding:22px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#1f3a5f;">압축하는 이유</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:6px;">깊어질수록 한 뉴런이 더 넓은 영역을 보게 되어, 작은 커널만으로도 <span style="color:#1a2333;font-weight:600;">pore의 전체 형태와 맥락</span>을 파악합니다.</div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-left:4px solid #ea851b;border-radius:8px;padding:22px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#ea851b;">다시 키우는 이유</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:6px;">출력은 입력과 <span style="color:#1a2333;font-weight:600;">같은 64×64 이미지</span>여야 합니다. 압축된 표현을 원래 해상도로 복원해 픽셀을 채웁니다.</div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-left:4px solid #475067;border-radius:8px;padding:22px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;color:#475067;">skip이 필요한 이유</div><div style="font-size:24px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;margin-top:6px;">압축은 "무엇이 있는지"엔 강하지만 <span style="color:#1a2333;font-weight:600;">정확한 위치·경계</span>는 흐려집니다. encoder의 detail을 직접 가져와 보완합니다.</div></div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">26</b> / 32</span></div></section>
+
+<section data-label="ConvBlock" data-screen-label="27" data-speaker-notes="ConvBlock = Conv→BN→LeakyReLU 를 두 번. U-Net은 이 블록을 여러 개 쌓는다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">model_utils.py</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">ConvBlock</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:11px;margin-top:4px;flex-wrap:wrap;">
+    <div style="padding:16px 20px;border-radius:8px;background:#dfe7f0;border:1px solid #9eb7d3;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">Conv2d</div><span style="color:#8a93a3;font-size:24px;">→</span>
+    <div style="padding:16px 20px;border-radius:8px;background:#e9ebf0;border:1px solid #c2c8d3;font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">BatchNorm</div><span style="color:#8a93a3;font-size:24px;">→</span>
+    <div style="padding:16px 20px;border-radius:8px;background:#f6e7d5;border:1px solid #e3b883;font-family:'JetBrains Mono',monospace;font-size:24px;color:#b5650c;">LeakyReLU</div>
+    <span style="color:#8a93a3;font-size:24px;font-family:'JetBrains Mono',monospace;margin:0 4px;">× 2</span>
+    <div style="padding:16px 20px;border-radius:8px;background:#dfe7f0;border:1px solid #9eb7d3;font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;">Conv2d</div><span style="color:#8a93a3;font-size:24px;">→</span>
+    <div style="padding:16px 20px;border-radius:8px;background:#e9ebf0;border:1px solid #c2c8d3;font-family:'JetBrains Mono',monospace;font-size:24px;color:#475067;">BatchNorm</div><span style="color:#8a93a3;font-size:24px;">→</span>
+    <div style="padding:16px 20px;border-radius:8px;background:#f6e7d5;border:1px solid #e3b883;font-family:'JetBrains Mono',monospace;font-size:24px;color:#b5650c;">LeakyReLU</div>
+  </div>
+  <div style="display:flex;gap:32px;margin-top:36px;flex:1;">
+    <div style="flex:1;background:#1d2330;border-radius:10px;padding:30px 34px;font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.7;color:#e6e9ef;">
+<span style="color:#b3a7ef;">class</span> <span style="color:#6598d2;">ConvBlock</span>(nn.Module):<br>
+&nbsp;&nbsp;<span style="color:#7d879b;"># Conv→BN→LeakyReLU 를 두 번</span><br>
+&nbsp;&nbsp;self.conv = nn.<span style="color:#6598d2;">Sequential</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nn.Conv2d(in_ch, out_ch, <span style="color:#e0a762;">3</span>, padding=<span style="color:#e0a762;">1</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nn.BatchNorm2d(out_ch),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nn.LeakyReLU(<span style="color:#e0a762;">0.1</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7d879b;"># … 한 번 더</span><br>
+&nbsp;&nbsp;)
+    </div>
+    <div style="flex:0.85;display:flex;flex-direction:column;gap:14px;">
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:20px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;color:#1f3a5f;font-weight:600;font-family:Pretendard,sans-serif;">1 · Conv2d — 패턴 추출 (§9)</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">3×3 커널로 채널 in→out.</div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:20px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;color:#475067;font-weight:600;font-family:Pretendard,sans-serif;">2 · BatchNorm — 정규화 (§17)</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">값 크기를 맞춰 안정화.</div></div>
+      <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:20px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:26px;color:#ea851b;font-weight:600;font-family:Pretendard,sans-serif;">3 · LeakyReLU — 비선형 (§8)</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">음수도 0.1배로 통과.</div></div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">27</b> / 32</span></div></section>
+
+<section data-label="크기 추적" data-screen-label="28" data-speaker-notes="입력 2×64²에서 채널↑ 크기↓로 압축, bottleneck 32×16², 다시 복원해 1×64². 단계별 텐서 크기를 표로 따라간다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">Forward pass · base=8</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">단계별 텐서 크기</div>
+  </div>
+  <div style="display:flex;gap:34px;flex:1;">
+    <div style="flex:1.3;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:10px 30px;box-shadow:0 1px 3px rgba(40,34,20,.05);display:flex;flex-direction:column;justify-content:center;">
+      <div style="display:grid;grid-template-columns:1.1fr 1.2fr 2fr;font-family:Pretendard,sans-serif;">
+        <div style="padding:14px 6px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#8a93a3;border-bottom:2px solid #e4ded2;">단계</div><div style="padding:14px 6px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#8a93a3;border-bottom:2px solid #e4ded2;">텐서 C×H×W</div><div style="padding:14px 6px;font-family:'JetBrains Mono',monospace;font-size:24px;color:#8a93a3;border-bottom:2px solid #e4ded2;">처리 내용</div>
+        <div style="padding:13px 6px;font-size:26px;color:#1f3a5f;border-bottom:1px solid #f4eade;">입력</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;border-bottom:1px solid #f4eade;">2×64×64</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;border-bottom:1px solid #f4eade;">[앞, 뒤] 슬라이스</div>
+        <div style="padding:13px 6px;font-size:26px;color:#1f3a5f;border-bottom:1px solid #f4eade;">e1</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;border-bottom:1px solid #f4eade;">8×64×64</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;border-bottom:1px solid #f4eade;">ConvBlock (채널 2→8)</div>
+        <div style="padding:13px 6px;font-size:26px;color:#1f3a5f;border-bottom:1px solid #f4eade;">e2</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;border-bottom:1px solid #f4eade;">16×32×32</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;border-bottom:1px solid #f4eade;">Pool 후 ConvBlock</div>
+        <div style="padding:13px 6px;font-size:26px;color:#475067;border-bottom:1px solid #f4eade;">bottleneck</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;border-bottom:1px solid #f4eade;">32×16×16</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;border-bottom:1px solid #f4eade;">가장 압축된 표현</div>
+        <div style="padding:13px 6px;font-size:26px;color:#ea851b;border-bottom:1px solid #f4eade;">d2</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;border-bottom:1px solid #f4eade;">16×32×32</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;border-bottom:1px solid #f4eade;">ConvT 업샘플 + e2 skip</div>
+        <div style="padding:13px 6px;font-size:26px;color:#ea851b;border-bottom:1px solid #f4eade;">d1</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;border-bottom:1px solid #f4eade;">8×64×64</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;border-bottom:1px solid #f4eade;">ConvT 업샘플 + e1 skip</div>
+        <div style="padding:13px 6px;font-size:26px;color:#1a2333;">출력</div><div style="padding:13px 6px;font-family:'JetBrains Mono',monospace;font-size:26px;">1×64×64</div><div style="padding:13px 6px;font-size:24px;color:#5a6475;">1×1 Conv + sigmoid</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+      <div style="display:flex;align-items:flex-end;gap:8px;height:230px;">
+        <div style="width:46px;height:200px;border-top:4px solid #1f3a5f;background:repeating-linear-gradient(90deg,#9eb7d3 0 3px,transparent 3px 11px);background-color:#e7edf4;border-radius:2px;"></div>
+        <div style="width:46px;height:200px;border-top:4px solid #1f3a5f;background:repeating-linear-gradient(90deg,#9eb7d3 0 3px,transparent 3px 8px);background-color:#e7edf4;border-radius:2px;"></div>
+        <div style="width:40px;height:140px;border-top:4px solid #1f3a5f;background:repeating-linear-gradient(90deg,#9eb7d3 0 3px,transparent 3px 6px);background-color:#e7edf4;border-radius:2px;"></div>
+        <div style="width:34px;height:92px;border-top:4px solid #475067;background:repeating-linear-gradient(90deg,#b6bdc9 0 3px,transparent 3px 5px);background-color:#e9ebf0;border-radius:2px;"></div>
+        <div style="width:40px;height:140px;border-top:4px solid #ea851b;background:repeating-linear-gradient(90deg,#e3b883 0 3px,transparent 3px 6px);background-color:#f8ebdb;border-radius:2px;"></div>
+        <div style="width:46px;height:200px;border-top:4px solid #ea851b;background:repeating-linear-gradient(90deg,#e3b883 0 3px,transparent 3px 8px);background-color:#f8ebdb;border-radius:2px;"></div>
+        <div style="width:46px;height:200px;border-top:4px solid #1a2333;background:repeating-linear-gradient(90deg,#c2c8d3 0 3px,transparent 3px 24px);background-color:#eaecf0;border-radius:2px;"></div>
+      </div>
+      <div style="font-size:24px;color:#5a6475;text-align:center;line-height:1.5;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">높이=공간 크기</span>, <span style="color:#ea851b;font-weight:600;">줄무늬=채널</span>. 압축→복원의 U자 옆모습. <span style="font-family:'JetBrains Mono',monospace;color:#8a93a3;">base=8 → 총 ≈ 29,553개 파라미터</span></div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">28</b> / 32</span></div></section>
+
+<section data-label="skip 또렷함" data-screen-label="29" data-speaker-notes="skip은 encoder의 같은 크기 feature를 채널 축으로 cat. 8+8=16채널. 없으면 흐릿, 있으면 선명한 경계." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#475067;margin-bottom:10px;">Skip-connection</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">스킵 연결</div>
+  </div>
+  <div style="display:flex;gap:40px;flex:1;align-items:center;">
+    <div style="flex:1.05;display:flex;flex-direction:column;gap:22px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+        <div style="text-align:center;"><div style="width:80px;height:120px;border-radius:4px;border:1.5px solid #1f3a5f;background:repeating-linear-gradient(90deg,#9eb7d3 0 3px,transparent 3px 9px);background-color:#e7edf4;"></div><div style="font-size:24px;color:#1f3a5f;font-family:'JetBrains Mono',monospace;margin-top:6px;">e1 · 8ch</div></div>
+        <div style="font-size:26px;color:#8a93a3;">+</div>
+        <div style="text-align:center;"><div style="width:80px;height:120px;border-radius:4px;border:1.5px solid #ea851b;background:repeating-linear-gradient(90deg,#e3b883 0 3px,transparent 3px 9px);background-color:#f8ebdb;"></div><div style="font-size:24px;color:#ea851b;font-family:'JetBrains Mono',monospace;margin-top:6px;">up · 8ch</div></div>
+        <div style="font-size:30px;color:#8a93a3;">→</div>
+        <div style="text-align:center;"><div style="width:120px;height:120px;border-radius:4px;border:1.5px solid #475067;background:repeating-linear-gradient(90deg,#9eb7d3 0 3px,transparent 3px 9px),repeating-linear-gradient(90deg,transparent 0 60px,#e3b883 60px 63px,transparent 63px 69px);background-color:#eef0f3;"></div><div style="font-size:24px;color:#475067;font-family:'JetBrains Mono',monospace;margin-top:6px;">cat · 16ch</div></div>
+      </div>
+      <div style="background:#1d2330;border-radius:10px;padding:24px 30px;font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.7;color:#e6e9ef;">x = torch.<span style="color:#6598d2;">cat</span>([x, skip], <span style="color:#e0a762;">dim=1</span>)<br><span style="color:#7d879b;"># dim=1 = 채널 축 → 8+8 = 16채널</span></div>
+    </div>
+    <div style="flex:1;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:30px 34px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+      <div style="display:flex;gap:22px;justify-content:center;margin-bottom:20px;">
+        <div style="text-align:center;"><div style="width:148px;height:148px;border-radius:8px;border:2px solid #d9b58a;background:url(assets/slices/BB_bin.png) center/cover;filter:blur(3px);"></div><div style="font-size:24px;color:#ea851b;font-family:Pretendard,sans-serif;margin-top:8px;">skip 없음 → 흐릿</div></div>
+        <div style="text-align:center;"><div style="width:148px;height:148px;border-radius:8px;border:2px solid #1f3a5f;background:url(assets/slices/BB_bin.png) center/cover;"></div><div style="font-size:24px;color:#1f3a5f;font-family:Pretendard,sans-serif;margin-top:8px;">skip 있음 → 선명</div></div>
+      </div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;font-family:Pretendard,sans-serif;">압축하며 잃은 <span style="color:#ea851b;font-weight:600;">경계 detail</span>을 decoder가 그대로 돌려받아 pore 경계가 <span style="color:#1f3a5f;font-weight:600;">또렷</span>해집니다.</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">29</b> / 32</span></div></section>
+
+<section data-label="한 바퀴 통합" data-screen-label="30" data-speaker-notes="배운 모든 부품이 한 학습 스텝에서 이어진다. 입력→ConvBlock→압축→복원+skip→Sigmoid 예측→L1 손실→역전파→갱신→반복." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:54px 80px 52px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:18px;margin-bottom:18px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:8px;">통합 복습</div>
+    <div style="font-size:44px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">전체 학습 과정 정리</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:24px;margin-bottom:18px;flex-wrap:wrap;">
+    <span style="padding:7px 14px;background:#dfe7f0;color:#1f3a5f;border-radius:4px;">순전파 ▶</span><span style="color:#8a93a3;">→</span><span style="padding:7px 14px;background:#c83a3a;color:#fff;border-radius:4px;">손실</span><span style="color:#8a93a3;">→</span><span style="padding:7px 14px;background:#f6e7d5;color:#b5650c;border-radius:4px;">◀ 역전파</span><span style="color:#8a93a3;">→</span><span style="padding:7px 14px;background:#e9ebf0;color:#475067;border-radius:4px;">θ 갱신</span><span style="color:#8a93a3;">↻ 반복</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 28px;flex:1;">
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">1</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">입력 (§6)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;">앞·뒤 슬라이스를 <span style="font-family:'JetBrains Mono',monospace;">2×64²</span> 텐서로.</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">2</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">ConvBlock</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;"><span style="color:#1f3a5f;font-weight:600;">Conv(§9)</span>→<span style="color:#475067;font-weight:600;">BN(§17)</span>→<span style="color:#ea851b;font-weight:600;">LeakyReLU(§8)</span>.</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">3</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">압축 (§15)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;">MaxPool로 크기↓ 채널↑ → bottleneck.</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#ea851b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">4</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">복원 (§16)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;">ConvTranspose로 크기↑.</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">5</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">skip (§26)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;">encoder 경계 detail을 합친다 (cat).</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#ea851b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">6</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">예측 (§8)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;">1×1 Conv + Sigmoid → <span style="font-family:'JetBrains Mono',monospace;">ŷ</span> (0~1).</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#c83a3a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">7</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">채점 (§18)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;">L1 손실로 정답 y와 비교.</div></div></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;"><div style="flex:none;width:40px;height:40px;border-radius:50%;background:#475067;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;">8</div><div><div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;">역전파·갱신 (§20·19)</div><div style="font-size:24px;color:#5a6475;line-height:1.4;font-family:Pretendard,sans-serif;"><span style="font-family:'JetBrains Mono',monospace;">θ ← θ − η∇</span> → <span style="color:#1f3a5f;font-weight:600;">다시 1번.</span></div></div></div>
+  </div>
+  <div style="margin-top:16px;background:#dfe7f0;border-left:4px solid #1f3a5f;border-radius:4px;padding:18px 30px;font-size:26px;color:#16304e;line-height:1.4;font-family:Pretendard,sans-serif;">이 <span style="font-weight:600;">한 바퀴(①→⑧)를 수백~수천 번</span> 돌리면 예측 ŷ가 정답 y에 점점 가까워집니다 — 그게 "학습".</div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">30</b> / 32</span></div></section>
+
+<section data-label="데이터·루프" data-screen-label="31" data-speaker-notes="각 슬라이스 t 를 양옆 이웃 t−k·t+k 로 묶어 triplet 생성 (이웃 거리 k, 경계 제외 range(k, Z−k)). 학습 루프는 4박자 코드 그대로." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">코드 · 데이터 &amp; 학습</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">학습 데이터와 학습 루프</div>
+  </div>
+  <div style="display:flex;gap:36px;flex:1;">
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:16px;">데이터 — triplet (이웃 거리 k)</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;">
+        <div style="text-align:center;"><img src="assets/slices/BB_bin.png" alt="" style="width:96px;height:96px;border-radius:5px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;margin-top:6px;">z=4</div></div>
+        <div style="font-size:24px;color:#8a93a3;">+</div>
+        <div style="text-align:center;"><div style="width:96px;height:96px;border-radius:5px;background:#f6e7d5;border:2px dashed #ea851b;display:flex;align-items:center;justify-content:center;font-size:30px;color:#b5650c;font-family:'JetBrains Mono',monospace;">?</div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#ea851b;margin-top:6px;">z=5 정답</div></div>
+        <div style="font-size:24px;color:#8a93a3;">+</div>
+        <div style="text-align:center;"><img src="assets/slices/BB_bin.png" alt="" style="width:96px;height:96px;border-radius:5px;border:2px solid #1f3a5f;object-fit:cover;"><div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#1f3a5f;margin-top:6px;">z=6</div></div>
+      </div>
+      <div style="background:#1d2330;border-radius:10px;padding:22px 28px;font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.6;color:#e6e9ef;margin-top:auto;"><span style="color:#b3a7ef;">for</span> t <span style="color:#b3a7ef;">in</span> range(k, Z − k):<br>&nbsp;&nbsp;before = t − k<span style="color:#7d879b;">  # 위 이웃</span><br>&nbsp;&nbsp;after&nbsp; = t + k<span style="color:#7d879b;">  # 아래 이웃</span><br>&nbsp;&nbsp;<span style="color:#7d879b;"># 입력 [vol[before], vol[after]] → 정답 vol[t]</span></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div style="font-size:26px;font-weight:600;font-family:Pretendard,sans-serif;margin-bottom:16px;">학습 루프 — 4박자 (§4)</div>
+      <div style="background:#1d2330;border-radius:10px;padding:24px 30px;font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.8;color:#e6e9ef;">
+        <span style="color:#b3a7ef;">for</span> x, y <span style="color:#b3a7ef;">in</span> loader:<br>
+        &nbsp;&nbsp;pred = model(x)<span style="color:#7d879b;"> # ① 예측</span><br>
+        &nbsp;&nbsp;loss = criterion(pred, y)<span style="color:#7d879b;"> # ②</span><br>
+        &nbsp;&nbsp;optimizer.zero_grad()<br>
+        &nbsp;&nbsp;loss.backward()<span style="color:#7d879b;"> # ③ 책임</span><br>
+        &nbsp;&nbsp;optimizer.step()<span style="color:#7d879b;"> # ④ 갱신</span>
+      </div>
+      <div style="font-size:26px;color:#5a6475;line-height:1.5;margin-top:18px;font-family:Pretendard,sans-serif;">부피 전체에서 수백 개의 triplet이 자동 생성되고, 이 루프가 그것들을 반복 학습합니다.</div>
+    </div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">31</b> / 32</span></div></section>
+
+<section data-label="마무리" data-screen-label="32" data-speaker-notes="손잡이(base/epochs/lr/k)와 채점(공극률 오차, SSIM). 실제로 mini UNet(|Δφ| 0.47%p)이 linear(6.87%p)를 크게 이긴다. 이제 노트북 §6.5에서 직접 바꿔보며 확인." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;padding:58px 84px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div style="border-bottom:1px solid #e4ded2;padding-bottom:20px;margin-bottom:22px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:0.18em;text-transform:uppercase;color:#1f3a5f;margin-bottom:10px;">손잡이 &amp; 채점</div>
+    <div style="font-size:46px;font-weight:600;letter-spacing:-0.01em;font-family:Pretendard,sans-serif;">하이퍼파라미터와 평가 지표</div>
+  </div>
+  <div style="display:flex;gap:30px;">
+    <div style="flex:1;">
+      <div style="font-size:26px;color:#8a93a3;margin-bottom:14px;font-family:Pretendard,sans-serif;">하이퍼파라미터 (train_quick)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:18px 22px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#1f3a5f;">base</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">모델 크기 (8/16)</div></div>
+        <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:18px 22px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#1f3a5f;">epochs</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">전체 반복 횟수</div></div>
+        <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:18px 22px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#1f3a5f;">lr (η)</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">걸음 크기 (1e-3)</div></div>
+        <div style="background:#fff;border:1px solid #e4ded2;border-radius:8px;padding:18px 22px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-family:'JetBrains Mono',monospace;font-size:26px;color:#1f3a5f;">k</div><div style="font-size:24px;color:#5a6475;margin-top:5px;font-family:Pretendard,sans-serif;">이웃 거리 (양옆 t±k)</div></div>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:26px;color:#8a93a3;margin-bottom:14px;font-family:Pretendard,sans-serif;">평가 지표</div>
+      <div style="background:#fff;border:1px solid #e3b883;border-radius:8px;padding:20px 26px;margin-bottom:12px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:24px;color:#ea851b;font-weight:600;font-family:Pretendard,sans-serif;">공극률 오차 (작을수록 좋음)</div><div style="font-size:28px;margin-top:10px;">$\lvert\Delta\phi\rvert = \lvert \phi_{\text{복원}} - \phi_{\text{원본}} \rvert$</div></div>
+      <div style="background:#fff;border:1px solid #9eb7d3;border-radius:8px;padding:20px 26px;box-shadow:0 1px 3px rgba(40,34,20,.05);"><div style="font-size:24px;color:#1f3a5f;font-weight:600;font-family:Pretendard,sans-serif;">SSIM — 구조 유사도 (0~1)</div><div style="font-size:24px;color:#5a6475;margin-top:6px;line-height:1.45;font-family:Pretendard,sans-serif;">공극률은 "양", SSIM은 "모양"이 맞는지 — 함께 봅니다.</div></div>
+    </div>
+  </div>
+  <div style="margin-top:auto;display:flex;align-items:center;gap:22px;background:#fff;border:1px solid #e4ded2;border-radius:12px;padding:18px 28px;box-shadow:0 1px 3px rgba(40,34,20,.05);">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:20px;color:#8a93a3;flex:none;line-height:1.35;">실제 결과<br>BB · k=1</div>
+    <div style="display:flex;align-items:center;gap:20px;flex:1;justify-content:center;font-family:'JetBrains Mono',monospace;">
+      <div style="text-align:center;"><div style="font-size:20px;color:#8a93a3;">Linear (B1)</div><div style="font-size:25px;color:#5a6475;margin-top:3px;">|Δφ| 6.87%p · SSIM 0.605</div></div>
+      <div style="font-size:30px;color:#ea851b;">→</div>
+      <div style="text-align:center;"><div style="font-size:20px;color:#ea851b;font-weight:600;">mini UNet · base=8 · 29,553 params</div><div style="font-size:25px;color:#1f3a5f;font-weight:700;margin-top:3px;">|Δφ| 0.47%p · SSIM 0.731</div></div>
+    </div>
+  </div>
+  <div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(100deg,#1f3a5f,#16304e);border-radius:14px;padding:26px 42px;color:#ebf2f9;">
+    <div><div style="font-size:34px;font-weight:600;font-family:Pretendard,sans-serif;">그림 → 숫자 → 코드, 이제 노트북에서.</div><div style="font-size:26px;color:#bfd4ec;margin-top:8px;font-family:Pretendard,sans-serif;">§6.5 심화에서 base·손실·k 를 직접 바꿔 보며 확인하세요.</div></div>
+    <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:24px;flex:none;"><span style="padding:13px 20px;border:1px solid rgba(255,255,255,.35);border-radius:4px;">W2_…intro.ipynb</span><span style="padding:13px 20px;border:1px solid rgba(255,255,255,.35);border-radius:4px;">model_utils.py</span></div>
+  </div>
+<div style="position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.02em;color:#8A93A3;pointer-events:none;z-index:5;"><span style="color:#5A6475;font-weight:500;">Digital Rock · U-Net 해부</span><span><b style="color:#D4760F;">32</b> / 32</span></div></section>
+</deck-stage>
+<script src="deck/deck-stage.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+  // KaTeX — 슬라이드는 light DOM(body slot)에 있으므로 body 전체 스캔. 폰트 늦은 로드 대비 다중 패스.
+  function _rm(){
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+        throwOnError:false
+      });
+    }
+  }
+  let _n=0; const _iv=setInterval(()=>{ _rm(); if(++_n>=10) clearInterval(_iv); }, 200);
+  window.addEventListener('load', ()=>{ _rm(); setTimeout(_rm,300); setTimeout(_rm,900); });
+</script>
+</body>
+</html>
