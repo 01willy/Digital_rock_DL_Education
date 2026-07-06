@@ -328,6 +328,7 @@ def predict_continuous(model, before, after, device='cpu'):
 def train_gan(volume, k=1, preset='fast', generator=None, device='cpu',
               lambda_gan=0.1, w_l1=1.0, w_ssim=0.3, lr_g=2e-4, lr_d=2e-4,
               lambda_decay=0.0, epochs=None, warmup=None,
+              d_base=None, d_every=1,
               snapshot=None, snapshot_every=0, verbose=True):
     """
     조건부 pix2pix GAN 학습 (CPU 가능).
@@ -353,8 +354,9 @@ def train_gan(volume, k=1, preset='fast', generator=None, device='cpu',
                       n_patches_per_triplet=p['n_patches'], augment=True)
     loader = DataLoader(ds, batch_size=p['batch_size'], shuffle=True, num_workers=0)
 
+    db = d_base if d_base is not None else p['d_base']   # 판별자 폭 override (독주 방지용)
     G = generator.to(device) if generator is not None else UNetMini(in_ch=2, base=p['base']).to(device)
-    D = PatchDiscriminatorMini(cond_ch=2, base=p['d_base']).to(device)
+    D = PatchDiscriminatorMini(cond_ch=2, base=db).to(device)
     if verbose:
         mode = 'fine-tune (W2 이어받기)' if generator is not None else 'from scratch'
         print(f'[train_gan] preset={preset} · {mode}')
@@ -369,17 +371,18 @@ def train_gan(volume, k=1, preset='fast', generator=None, device='cpu',
         progress = max(0.0, (ep - n_warmup) / max(1, n_epochs - n_warmup))
         lam = 0.0 if ep < n_warmup else lambda_gan * (1.0 - lambda_decay * progress)
         G.train(); D.train()
-        e_l1 = e_ss = e_gan = e_d = 0.0; nb = 0
+        e_l1 = e_ss = e_gan = e_d = 0.0; nb = 0; nd = 0; step = 0
         for x, y in loader:
             x = x.to(device); y = y.to(device)
             cond = x                       # 조건 = 앞·뒤 슬라이스 2ch
             y_fake = G(x)
-            # ── 판별자 갱신 (warmup 이후에만) ──
-            if lam > 0:
+            # ── 판별자 갱신 (warmup 이후 · d_every 스텝마다) ──
+            if lam > 0 and (step % d_every == 0):
                 opt_D.zero_grad()
                 d_loss = d_hinge_loss(D, cond, y, y_fake)
                 d_loss.backward(); opt_D.step()
-                e_d += float(d_loss.detach())
+                e_d += float(d_loss.detach()); nd += 1
+            step += 1
             # ── 생성자 갱신 ──
             opt_G.zero_grad()
             y_fake = G(x)
@@ -393,7 +396,7 @@ def train_gan(volume, k=1, preset='fast', generator=None, device='cpu',
             g_loss.backward(); opt_G.step()
             e_l1 += float(loss_l1.detach()); e_ss += float(loss_ss.detach()); nb += 1
         hist['G_l1'].append(e_l1 / nb); hist['G_ssim'].append(e_ss / nb)
-        hist['G_gan'].append(e_gan / max(1, nb)); hist['D_loss'].append(e_d / max(1, nb))
+        hist['G_gan'].append(e_gan / max(1, nb)); hist['D_loss'].append(e_d / max(1, nd))
         hist['lam'].append(lam)
         if snapshot is not None and snapshot_every and (ep % snapshot_every == 0 or ep == n_epochs - 1):
             cont = predict_continuous(G, snapshot[0], snapshot[1], device=device)

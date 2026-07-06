@@ -1,0 +1,18 @@
+{
+  "figure": "pix2pix_method_architecture",
+  "message": "슬라이스 보간 pix2pix GAN 전체 구조 — 생성자(UNet) + 조건부 판별자(PatchGAN) + 손실",
+  "target": "web slide 1920x1080 content area, also PNG for pptx",
+  "nodes": {
+    "input": {"label": "이웃 슬라이스", "detail": "x = [t−k, t+k]", "shape": "2 ch", "tiles": ["W3_tile_before.png","W3_tile_after.png"]},
+    "generator": {"label": "Generator (UNet)", "encoder": [[2,"64²"],[8,"32²"],[16,"16²"]], "bottleneck": [32,"16²"], "decoder": [[16,"32²"],[8,"64²"]], "skip": true, "out": [1,"64²","sigmoid"]},
+    "fake": {"label": "생성 슬라이스", "detail": "ŷ = G(x)", "tile": "W3_tile_cont_gan.png"},
+    "real": {"label": "진짜 슬라이스", "detail": "y (정답)", "tile": "W3_tile_target.png"},
+    "discriminator": {"label": "Discriminator (PatchGAN)", "in": "x ⊕ y  (3 ch)", "convs": [[32,"64²"],[64,"32²"],[128,"16²"]], "out": [1,"15²","patch 점수"], "spectral_norm": true}
+  },
+  "losses": {
+    "reconstruction": ["L1(ŷ, y)  w=1.0", "SSIM(ŷ, y)  w=0.3"],
+    "adversarial": ["hinge:  D(x, y)→+1,  D(x, ŷ)→−1", "λ ≈ 0.1"],
+    "total_G": "L_G = 1.0·L1 + 0.3·SSIM + λ·adversarial"
+  },
+  "render": "SVG (vector) → PNG via cairosvg. Tokens: navy #1f3a5f, orange #ea851b, green #2e8b57, cream #f4f1eb."
+}

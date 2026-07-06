@@ -1,0 +1,54 @@
+{
+  "_note": "Digital Rock 교육 사이트 실제 디자인 시스템 (U-Net 해부덱 = W3 deck v2 기준). 웹 슬라이드 1920x1080, deck/deck.css + Pretendard.",
+  "canvas": {
+    "web_slide_px": [1920, 1080],
+    "pptx_ratio": "16:9",
+    "pptx_width_in": 13.333,
+    "pptx_height_in": 7.5
+  },
+  "grid": {
+    "web_pad_px": 84,
+    "web_footer_zone_px": 92,
+    "columns": 12,
+    "gutter_px": 20
+  },
+  "typography": {
+    "font_family": "Pretendard",
+    "mono_family": "JetBrains Mono",
+    "web_title_px": 46,
+    "web_eyebrow_px": 22,
+    "web_lead_px": 25,
+    "web_body_px": 23,
+    "web_caption_px": 19,
+    "pptx_title_pt": 24,
+    "pptx_body_pt": 16,
+    "pptx_caption_pt": 13
+  },
+  "colors": {
+    "bg": "#f4f1eb",
+    "card": "#ffffff",
+    "tint_bg": "#fbf7f2",
+    "tint_line": "#f1e5d6",
+    "ink": "#1a2333",
+    "sub": "#5a6475",
+    "muted": "#8a93a3",
+    "line": "#e4ded2",
+    "navy": "#1f3a5f",
+    "navy_2": "#475067",
+    "orange": "#ea851b",
+    "orange_d": "#d4760f",
+    "green": "#2e8b57",
+    "red": "#c83a3a"
+  },
+  "figure_palette": {
+    "_use_in": "matplotlib figures (assets/figures/W3_*.png)",
+    "NAVY": "#1f3a5f", "ORANGE": "#ea851b", "GREEN": "#2e8b57", "RED": "#c83a3a",
+    "INK": "#1a2333", "SUB": "#5a6475", "MUTED": "#8a93a3", "LINE": "#e4ded2",
+    "rules": ["facecolor white", "dpi 140", "spines top/right off", "grid alpha 0.15", "no internal suptitle (slide header is the title)", "axis labels with units", "pore dark: research cubes cmap gray (1=solid), education 1=pore cmap gray_r"]
+  },
+  "export": {
+    "figure_png_dpi": 140,
+    "prefer_svg_for_diagrams": true,
+    "fonts_dir": "/home/willy010313/.fonts (Pretendard-Regular.otf, Pretendard-Bold.otf)"
+  }
+}

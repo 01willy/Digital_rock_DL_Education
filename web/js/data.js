@@ -48,13 +48,13 @@ window.COURSE = {
     },
     {
       n:3, status:'now', slug:'w3', available:true,
-      title:'적대적 학습 — pix2pix GAN',
+      title:'적대적 학습 · pix2pix GAN',
       en:'Conditional GAN',
-      summary:'L1 손실은 "평균의 함정"으로 경계를 흐린다. 두 번째 신경망 판별자(Discriminator)를 붙여 조건부 pix2pix GAN으로 확장 — 처음부터/W2 이어받기 두 경로로 학습하고, 안정화(warmup·spectral norm·작은 λ)와 정직한 평가("좋은 숫자 ≠ 좋은 복원")까지 다룹니다. 이번 주는 두 조 공통(통합) 트랙.',
+      summary:'L1 손실은 "평균의 함정"으로 경계를 회색으로 번지게 합니다. 두 번째 신경망 판별자(Discriminator)를 붙여 조건부 pix2pix GAN으로 확장하고, 처음부터/W2 이어받기 두 경로로 학습합니다. 안정화(warmup·작은 판별자·spectral norm·작은 λ)와 정직한 평가("좋은 숫자 ≠ 좋은 복원")까지 다룹니다. 이번 주는 균질한 Bentheimer 사암을 k=2로 실습하는 두 조 공통(통합) 트랙입니다.',
       concepts:['GAN','Discriminator','hinge loss','조건부·PatchGAN','L1+SSIM+GAN 균형','학습 안정화'],
       nonDL:false,
       plan:[
-        '평균의 함정 — L1이 흐린 이유 (연속 출력으로 확인)',
+        '평균의 함정: L1이 회색을 내는 이유 (연속 출력으로 확인)',
         '판별자·hinge 손실·조건부·PatchGAN·spectral norm',
         'GAN 직접 학습 (처음부터 · W2 이어받기)',
         'λ sweep + 정직한 평가 (구조는 지표 밖)',
@@ -439,20 +439,20 @@ window.COURSE = {
   },
 
   // ===================================================================
-  //  W3 — 적대적 학습 (pix2pix GAN)  ·  두 조 공통(통합) 트랙
+  //  W3 · 적대적 학습 (pix2pix GAN)  ·  두 조 공통(통합) 트랙
   // ===================================================================
   w3: {
     flow: [
       { a:'강의 + L1의 한계·GAN 아이디어',        src:'슬라이드 1–13' },
-      { a:'노트북 — 판별자·hinge·연속 출력',      src:'W3_pix2pix_gan.ipynb §1–3' },
+      { a:'노트북: 판별자·hinge·연속 출력',        src:'W3_pix2pix_gan.ipynb §1–3' },
       { a:'GAN 직접 학습 (처음부터 · W2 이어받기)', src:'노트북 §4–5' },
       { a:'정직한 평가 + λ sweep',                src:'노트북 §6 · §6.5' },
       { a:'탐구 과제 안내 + W4 예고',             src:'handout §5' },
     ],
     groups: {
-      // 두 조 공통 — 동일 내용(통합 트랙)
+      // 두 조 공통 · 동일 내용(통합 트랙)
       g1: {
-        slides:38, cells:26, tryits:5,
+        slides:39, cells:26, tryits:5,
         notebook:'W3_pix2pix_gan.ipynb',
         tasks:[
           { t:'GAN 있음/없음 비교', req:true, d:'같은 조건에서 L1만 모델과 GAN 모델의 연속 출력·경계·작은 pore를 비교. 회색(불확실) 비율과 함께 무엇이 달라졌는지 서술.' },
@@ -462,7 +462,7 @@ window.COURSE = {
         ],
       },
       g2: {
-        slides:38, cells:26, tryits:5,
+        slides:39, cells:26, tryits:5,
         notebook:'W3_pix2pix_gan.ipynb',
         tasks:[
           { t:'GAN 있음/없음 비교', req:true, d:'같은 조건에서 L1만 모델과 GAN 모델의 연속 출력·경계·작은 pore를 비교. 회색(불확실) 비율과 함께 무엇이 달라졌는지 서술.' },
@@ -477,8 +477,8 @@ window.COURSE = {
       '판별자에 이웃(조건)을 함께 넣는 이유는? 안 넣으면 어떤 허점이 생기나?',
       'hinge 손실에서 "벌점 0"이 되는 조건은 진짜·가짜 각각 무엇인가?',
       'λ를 키우면 왜 |Δφ|가 나빠질 수 있나? 반대로 너무 작으면?',
-      'D 손실이 0에 붙으면 학습에 무슨 일이 생기나? 어떻게 완화하나?',
-      'GAN이 |Δφ|를 더 낮추지 못하는데도 쓰는 이유는? 무엇을 얻고 무엇을 내주나?',
+      'D 손실이 0에 붙으면 학습에 무슨 일이 생기나? d_base로 어떻게 완화하나?',
+      '픽셀 지표만으로는 GAN의 이득을 다 못 보는 이유는? GAN이 확실히 얻는 것은 무엇인가?',
     ],
     res: {
       deck: 'W3_deck.html',
@@ -493,7 +493,7 @@ window.COURSE = {
       codezip: 'w3_code.zip',
       data: {
         file:'data_w3.zip',
-        title:'data_w3.zip — 256³ binary · 4 도메인',
+        title:'data_w3.zip · 256³ binary · 4 도메인',
         desc:'BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB). W1·W2와 동일한 데이터.',
         tree:`<본인 작업 폴더>/
 ├ W3_pix2pix_gan.ipynb
@@ -515,44 +515,45 @@ window.COURSE = {
     // ---- W3 deep-dive: 노트북 walkthrough + GAN API reference ----
     guide: {
       utilsLabel: 'model_utils.py (+GAN)',
-      intro: 'W3의 핵심은 model_utils.py에 새로 추가된 판별자·GAN 학습 함수를 직접 호출하고, λ·warmup·손실 가중치를 바꿔가며 선명도·|Δφ|·학습 안정성이 어떻게 달라지는지 관찰·해석하는 것입니다. 특히 "GAN은 숫자를 더 낮추는 게 아니라 구조·사실감을 회복한다"는 점을 스스로 확인하세요.',
+      intro: 'W3의 핵심은 model_utils.py에 새로 추가된 판별자·GAN 학습 함수를 직접 호출하고, λ·warmup·d_base·손실 가중치를 바꿔가며 선명도·|Δφ|·학습 안정성이 어떻게 달라지는지 관찰하고 해석하는 것입니다. 이번 주는 균질한 Bentheimer 사암을 k=2로 실습해 복원과 GAN의 효과를 눈으로 보기 좋게 잡았습니다. 특히 "GAN은 숫자를 더 낮추는 게 목적이 아니라 구조와 사실감을 회복한다"는 점을 스스로 확인하세요.',
       notebook: {
         file: 'W3_pix2pix_gan.ipynb',
         cells: [
-          { n:'01', kind:'setup', t:'환경 & import', code:"from dr_utils import *\nfrom model_utils import *\nDEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'", d:'dr_utils·model_utils(+GAN)를 불러오고 device를 정합니다. torch·(선택) 미설치 시 pip install torch torchvision.' },
-          { n:'02', kind:'recap', t:'L1의 흐림 진단 (k=5)', code:"G_l1, _, _ = train_gan(bb, k=5, lambda_gan=0.0, w_ssim=0.0,\n                       epochs=18, warmup=0)", d:'GAN 없이(순수 L1) 학습한 모델을 만들어, 어려운 보간(k=5)에서 흐림을 관찰할 준비.' },
-          { n:'03', kind:'view', t:'연속 출력으로 흐림 확인', code:"cont_l1 = predict_continuous(G_l1, before, after)\n# 경계가 0.5 근처 회색으로 번짐", d:'threshold 전 확률 출력과 가로 단면을 그려, L1이 경계를 회색으로 흐리는 것을 눈으로 확인. [Try-it! ①]' },
-          { n:'04', kind:'arch', t:'판별자 구축', code:"D = PatchDiscriminatorMini(cond_ch=2, base=32)\nscore = D(cond, y)  # patch별 진위 점수 map", d:'조건부 PatchGAN 판별자를 만들고, 입력→점수 map 형태를 확인.' },
+          { n:'01', kind:'setup', t:'환경 & import', code:"from dr_utils import *\nfrom model_utils import *\nDEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'", d:'dr_utils와 model_utils(+GAN)를 불러오고 device를 정합니다. torch 미설치 시 pip install torch torchvision.' },
+          { n:'02', kind:'recap', t:'W2 복습과 오늘의 문제 (Bentheimer, k=2)', code:"vol = load_volume(DATA / 'Bentheimer_256.bin')\nK = 2\nG_l1, _, _ = train_gan(vol, k=K, preset='fast',\n    lambda_gan=0.0, w_ssim=0.0, epochs=22,\n    warmup=0, d_base=16)", d:'선형 보간 기준선을 잡고, GAN 없이 순수 L1로 학습한 모델을 만들어 회색 번짐을 관찰할 준비를 합니다.' },
+          { n:'03', kind:'view', t:'회색 번짐을 눈으로 확인', code:"cont_l1 = predict_continuous(G_l1, before, after)\n# 경계가 0.5 근처 회색으로 번짐", d:'threshold 전 확률 출력과 가로 단면을 그려, L1이 경계를 회색으로 번지게 하는 것을 눈으로 확인합니다. [Try-it! ①]' },
+          { n:'04', kind:'arch', t:'판별자 구축 (d_base=16)', code:"D = PatchDiscriminatorMini(cond_ch=2, base=16)\nscore = D(cond, y)  # patch별 진위 점수 map", d:'조건부 PatchGAN 판별자를 만들고 입력에서 점수 map 형태를 확인합니다. 폭을 생성자보다 작게 잡아 D 독주를 막습니다.' },
           { n:'05', kind:'loss', t:'hinge 손실 숫자 예시', code:"d_hinge_loss(D, cond, y_real, y_fake)\ng_hinge_loss(D, cond, y_fake)", d:'"확실히 맞히면 벌점 0"을 toy 텐서로 직접 계산해 감을 잡습니다.' },
-          { n:'06', kind:'train', t:'경로① 처음부터 GAN 학습', code:"G, D, hist = train_gan(bb, k=5, lambda_gan=0.12,\n    w_ssim=0.3, epochs=30, warmup=8,\n    snapshot=(before,after), snapshot_every=3)", d:'warmup 후 adversarial. snapshot으로 progression 저장. [Try-it! ②③]' },
-          { n:'07', kind:'view', t:'학습 곡선 — G·D 줄다리기', code:"plt.plot(hist['D_loss']); plt.plot(hist['G_gan'])", d:'D·G 손실을 함께 보고, 0에 붙거나 진동하는 불안정 신호를 찾습니다.' },
-          { n:'08', kind:'view', t:'GAN 출력 vs L1 (선명 비교)', code:"cont_gan = predict_continuous(G, before, after)\n# 회색 비율 L1 → GAN 감소", d:'같은 patch에서 L1(회색)과 GAN(선명)을 나란히. 회색 비율이 줄었는지 확인.' },
-          { n:'09', kind:'train', t:'경로② W2 이어받아 미세조정', code:"G0, _ = load_ckpt('unet_mini_fast.pth')\nG_ft, D_ft, _ = train_gan(bb, generator=G0,\n    lambda_gan=0.12, epochs=15, warmup=2)", d:'W2 체크포인트를 Generator 초기값으로 이어받아 GAN 미세조정. warmup을 짧게 줄일 수 있습니다.' },
-          { n:'10', kind:'metric', t:'정직한 평가 — GAN 없음 vs GAN', code:"evaluate_model(G_l1, bb, k=5)   # |Δφ|·SSIM\nevaluate_model(G,    bb, k=5)", d:'GAN이 |Δφ|·SSIM을 더 낮추지 못함(비슷/약간↑)을 직접 확인 — 이번 주 핵심 교훈. [Try-it! ④]' },
-          { n:'11', kind:'train', t:'§6.5 λ sweep', code:"for lam in [0.0, 0.1, 0.5]:\n    Gi,_,_ = train_gan(bb, k=5, lambda_gan=lam,\n        epochs=14, warmup=4)", d:'λ를 바꿔 선명도(회색↓)와 |Δφ|의 trade-off를 관찰. 적정 λ를 찾습니다. [Try-it! ⑤]' },
+          { n:'06', kind:'train', t:'경로① 처음부터 GAN 학습', code:"G, D, hist = train_gan(vol, k=K, preset='fast',\n    lambda_gan=0.1, w_ssim=0.3, epochs=30,\n    warmup=8, d_base=16, lambda_decay=0.3,\n    snapshot=(before,after), snapshot_every=3)", d:'warmup 후 adversarial을 켭니다. snapshot으로 학습 중 출력 변화를 저장합니다. [Try-it! ②③]' },
+          { n:'07', kind:'view', t:'학습 곡선: G·D 줄다리기', code:"plt.plot(hist['D_loss']); plt.plot(hist['G_gan'])", d:'D·G 손실을 함께 봅니다. D 손실이 0에 안 붙고 값을 유지하면 건강한 균형, 0에 붙거나 진동하면 불안정 신호입니다.' },
+          { n:'08', kind:'view', t:'복원 결과와 GAN 선명도 비교', code:"res_gan = evaluate_model(G, vol, k=K)\ncont_gan = predict_continuous(G, before, after)\n# 회색 비율 L1 → GAN 감소", d:'복원 슬라이스를 원본·선형과 나란히 보고, 같은 patch에서 L1(회색)과 GAN(선명)의 회색 비율을 비교합니다.' },
+          { n:'09', kind:'metric', t:'정직한 평가: 선형 vs GAN 없음 vs GAN', code:"G_fair, _, _ = train_gan(vol, k=K, preset='fast',\n    lambda_gan=0.0, w_ssim=0.3, epochs=30,\n    warmup=8, d_base=16)\nevaluate_model(G_fair, vol, k=K)  # GAN 없음", d:'세 방법의 |Δφ|·SSIM을 같은 설정에서 비교합니다. GAN은 선명도를 확실히 높이지만 픽셀 지표 이득은 작다는 이번 주 핵심 교훈. [Try-it! ④]' },
+          { n:'10', kind:'train', t:'경로② W2 이어받아 미세조정', code:"G0, _ = train_quick(vol, k=K, preset='fast')\nG_ft, D_ft, _ = train_gan(vol, k=K,\n    generator=G0, lambda_gan=0.1, w_ssim=0.3,\n    epochs=15, warmup=2, d_base=16)", d:'W2 UNet을 Generator 초기값으로 이어받아 GAN 미세조정. 이미 기본기가 있어 warmup을 짧게 줄일 수 있습니다.' },
+          { n:'11', kind:'train', t:'§8 λ sweep', code:"for lam in [0.0, 0.1, 0.3]:\n    Gi,_,_ = train_gan(vol, k=K, preset='fast',\n        lambda_gan=lam, w_ssim=0.3,\n        epochs=26, warmup=6, d_base=16)", d:'λ를 바꿔 선명도(회색↓)와 |Δφ|의 trade-off를 관찰합니다. λ가 크면 |Δφ|가 오히려 나빠지기 쉬워 작게(0.1) 넣습니다. [Try-it! ⑤]' },
         ],
         tryits: [
-          { n:'①', fn:'predict_continuous', change:'k = 1 · 3 · 5 · 7 로 관찰', observe:'이웃이 멀수록(k↑) L1의 회색 번짐이 심해진다' },
+          { n:'①', fn:'predict_continuous', change:'k = 1 · 2 · 3 · 5 로 관찰', observe:'이웃이 멀수록(k↑) L1의 회색 번짐이 심해진다' },
           { n:'②', fn:'train_gan (warmup)', change:'warmup = 0 · 4 · 8 · 12', observe:'너무 짧으면 초반 불안정, 너무 길면 GAN 효과 늦게' },
-          { n:'③', fn:'train_gan (lambda_gan)', change:'λ = 0 · 0.05 · 0.1 · 0.3', observe:'선명도 ↔ |Δφ| trade-off, 큰 λ의 환각' },
-          { n:'④', fn:'evaluate_model', change:'GAN 없음(G_l1) vs GAN(G)', observe:'|Δφ|·SSIM은 비슷 — 이득은 픽셀 지표 밖' },
-          { n:'⑤', fn:'PatchDiscriminatorMini (spectral norm)', change:'sn 제거 vs 유지', observe:'D 독주·발산 여부 — 안정화 효과' },
+          { n:'③', fn:'train_gan (lambda_gan)', change:'λ = 0 · 0.05 · 0.1 · 0.3', observe:'선명도와 |Δφ|의 trade-off, 큰 λ의 환각' },
+          { n:'④', fn:'evaluate_model', change:'GAN 없음(G_fair) vs GAN(G)', observe:'|Δφ|·SSIM 차이는 작다, GAN 이득은 주로 선명도' },
+          { n:'⑤', fn:'train_gan (d_base)', change:'d_base = 16 vs 48', observe:'판별자를 키우면 D 독주(D_loss→0)로 학습이 무너진다' },
         ],
       },
       utils: [
-        { fn:'PatchDiscriminatorMini', group:'모델', sig:'PatchDiscriminatorMini(cond_ch=2, base=32)',
-          ret:'nn.Module', desc:'조건부 PatchGAN 판별자 + spectral norm. 조건(2ch)+대상(1ch)→patch별 점수 map.',
+        { fn:'PatchDiscriminatorMini', group:'모델', sig:'PatchDiscriminatorMini(cond_ch=2, base=16)',
+          ret:'nn.Module', desc:'조건부 PatchGAN 판별자 + spectral norm. 조건(2ch)+대상(1ch)에서 patch별 점수 map을 냅니다.',
           params:[
             { p:'cond_ch', d:'조건 채널 수(앞·뒤 슬라이스=2)' },
-            { p:'base', d:'판별자 폭(용량)', try:'너무 크면 D 독주 위험 — 작게 시작.' },
+            { p:'base', d:'판별자 폭(용량)', try:'생성자보다 작게(16). 너무 크면 D가 독주합니다.' },
           ] },
-        { fn:'train_gan', group:'학습', sig:'train_gan(volume, k, preset="fast", generator=None, lambda_gan=0.1, warmup=None, epochs=None, ...)',
+        { fn:'train_gan', group:'학습', sig:'train_gan(volume, k, preset="fast", generator=None, lambda_gan=0.1, w_ssim=0.3, warmup=None, epochs=None, d_base=16, ...)',
           ret:'(G, D, history)', desc:'조건부 pix2pix GAN 학습. warmup·hinge·spectral norm 내장.',
           params:[
-            { p:'generator', d:'None=처음부터 · 모델=W2 이어받기', try:'두 경로를 모두 돌려 결과·속도를 비교.' },
-            { p:'lambda_gan', d:'adversarial 가중치', try:'0·0.1·0.5 — 흐림↔환각 균형의 핵심 노브.' },
-            { p:'warmup', d:'재구성만 학습할 epoch', try:'0·8·12 — 안정성에 미치는 영향.' },
-            { p:'snapshot', d:'(before,after) 주면 progression 저장', try:'학습 중 출력이 언제 또렷해지는지 관찰.' },
+            { p:'generator', d:'None이면 처음부터, 모델을 주면 W2 이어받기', try:'두 경로를 모두 돌려 결과와 속도를 비교.' },
+            { p:'lambda_gan', d:'adversarial 가중치', try:'0·0.1·0.3. 흐림과 환각 사이 균형의 핵심 노브.' },
+            { p:'d_base', d:'판별자 폭. 생성자보다 작게 잡아 독주 방지', try:'16 vs 48로 D 독주(D_loss→0)를 관찰.' },
+            { p:'warmup', d:'재구성만 학습할 epoch', try:'0·8·12로 안정성에 미치는 영향을 확인.' },
+            { p:'snapshot', d:'(before,after)를 주면 학습 중 출력을 저장', try:'출력이 언제 또렷해지는지 관찰.' },
           ] },
         { fn:'ssim_loss', group:'손실', sig:'ssim_loss(pred, target) → tensor',
           ret:'1 − SSIM', desc:'미분가능 SSIM 손실(Gaussian window). 외부 패키지 불필요.',

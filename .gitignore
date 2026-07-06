@@ -64,3 +64,12 @@ _claude_design_received/
 테마연구회.zip
 U-Net 교육용 프레젠테이션.zip
 _w3_build/
+# design-ops 스캐폴딩 (로컬 도구, 배포 repo에는 불필요)
+/CLAUDE.md
+/Makefile
+/scripts/
+/prompts/
+/design/layout_rules.md
+/design/slide_archetypes.md
+/design/visual_qa_checklist.md
+claude_design_ops_pack.zip
