@@ -31,7 +31,7 @@ window.COURSE = {
       nonDL:true,
     },
     {
-      n:2, status:'now', slug:'w2', available:true,
+      n:2, status:'done', slug:'w2', available:true,
       title:'Deep Learning 입문 — UNet · pix2pix 구조',
       en:'UNet · pix2pix · Train',
       summary:'슬라이스 보간을 학습 가능한 함수로 정식화. UNet 구조와 pix2pix(조건부 image-to-image) 흐름을 코드로 따라가고, mini UNet을 직접 학습합니다. 나아가 학습 루프·손실·모델 크기를 직접 수정하며 cross-domain 일반화와 실패 모드까지 분석합니다.',
@@ -47,23 +47,23 @@ window.COURSE = {
       prep:['pip install torch torchvision','W1 baseline 결과'],
     },
     {
-      n:3, status:'next', slug:'w3', available:false,
+      n:3, status:'now', slug:'w3', available:true,
       title:'적대적 학습 — pix2pix GAN',
       en:'Conditional GAN',
-      summary:'L1 손실만으로는 흐릿한 복원이 한계. pix2pix 구조에 patch discriminator를 더해 조건부 GAN 학습으로 확장. 학습 안정화·loss weight 균형·평가 metric 추가.',
-      concepts:['GAN','Discriminator','Adversarial loss','L1 + GAN 균형','학습 안정화'],
+      summary:'L1 손실은 "평균의 함정"으로 경계를 흐린다. 두 번째 신경망 판별자(Discriminator)를 붙여 조건부 pix2pix GAN으로 확장 — 처음부터/W2 이어받기 두 경로로 학습하고, 안정화(warmup·spectral norm·작은 λ)와 정직한 평가("좋은 숫자 ≠ 좋은 복원")까지 다룹니다. 이번 주는 두 조 공통(통합) 트랙.',
+      concepts:['GAN','Discriminator','hinge loss','조건부·PatchGAN','L1+SSIM+GAN 균형','학습 안정화'],
       nonDL:false,
       plan:[
-        'Discriminator 구조와 PatchGAN',
-        'L1 / SSIM / Adversarial loss 가중 균형',
-        '학습 안정화 (gradient penalty · spectral norm)',
-        'W2 결과 대비 시각·정량 비교',
+        '평균의 함정 — L1이 흐린 이유 (연속 출력으로 확인)',
+        '판별자·hinge 손실·조건부·PatchGAN·spectral norm',
+        'GAN 직접 학습 (처음부터 · W2 이어받기)',
+        'λ sweep + 정직한 평가 (구조는 지표 밖)',
       ],
-      newUtils:['PatchDiscriminator','gan_train_step','loss_balancer'],
-      prep:['W2 학습된 mini UNet 체크포인트'],
+      newUtils:['PatchDiscriminatorMini','train_gan','d_hinge_loss / g_hinge_loss','ssim_loss','predict_continuous'],
+      prep:['W2 학습된 mini UNet 체크포인트','pip install torch torchvision'],
     },
     {
-      n:4, status:'upcoming', slug:'w4', available:false,
+      n:4, status:'next', slug:'w4', available:false,
       title:'다른 아키텍처 비교',
       en:'Transformer · 3D · trade-off',
       summary:'CNN 외의 아키텍처(Transformer 기반·3D conv)들을 같은 sparse 보간 문제에 적용. 파라미터 수·학습 시간·정확도의 trade-off를 비교.',
@@ -434,6 +434,143 @@ window.COURSE = {
         { t:'바꾼다', d:'한 번에 인자 하나(preset·loss·lr·k)만 바꿉니다. 원인이 분리되어야 관찰이 됩니다.', icon:'sliders' },
         { t:'관찰한다', d:'학습 곡선·|Δφ|·SSIM·학습 시간이 어떻게 변하는지 기록합니다. 한 문장이면 충분합니다.', icon:'target' },
         { t:'해석한다', d:'“왜” 그렇게 변했는지 모델 크기·손실 성질·일반화로 설명해 봅니다. 이게 진짜 학습입니다.', icon:'spark' },
+      ],
+    },
+  },
+
+  // ===================================================================
+  //  W3 — 적대적 학습 (pix2pix GAN)  ·  두 조 공통(통합) 트랙
+  // ===================================================================
+  w3: {
+    flow: [
+      { a:'강의 + L1의 한계·GAN 아이디어',        src:'슬라이드 1–13' },
+      { a:'노트북 — 판별자·hinge·연속 출력',      src:'W3_pix2pix_gan.ipynb §1–3' },
+      { a:'GAN 직접 학습 (처음부터 · W2 이어받기)', src:'노트북 §4–5' },
+      { a:'정직한 평가 + λ sweep',                src:'노트북 §6 · §6.5' },
+      { a:'탐구 과제 안내 + W4 예고',             src:'handout §5' },
+    ],
+    groups: {
+      // 두 조 공통 — 동일 내용(통합 트랙)
+      g1: {
+        slides:30, cells:26, tryits:5,
+        notebook:'W3_pix2pix_gan.ipynb',
+        tasks:[
+          { t:'GAN 있음/없음 비교', req:true, d:'같은 조건에서 L1만 모델과 GAN 모델의 연속 출력·경계·작은 pore를 비교. 회색(불확실) 비율과 함께 무엇이 달라졌는지 서술.' },
+          { t:'λ sweep trade-off', req:true, d:'λ∈{0, 0.05, 0.1, 0.3, 0.5} 을 바꿔 선명도(회색↓)와 |Δφ|의 trade-off 곡선을 그리고, 적정 λ를 근거와 함께 고르기.' },
+          { t:'학습 안정화 실험', req:false, d:'warmup 길이·spectral norm on/off·학습률을 바꿔 D/G 손실 곡선의 안정성이 어떻게 달라지는지 관찰. 무너지는 신호를 찾아 설명.' },
+          { t:'"숫자 ≠ 좋은 복원" 사례', req:false, d:'|Δφ|·SSIM은 비슷한데 구조는 다른 슬라이스를 직접 찾아 시각화. 왜 픽셀 지표가 이를 못 잡는지, 어떤 지표가 필요한지(→W5) 서술.' },
+        ],
+      },
+      g2: {
+        slides:30, cells:26, tryits:5,
+        notebook:'W3_pix2pix_gan.ipynb',
+        tasks:[
+          { t:'GAN 있음/없음 비교', req:true, d:'같은 조건에서 L1만 모델과 GAN 모델의 연속 출력·경계·작은 pore를 비교. 회색(불확실) 비율과 함께 무엇이 달라졌는지 서술.' },
+          { t:'λ sweep trade-off', req:true, d:'λ∈{0, 0.05, 0.1, 0.3, 0.5} 을 바꿔 선명도(회색↓)와 |Δφ|의 trade-off 곡선을 그리고, 적정 λ를 근거와 함께 고르기.' },
+          { t:'학습 안정화 실험', req:false, d:'warmup 길이·spectral norm on/off·학습률을 바꿔 D/G 손실 곡선의 안정성이 어떻게 달라지는지 관찰. 무너지는 신호를 찾아 설명.' },
+          { t:'"숫자 ≠ 좋은 복원" 사례', req:false, d:'|Δφ|·SSIM은 비슷한데 구조는 다른 슬라이스를 직접 찾아 시각화. 왜 픽셀 지표가 이를 못 잡는지, 어떤 지표가 필요한지(→W5) 서술.' },
+        ],
+      },
+    },
+    selfcheck: [
+      'L1은 왜 흐린 결과를 내나? "평균의 함정"을 한 문장으로.',
+      '판별자에 이웃(조건)을 함께 넣는 이유는? 안 넣으면 어떤 허점이 생기나?',
+      'hinge 손실에서 "벌점 0"이 되는 조건은 진짜·가짜 각각 무엇인가?',
+      'λ를 키우면 왜 |Δφ|가 나빠질 수 있나? 반대로 너무 작으면?',
+      'D 손실이 0에 붙으면 학습에 무슨 일이 생기나? 어떻게 완화하나?',
+      'GAN이 |Δφ|를 더 낮추지 못하는데도 쓰는 이유는? 무엇을 얻고 무엇을 내주나?',
+    ],
+    res: {
+      deck: 'W3_deck.html',
+      notebookHtml: 'notebooks/W3_pix2pix_gan.html',
+      notebook: 'W3_pix2pix_gan.ipynb',
+      utils: [
+        { name:'dr_utils.py',    meta:'W1·W2와 동일 (평가 지표 포함)' },
+        { name:'model_utils.py', meta:'+ PatchDiscriminatorMini · train_gan · hinge · ssim_loss' },
+      ],
+      handout: { name:'W3_handout.md', meta:'학습 목표 · GAN 손실 · 탐구 과제' },
+      pptx: 'W3.pptx',
+      codezip: 'w3_code.zip',
+      data: {
+        file:'data_w3.zip',
+        title:'data_w3.zip — 256³ binary · 4 도메인',
+        desc:'BB · CastleGate · Bentheimer · Parker (각 16 MB, zip ~4.5 MB). W1·W2와 동일한 데이터.',
+        tree:`<본인 작업 폴더>/
+├ W3_pix2pix_gan.ipynb
+├ dr_utils.py
+├ model_utils.py
+└ data/        ← data_w3.zip의 .bin 파일을 여기에 압축 해제
+  ├ BB_256.bin
+  ├ CastleGate_256.bin
+  ├ Bentheimer_256.bin
+  └ Parker_256.bin`,
+      },
+      supp: [
+        { icon:'book',     kind:'개념 풀이',        name:'W3_concept_notes.md',    meta:'GAN · 판별자 · hinge · pix2pix · 안정화 등' },
+        { icon:'terminal', kind:'코드 walkthrough', name:'W3_code_walkthrough.md',  meta:'셀별 코드 설명 + 인자 변경 가이드' },
+        { icon:'notebook', kind:'작은 예시 노트북',  name:'W3_extra_examples.ipynb', meta:'단계별 mini 예제' },
+      ],
+      suppzip: 'w3_supplement.zip',
+    },
+    // ---- W3 deep-dive: 노트북 walkthrough + GAN API reference ----
+    guide: {
+      utilsLabel: 'model_utils.py (+GAN)',
+      intro: 'W3의 핵심은 model_utils.py에 새로 추가된 판별자·GAN 학습 함수를 직접 호출하고, λ·warmup·손실 가중치를 바꿔가며 선명도·|Δφ|·학습 안정성이 어떻게 달라지는지 관찰·해석하는 것입니다. 특히 "GAN은 숫자를 더 낮추는 게 아니라 구조·사실감을 회복한다"는 점을 스스로 확인하세요.',
+      notebook: {
+        file: 'W3_pix2pix_gan.ipynb',
+        cells: [
+          { n:'01', kind:'setup', t:'환경 & import', code:"from dr_utils import *\nfrom model_utils import *\nDEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'", d:'dr_utils·model_utils(+GAN)를 불러오고 device를 정합니다. torch·(선택) 미설치 시 pip install torch torchvision.' },
+          { n:'02', kind:'recap', t:'L1의 흐림 진단 (k=5)', code:"G_l1, _, _ = train_gan(bb, k=5, lambda_gan=0.0, w_ssim=0.0,\n                       epochs=18, warmup=0)", d:'GAN 없이(순수 L1) 학습한 모델을 만들어, 어려운 보간(k=5)에서 흐림을 관찰할 준비.' },
+          { n:'03', kind:'view', t:'연속 출력으로 흐림 확인', code:"cont_l1 = predict_continuous(G_l1, before, after)\n# 경계가 0.5 근처 회색으로 번짐", d:'threshold 전 확률 출력과 가로 단면을 그려, L1이 경계를 회색으로 흐리는 것을 눈으로 확인. [Try-it! ①]' },
+          { n:'04', kind:'arch', t:'판별자 구축', code:"D = PatchDiscriminatorMini(cond_ch=2, base=32)\nscore = D(cond, y)  # patch별 진위 점수 map", d:'조건부 PatchGAN 판별자를 만들고, 입력→점수 map 형태를 확인.' },
+          { n:'05', kind:'loss', t:'hinge 손실 숫자 예시', code:"d_hinge_loss(D, cond, y_real, y_fake)\ng_hinge_loss(D, cond, y_fake)", d:'"확실히 맞히면 벌점 0"을 toy 텐서로 직접 계산해 감을 잡습니다.' },
+          { n:'06', kind:'train', t:'경로① 처음부터 GAN 학습', code:"G, D, hist = train_gan(bb, k=5, lambda_gan=0.12,\n    w_ssim=0.3, epochs=30, warmup=8,\n    snapshot=(before,after), snapshot_every=3)", d:'warmup 후 adversarial. snapshot으로 progression 저장. [Try-it! ②③]' },
+          { n:'07', kind:'view', t:'학습 곡선 — G·D 줄다리기', code:"plt.plot(hist['D_loss']); plt.plot(hist['G_gan'])", d:'D·G 손실을 함께 보고, 0에 붙거나 진동하는 불안정 신호를 찾습니다.' },
+          { n:'08', kind:'view', t:'GAN 출력 vs L1 (선명 비교)', code:"cont_gan = predict_continuous(G, before, after)\n# 회색 비율 L1 → GAN 감소", d:'같은 patch에서 L1(회색)과 GAN(선명)을 나란히. 회색 비율이 줄었는지 확인.' },
+          { n:'09', kind:'train', t:'경로② W2 이어받아 미세조정', code:"G0, _ = load_ckpt('unet_mini_fast.pth')\nG_ft, D_ft, _ = train_gan(bb, generator=G0,\n    lambda_gan=0.12, epochs=15, warmup=2)", d:'W2 체크포인트를 Generator 초기값으로 이어받아 GAN 미세조정. warmup을 짧게 줄일 수 있습니다.' },
+          { n:'10', kind:'metric', t:'정직한 평가 — GAN 없음 vs GAN', code:"evaluate_model(G_l1, bb, k=5)   # |Δφ|·SSIM\nevaluate_model(G,    bb, k=5)", d:'GAN이 |Δφ|·SSIM을 더 낮추지 못함(비슷/약간↑)을 직접 확인 — 이번 주 핵심 교훈. [Try-it! ④]' },
+          { n:'11', kind:'train', t:'§6.5 λ sweep', code:"for lam in [0.0, 0.1, 0.5]:\n    Gi,_,_ = train_gan(bb, k=5, lambda_gan=lam,\n        epochs=14, warmup=4)", d:'λ를 바꿔 선명도(회색↓)와 |Δφ|의 trade-off를 관찰. 적정 λ를 찾습니다. [Try-it! ⑤]' },
+        ],
+        tryits: [
+          { n:'①', fn:'predict_continuous', change:'k = 1 · 3 · 5 · 7 로 관찰', observe:'이웃이 멀수록(k↑) L1의 회색 번짐이 심해진다' },
+          { n:'②', fn:'train_gan (warmup)', change:'warmup = 0 · 4 · 8 · 12', observe:'너무 짧으면 초반 불안정, 너무 길면 GAN 효과 늦게' },
+          { n:'③', fn:'train_gan (lambda_gan)', change:'λ = 0 · 0.05 · 0.1 · 0.3', observe:'선명도 ↔ |Δφ| trade-off, 큰 λ의 환각' },
+          { n:'④', fn:'evaluate_model', change:'GAN 없음(G_l1) vs GAN(G)', observe:'|Δφ|·SSIM은 비슷 — 이득은 픽셀 지표 밖' },
+          { n:'⑤', fn:'PatchDiscriminatorMini (spectral norm)', change:'sn 제거 vs 유지', observe:'D 독주·발산 여부 — 안정화 효과' },
+        ],
+      },
+      utils: [
+        { fn:'PatchDiscriminatorMini', group:'모델', sig:'PatchDiscriminatorMini(cond_ch=2, base=32)',
+          ret:'nn.Module', desc:'조건부 PatchGAN 판별자 + spectral norm. 조건(2ch)+대상(1ch)→patch별 점수 map.',
+          params:[
+            { p:'cond_ch', d:'조건 채널 수(앞·뒤 슬라이스=2)' },
+            { p:'base', d:'판별자 폭(용량)', try:'너무 크면 D 독주 위험 — 작게 시작.' },
+          ] },
+        { fn:'train_gan', group:'학습', sig:'train_gan(volume, k, preset="fast", generator=None, lambda_gan=0.1, warmup=None, epochs=None, ...)',
+          ret:'(G, D, history)', desc:'조건부 pix2pix GAN 학습. warmup·hinge·spectral norm 내장.',
+          params:[
+            { p:'generator', d:'None=처음부터 · 모델=W2 이어받기', try:'두 경로를 모두 돌려 결과·속도를 비교.' },
+            { p:'lambda_gan', d:'adversarial 가중치', try:'0·0.1·0.5 — 흐림↔환각 균형의 핵심 노브.' },
+            { p:'warmup', d:'재구성만 학습할 epoch', try:'0·8·12 — 안정성에 미치는 영향.' },
+            { p:'snapshot', d:'(before,after) 주면 progression 저장', try:'학습 중 출력이 언제 또렷해지는지 관찰.' },
+          ] },
+        { fn:'ssim_loss', group:'손실', sig:'ssim_loss(pred, target) → tensor',
+          ret:'1 − SSIM', desc:'미분가능 SSIM 손실(Gaussian window). 외부 패키지 불필요.',
+          params:[ { p:'pred / target', d:'예측·정답', try:'w_ssim으로 가중해 L1과 함께 사용.' } ] },
+        { fn:'d_hinge_loss / g_hinge_loss', group:'손실', sig:'d_hinge_loss(D, cond, y_real, y_fake) · g_hinge_loss(D, cond, y_fake)',
+          ret:'판별자 · 생성자 적대적 손실', desc:'hinge 형태. "확실히 맞히면 벌점 0". D는 y_fake를 detach.',
+          params:[ { p:'cond', d:'조건(이웃 2ch)', try:'toy 텐서로 값을 넣어 벌점 계산을 직접 확인.' } ] },
+        { fn:'predict_continuous', group:'시각화', sig:'predict_continuous(model, before, after) → 2D',
+          ret:'0~1 연속 출력', desc:'threshold 전 확률 출력. L1 회색 vs GAN 선명 비교의 핵심.',
+          params:[ { p:'before / after', d:'이웃 슬라이스', try:'경계를 지나는 가로 단면을 그려 회색 번짐을 정량화.' } ] },
+        { fn:'save_gan_ckpt / load_gan_ckpt', group:'체크포인트', sig:'save_gan_ckpt(G, D, path, meta) · load_gan_ckpt(path)',
+          ret:'저장 / (G, D, meta)', desc:'생성자+판별자 가중치 저장·로드. 배포 시엔 G만 사용.',
+          params:[ { p:'path', d:'.pth 경로', try:'W4에서 이 G를 다른 아키텍처와 비교.' } ] },
+      ],
+      playbook: [
+        { t:'바꾼다', d:'한 번에 인자 하나(λ·warmup·loss·k)만 바꿉니다. 원인이 분리되어야 관찰이 됩니다.', icon:'sliders' },
+        { t:'관찰한다', d:'연속 출력의 회색 비율·D/G 손실 곡선·|Δφ|·SSIM이 어떻게 변하는지 기록합니다.', icon:'target' },
+        { t:'해석한다', d:'“왜” 그렇게 변했는지 손실 균형·안정성·평가의 한계로 설명해 봅니다. 이게 진짜 학습입니다.', icon:'spark' },
       ],
     },
   },
