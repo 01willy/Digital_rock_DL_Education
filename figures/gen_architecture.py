@@ -80,7 +80,7 @@ for i,(ch,sz) in enumerate(dec):
 # skip connection 호 (encoder → decoder)
 add(f'<path d="M{gx+78} {gy+95} C {gx+180} {gy+58}, {dxs[1]+46-30} {gy+58}, {dxs[1]+23} {gy+95}" stroke="{TOK["green"]}" stroke-width="2.2" fill="none" stroke-dasharray="6 6"/>')
 add(f'<path d="M{gx+138} {gy+108} C {gx+230} {gy+80}, {dxs[0]-20} {gy+80}, {dxs[0]+23} {gy+108}" stroke="{TOK["green"]}" stroke-width="2.2" fill="none" stroke-dasharray="6 6"/>')
-txt(gx+235, gy+70, 'skip connection', 15, TOK['green'], '600')
+txt(gx+235, gy-12, 'skip connection', 14, TOK['green'], '600')
 txt(gx+235, gy+290, 'encoder  →  bottleneck  →  decoder', 15, TOK['sub'])
 
 # ── 생성 슬라이스 ŷ ───────────────────────────────────

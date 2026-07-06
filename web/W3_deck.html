@@ -41,6 +41,8 @@ section.s{background:var(--bg);color:var(--ink);font-family:var(--sans);
 .row{display:flex;gap:20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 28px;
   box-shadow:0 1px 3px rgba(40,34,20,.05)}
+/* 내용이 적어 카드가 크게 늘어나는 슬라이드에서만 수직 중앙 정렬 */
+.card.vc,.tint.vc{display:flex;flex-direction:column;justify-content:center}
 .card.tn{border-top:4px solid var(--navy)} .card.to{border-top:4px solid var(--orange)}
 .card.ts{border-top:4px solid var(--navy-2)} .card.tr{border-top:4px solid var(--red)}
 .card.tg{border-top:4px solid var(--green)}
@@ -132,7 +134,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
   <div style="flex:1;padding:0 96px;display:flex;flex-direction:column;justify-content:center;">
     <div style="font-family:'JetBrains Mono',Pretendard,monospace;font-size:26px;letter-spacing:.18em;color:#1f3a5f;margin-bottom:30px;">DIGITAL ROCK · WEEK 3</div>
     <div style="font-size:100px;font-weight:600;letter-spacing:-.02em;line-height:1.0;">적대적 학습<br><span style="color:#1f3a5f;">pix2pix GAN</span></div>
-    <div style="font-size:31px;color:#5a6475;margin-top:34px;line-height:1.5;">두 신경망을 경쟁시켜 복원의 흐림을 걷어냅니다.<br>원리와 수식부터, 투과율 검증까지 실제 데이터로 따라갑니다.</div>
+    <div style="font-size:31px;color:#5a6475;margin-top:34px;line-height:1.5;">두 신경망을 경쟁시켜 복원의 흐림을 걷어낸다.<br>원리와 수식부터, 투과율 검증까지 실제 데이터로 따라간다.</div>
     <div style="display:flex;gap:12px;margin-top:46px;font-family:'JetBrains Mono',Pretendard,monospace;font-size:23px;">
       <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:4px;color:#5a6475;">원리</span>
       <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:4px;color:#5a6475;">수식</span>
@@ -146,14 +148,14 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="지난 이야기" data-speaker-notes="W1 선형 보간은 k=1에서 |Δφ| 6.87%p. W2 UNet은 0.47%p로 14배 개선. 그런데 threshold 전 출력을 보면 경계가 회색으로 번져 있다. 이 흐림이 오늘의 출발점.">
   <div class="hd">
     <div class="eb">Recap · W1 – W2</div>
-    <div class="tt">여기까지 왔습니다, 그리고 하나가 남았습니다</div>
+    <div class="tt">여기까지 왔고, 하나가 남았다</div>
   </div>
   <div class="row" style="margin-top:10px">
     <div class="card tn" style="flex:1">
       <div class="tag">W1 · 고전 보간</div>
       <div class="ct" style="margin-top:8px">선형 보간</div>
       <div style="font-family:var(--mono);font-size:44px;font-weight:700;color:var(--navy);margin:6px 0">6.87 <span style="font-size:24px;color:var(--muted)">%p</span></div>
-      <div class="cd">이웃 두 장의 평균. pore가 <b>어떻게 이어지는지</b>는 모릅니다.</div>
+      <div class="cd">이웃 두 장의 평균. pore가 <b>어떻게 이어지는지</b>는 모른다.</div>
     </div>
     <div class="arrow">→</div>
     <div class="card to" style="flex:1">
@@ -167,16 +169,16 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       <div class="tag" style="color:var(--red)">남은 문제</div>
       <div class="ct" style="margin-top:8px">경계가 흐리다</div>
       <div style="font-family:var(--mono);font-size:44px;font-weight:700;color:var(--red);margin:6px 0">?</div>
-      <div class="cd">이진화 전 출력을 보면 pore 경계가 <b>회색으로 번져</b> 있습니다.</div>
+      <div class="cd">이진화 전 출력을 보면 pore 경계가 <b>회색으로 번져</b> 있다.</div>
     </div>
   </div>
   <div class="row" style="margin-top:26px;flex:1;align-items:center">
     <div class="tint" style="flex:1;display:flex;gap:26px;align-items:center">
       <img src="assets/figures/W3_tile_cont_l1.png" style="width:190px;height:190px;border-radius:10px;border:1px solid var(--tintline)" alt="L1 흐린 출력">
       <div style="flex:1">
-        <div class="ct">이것이 W2 모델의 실제 출력입니다 (이진화 전)</div>
-        <div class="cd" style="font-size:24px">숫자(|Δφ|)는 좋았는데, 픽셀 값을 그대로 보면 경계마다 <b>0과 1 사이의 회색</b>이 넓게 깔려 있습니다. 진짜 암석에는 없는 값입니다.<br>
-        <span class="nv">왜 이런 회색이 생기고, 왜 문제이며, 어떻게 없애는가</span>. 오늘 90분은 이걸 다룹니다.</div>
+        <div class="ct">이것이 W2 모델의 실제 출력이다 (이진화 전)</div>
+        <div class="cd" style="font-size:24px">숫자(|Δφ|)는 좋았는데, 픽셀 값을 그대로 보면 경계마다 <b>0과 1 사이의 회색</b>이 넓게 깔려 있다. 진짜 암석에는 없는 값이다.<br>
+        <span class="nv">왜 이런 회색이 생기고, 왜 문제이며, 어떻게 없애는가</span>. 오늘 90분은 이걸 다룬다.</div>
       </div>
     </div>
   </div>
@@ -194,19 +196,19 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       <div class="card tn" style="flex:1">
         <div class="tag">질문 1</div>
         <div class="ct" style="margin-top:10px;font-size:30px">왜 흐린가?</div>
-        <div class="cd" style="margin-top:6px">L1 손실의 수학적 성질입니다. 정답이 애매할 때 손실은 <b>회색을 벌하지 않습니다</b>. 수식과 숫자로 확인합니다.</div>
+        <div class="cd" style="margin-top:6px">L1 손실의 수학적 성질이다. 정답이 애매할 때 손실은 <b>회색을 벌하지 않는다</b>. 수식과 숫자로 확인한다.</div>
         <div style="font-family:var(--mono);font-size:18px;color:var(--muted);margin-top:14px">§1</div>
       </div>
       <div class="card to" style="flex:1">
         <div class="tag" style="color:var(--orange-d)">질문 2</div>
         <div class="ct" style="margin-top:10px;font-size:30px">어떻게 없애나?</div>
-        <div class="cd" style="margin-top:6px">"진짜 같은가"를 심사하는 <b>두 번째 신경망</b>을 붙여 경쟁시킵니다. GAN의 원리·역사·수식, 그리고 우리 문제용 pix2pix까지.</div>
+        <div class="cd" style="margin-top:6px">"진짜 같은가"를 심사하는 <b>두 번째 신경망</b>을 붙여 경쟁시킨다. GAN의 원리·역사·수식, 그리고 우리 문제용 pix2pix까지.</div>
         <div style="font-family:var(--mono);font-size:18px;color:var(--muted);margin-top:14px">§2 – §4</div>
       </div>
       <div class="card tg" style="flex:1">
         <div class="tag" style="color:var(--green)">질문 3</div>
         <div class="ct" style="margin-top:10px;font-size:30px">무엇으로 확인하나?</div>
-        <div class="cd" style="margin-top:6px">공극률 하나로는 부족합니다. <b>S2 상관·투과율(LBM)</b> 같은 물성 지표로 개선을 검증합니다. 본 연구의 측정 결과입니다.</div>
+        <div class="cd" style="margin-top:6px">공극률 하나로는 부족하다. <b>S2 상관·투과율(LBM)</b> 같은 물성 지표로 개선을 검증한다. 본 연구의 측정 결과다.</div>
         <div style="font-family:var(--mono);font-size:18px;color:var(--muted);margin-top:14px">§5</div>
       </div>
     </div>
@@ -223,7 +225,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
   <div class="num">01</div>
   <div class="k">Part 1 · The Problem</div>
   <div class="t">L1 손실은 왜<br>흐린 그림을 그리는가</div>
-  <div class="d">흐림은 우연도, 학습 부족도 아닙니다. 손실 함수의 수학적 성질에서 나오는 필연입니다. 수식 → 숫자 → 실측 순서로 확인합니다.</div>
+  <div class="d">흐림은 우연도, 학습 부족도 아니다. 손실 함수의 수학적 성질에서 나오는 필연이다. 수식 → 숫자 → 실측 순서로 확인한다.</div>
   <div class="foot"><span class="b">Digital Rock · W3</span><span class="pg"><b>04</b> / 39</span></div>
 </section>
 
@@ -233,7 +235,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div class="eb">§1 · 손실의 성질</div>
     <div class="tt">픽셀 하나로 계산해 보는 흐림의 근원</div>
   </div>
-  <div class="lead">이웃 두 장만으로는 가운데 픽셀이 pore(1)인지 solid(0)인지 확정할 수 없는 경우가 생깁니다. <b>절반 확률로 0 또는 1</b>인 픽셀 하나를 놓고, 모델이 어떤 값 ŷ를 내는 게 손실상 최적인지 계산해 봅니다.</div>
+  <div class="lead">이웃 두 장만으로는 가운데 픽셀이 pore(1)인지 solid(0)인지 확정할 수 없는 경우가 생긴다. <b>절반 확률로 0 또는 1</b>인 픽셀 하나를 놓고, 모델이 어떤 값 ŷ를 내는 게 손실상 최적인지 계산해 본다.</div>
   <div class="row" style="margin-top:24px;flex:1;align-items:stretch">
     <div style="flex:1.15;display:flex;flex-direction:column;gap:16px">
       <div class="eq"><div class="lbl">L2 (MSE) · 기대 손실</div>
@@ -241,7 +243,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       <div class="eq"><div class="lbl">L1 (MAE) · 기대 손실</div>
         $\mathbb{E}[|y-\hat{y}|] = \tfrac{1}{2}\hat{y} + \tfrac{1}{2}(1-\hat{y}) = \tfrac{1}{2}$ &nbsp;→&nbsp; $0\le\hat{y}\le1$ <b>어디든 동일</b>, 중간값이어도 벌점 없음</div>
       <div class="tint">
-        <div class="cd" style="font-size:24px"><b>결론.</b> 픽셀 단위 손실(L1·L2)은 애매한 곳에서 <span class="hl">회색을 벌하지 않거나(L1), 오히려 보상합니다(L2)</span>. 모델은 안전한 중간값으로 수렴합니다.</div>
+        <div class="cd" style="font-size:24px"><b>결론.</b> 픽셀 단위 손실(L1·L2)은 애매한 곳에서 <span class="hl">회색을 벌하지 않거나(L1), 오히려 보상한다(L2)</span>. 모델은 안전한 중간값으로 수렴한다.</div>
       </div>
     </div>
     <div style="flex:1">
@@ -251,7 +253,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
         <tr><td style="color:var(--red);font-weight:600">0.5 (회색)</td><td class="m">0.50</td><td class="m" style="color:var(--red)">0.25 ← 최소</td></tr>
         <tr><td>1.0 (pore 확신)</td><td class="m">0.50</td><td class="m">0.50</td></tr>
       </table>
-      <div class="cap" style="margin-top:14px">정답이 50:50으로 갈리는 픽셀 하나의 기대 손실. L2는 회색(0.5)이 유일한 최적해이고, L1은 확신과 중간값의 벌점이 같습니다. 어느 쪽도 <b>"확신하라"</b>는 압력을 주지 않습니다.</div>
+      <div class="cap" style="margin-top:14px">정답이 50:50으로 갈리는 픽셀 하나의 기대 손실. L2는 회색(0.5)이 유일한 최적해이고, L1은 확신과 중간값의 벌점이 같다. 어느 쪽도 <b>"확신하라"</b>는 압력을 주지 않는다.</div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §1</span><span class="pg"><b>05</b> / 39</span></div>
@@ -261,7 +263,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="평균의 함정" data-speaker-notes="픽셀 하나의 논리를 2D로 확장. 정답 후보가 A(왼쪽 pore)일 수도 B(오른쪽)일 수도 있으면, 손실 최소화는 둘의 평균 = 겹치는 회색 두 덩어리를 만든다. 진짜 암석엔 존재하지 않는 이미지다.">
   <div class="hd">
     <div class="eb">§1 · 2D로 확장</div>
-    <div class="tt">정답이 여럿이면, 손실은 "평균"을 고릅니다</div>
+    <div class="tt">정답이 여럿이면, 손실은 "평균"을 고른다</div>
   </div>
   <div class="row" style="flex:1;align-items:center;margin-top:6px">
     <div style="flex:1.35" class="figbox">
@@ -269,14 +271,15 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:16px">
       <div class="eq" style="text-align:center"><div class="lbl">픽셀별 최적해</div>
-        $\hat{y}^{*}=\arg\min_{\hat{y}}\ \mathbb{E}\big[\,\|y-\hat{y}\|\,\big]\ \approx\ \text{후보들의 평균/중앙값}$</div>
+        $\hat{y}^{*}=\arg\min_{\hat{y}}\ \mathbb{E}\big[\,\|y-\hat{y}\|\,\big]=\mathrm{median}(y)$
+        <div style="font-size:19px;color:var(--sub);margin-top:10px">정답 후보들의 <b>평균 · 중앙값</b></div></div>
       <div class="card tn">
         <div class="ct" style="font-size:25px">모든 후보를 반씩 섞은 이미지</div>
-        <div class="cd">pore가 A에 있을 수도, B에 있을 수도 있다면, 손실을 최소화하는 답은 <b>A도 B도 아닌, 둘을 겹친 회색</b>입니다.</div>
+        <div class="cd">pore가 A에 있을 수도, B에 있을 수도 있다면, 손실을 최소화하는 답은 <b>A도 B도 아닌, 둘을 겹친 회색</b>이다.</div>
       </div>
       <div class="card to">
         <div class="ct" style="font-size:25px">우리에게 필요한 압력</div>
-        <div class="cd">"평균을 내지 말고, <span class="hl">그럴듯한 후보 하나를 확신 있게</span> 골라라." 픽셀 손실은 이 압력을 만들 수 없습니다. 새로운 종류의 신호가 필요합니다.</div>
+        <div class="cd">"평균을 내지 말고, <span class="hl">그럴듯한 후보 하나를 확신 있게</span> 골라라." 픽셀 손실은 이 압력을 만들 수 없다. 새로운 종류의 신호가 필요하다.</div>
       </div>
     </div>
   </div>
@@ -287,9 +290,9 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="실측 · 흐림" data-speaker-notes="이론이 아니라 실측. 노트북에서 학습한 mini 모델(k=5)의 이진화 전 출력. L1 모델은 전체 픽셀의 16%가 회색(0.2~0.8, GAN은 8%), 가로 단면을 그리면 정답의 계단과 달리 완만한 경사를 그린다.">
   <div class="hd">
     <div class="eb">§1 · 실측</div>
-    <div class="tt">우리 모델의 출력으로 직접 확인합니다</div>
+    <div class="tt">우리 모델의 출력으로 직접 확인한다</div>
   </div>
-  <div class="lead">이웃이 먼 어려운 조건(k=5 · 이웃까지 슬라이스 5장)에서 학습한 mini 모델의 <b>이진화(0.5) 전 출력</b>입니다. 점선 위치의 픽셀 값을 단면으로 그려 보면, 정답은 0↔1 <b>계단</b>인데 L1 모델은 <span class="hl">완만한 경사(회색)</span>입니다.</div>
+  <div class="lead">이웃이 먼 어려운 조건(k=5 · 이웃까지 슬라이스 5장)에서 학습한 mini 모델의 <b>이진화(0.5) 전 출력</b>이다. 점선 위치의 픽셀 값을 단면으로 그려 보면, 정답은 0↔1 <b>계단</b>인데 L1 모델은 <span class="hl">완만한 경사(회색)</span>다.</div>
   <div class="body" style="justify-content:center;margin-top:14px">
     <div class="figbox" style="align-self:center;max-width:1080px">
       <img src="assets/figures/W3_continuous_demo.png" style="width:100%" alt="연속 출력 실측">
@@ -302,29 +305,33 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="흐림의 대가" data-speaker-notes="흐림은 미관 문제가 아니다. ① 이진화 경계가 임계값에 민감해지고 ② 가는 목(throat)이 끊기거나 붙어 투과율이 왜곡되고 ③ 작은 pore가 통째로 사라진다. 디지털 암석의 존재 이유가 물성 계산이므로 치명적.">
   <div class="hd">
     <div class="eb">§1 · So What</div>
-    <div class="tt">흐림의 대가 · 물성이 왜곡됩니다</div>
+    <div class="tt">흐림의 대가 · 물성이 왜곡된다</div>
   </div>
-  <div class="lead">Digital Rock의 목적은 이미지 자체가 아니라 <b>이미지로 계산하는 물성</b>(공극률·표면적·투과율)입니다. 회색 경계는 그 물성을 직접 왜곡합니다.</div>
+  <div class="lead">Digital Rock의 목적은 이미지 자체가 아니라 <b>이미지로 계산하는 물성</b>(공극률·표면적·투과율)이다. 회색 경계는 그 물성을 직접 왜곡한다.</div>
   <div class="row" style="margin-top:24px">
     <div class="card tr" style="flex:1">
       <div class="tag" style="color:var(--red)">① 임계값 민감성</div>
       <div class="ct" style="margin-top:8px;font-size:26px">경계가 0.5 근처에서 흔들림</div>
-      <div class="cd">회색 픽셀은 이진화 임계값을 0.45→0.55로만 바꿔도 <b>pore↔solid가 뒤집힙니다</b>. 공극률이 임계값의 함수가 되어버립니다.</div>
+      <div class="cd">회색 픽셀은 이진화 임계값을 0.45→0.55로만 바꿔도 <b>pore↔solid가 뒤집힌다</b>. 공극률이 임계값의 함수가 되어버린다.</div>
     </div>
     <div class="card tr" style="flex:1">
       <div class="tag" style="color:var(--red)">② 연결성 훼손</div>
       <div class="ct" style="margin-top:8px;font-size:26px">가는 목이 끊기거나 붙음</div>
-      <div class="cd">유체는 pore의 <b>가장 좁은 길목(throat)</b>으로 흐릅니다. 흐린 경계는 목을 끊거나 이어 붙여 <b>투과율을 크게 왜곡</b>합니다.</div>
+      <div class="cd">유체는 pore의 <b>가장 좁은 길목(throat)</b>으로 흐른다. 흐린 경계는 목을 끊거나 이어 붙여 <b>투과율을 크게 왜곡</b>한다.</div>
     </div>
     <div class="card tr" style="flex:1">
       <div class="tag" style="color:var(--red)">③ 작은 구조 소실</div>
       <div class="ct" style="margin-top:8px;font-size:26px">작은 pore가 평균에 묻힘</div>
-      <div class="cd">몇 픽셀짜리 pore는 평균화 과정에서 <b>회색으로 옅어지다가 사라집니다</b>. 표면적·비표면적 통계가 함께 틀어집니다.</div>
+      <div class="cd">몇 픽셀짜리 pore는 평균화 과정에서 <b>회색으로 옅어지다가 사라진다</b>. 표면적·비표면적 통계가 함께 틀어진다.</div>
     </div>
   </div>
-  <div class="tint" style="margin-top:24px;display:flex;align-items:center;gap:20px">
+  <div class="figbox" style="align-self:center;max-width:1240px;margin-top:20px;padding:12px 18px 6px">
+    <img src="assets/figures/W3_throat.png" style="width:100%" alt="흐린 경계가 pore의 가는 목을 끊어 물길을 막는다">
+    <div class="cap" style="text-align:center">위 ②번의 예 · 가는 목(throat)이 흐려지면 물길이 끊겨 투과율이 크게 달라진다</div>
+  </div>
+  <div class="tint" style="margin-top:16px;display:flex;align-items:center;gap:20px">
     <div style="font-family:var(--mono);font-size:20px;color:var(--orange-d);flex:none">§2 로</div>
-    <div class="cd" style="font-size:24px">그래서 픽셀 손실 밖에서 <b>"이 이미지가 진짜 암석 단면처럼 보이는가"</b>를 묻는 새 신호를 만듭니다. 그 신호를 만드는 것이 두 번째 신경망, <span class="nv">판별자</span>입니다.</div>
+    <div class="cd" style="font-size:23px">그래서 픽셀 손실 밖에서 <b>"이 이미지가 진짜 암석 단면처럼 보이는가"</b>를 묻는 새 신호를 만든다. 그 신호를 만드는 것이 두 번째 신경망, <span class="nv">판별자</span>다.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §1</span><span class="pg"><b>08</b> / 39</span></div>
 </section>
@@ -334,7 +341,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
   <div class="num">02</div>
   <div class="k">Part 2 · The Idea</div>
   <div class="t">GAN · 그림을 심사하는<br>두 번째 신경망</div>
-  <div class="d">2014년에 등장해 이미지 생성의 표준이 된 아이디어입니다. 배경과 직관, min-max 수식, 교대 학습 절차를 차례로 봅니다.</div>
+  <div class="d">2014년에 등장해 이미지 생성의 표준이 된 아이디어다. 배경과 직관, min-max 수식, 교대 학습 절차를 차례로 본다.</div>
   <div class="foot"><span class="b">Digital Rock · W3</span><span class="pg"><b>09</b> / 39</span></div>
 </section>
 
@@ -344,7 +351,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div class="eb">Background · 2014~</div>
     <div class="tt">GAN · 손실 함수를 데이터에서 배우다</div>
   </div>
-  <div class="lead">2014년 Ian Goodfellow가 제안했습니다. 핵심 발상: <b>"무엇이 진짜 같은가"를 수식으로 설계하지 말고, 그것을 판정하는 신경망을 함께 학습시키자.</b> 손실 함수 자체를 데이터에서 배우는 셈입니다.</div>
+  <div class="lead">2014년 Ian Goodfellow가 제안했다. 핵심 발상: <b>"무엇이 진짜 같은가"를 수식으로 설계하지 말고, 그것을 판정하는 신경망을 함께 학습시키자.</b> 손실 함수 자체를 데이터에서 배우는 셈이다.</div>
   <div style="position:relative;margin-top:38px;display:flex;">
     <div style="position:absolute;left:7%;right:7%;top:17px;height:3px;background:#d8d2c4;"></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid #8a93a3;"></div><div style="font-family:var(--mono);font-size:24px;color:var(--sub);">GAN · 2014</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">Goodfellow<br>생성자 vs 판별자</div></div>
@@ -353,9 +360,9 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid var(--orange);"></div><div style="font-family:var(--mono);font-size:24px;color:var(--orange-d);">Mosser · 2017</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">다공성 매질 재구성에<br>GAN 도입</div></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid #475067;"></div><div style="font-family:var(--mono);font-size:24px;color:#475067;">오늘</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">슬라이스 보간에<br>pix2pix 적용</div></div>
   </div>
-  <div style="display:flex;gap:22px;margin-top:40px;flex:1;">
-    <div class="card" style="flex:1"><div class="ct" style="font-size:26px">왜 강력했나</div><div class="cd">"진짜 같음"은 픽셀 공식으로 쓰기 어렵습니다. 판별자는 그 기준을 <b>데이터에서 스스로 찾아내고</b>, 생성자가 좋아질수록 기준도 함께 정교해집니다.</div></div>
-    <div class="tint" style="flex:1"><div class="ct" style="font-size:26px">우리가 쓰는 계열</div><div class="cd">생성자가 UNet인 <span class="hl">pix2pix</span>입니다. W2에서 만든 모델을 <b>그대로 생성자로</b> 사용합니다. 새로 만드는 것은 판별자 하나뿐입니다.</div></div>
+  <div style="display:flex;gap:22px;margin-top:36px;flex:1;align-items:center;">
+    <div class="card" style="flex:1"><div class="ct" style="font-size:26px">왜 강력했나</div><div class="cd">"진짜 같음"은 픽셀 공식으로 쓰기 어렵다. 판별자는 그 기준을 <b>데이터에서 스스로 찾아내고</b>, 생성자가 좋아질수록 기준도 함께 정교해진다.</div></div>
+    <div class="tint" style="flex:1"><div class="ct" style="font-size:26px">우리가 쓰는 계열</div><div class="cd">생성자가 UNet인 <span class="hl">pix2pix</span>다. W2에서 만든 모델을 <b>그대로 생성자로</b> 사용한다. 새로 만드는 것은 판별자 하나뿐이다.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>10</b> / 39</span></div>
 </section>
@@ -370,7 +377,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div class="card to" style="flex:1">
       <div class="tag" style="color:var(--orange-d)">Generator · 생성자</div>
       <div class="ct" style="margin-top:8px">위조범 · 그럴듯하게 만든다</div>
-      <div class="cd">이웃 슬라이스를 받아 가운데 슬라이스를 그립니다. 목표는 하나, <b>감별사가 진짜로 착각할 만큼</b> 사실적으로 그리는 것입니다.</div>
+      <div class="cd">이웃 슬라이스를 받아 가운데 슬라이스를 그린다. 목표는 하나, <b>감별사가 진짜로 착각할 만큼</b> 사실적으로 그리는 것이다.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">= W2의 mini UNet, 그대로</div>
     </div>
     <div style="display:flex;flex-direction:column;justify-content:center;gap:8px;flex:none;padding:0 6px">
@@ -380,18 +387,26 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div class="card tn" style="flex:1">
       <div class="tag">Discriminator · 판별자</div>
       <div class="ct" style="margin-top:8px">감별사 · 진짜인지 심사한다</div>
-      <div class="cd">진짜 슬라이스와 생성 슬라이스를 받아 <b>"진짜 암석 단면인가?"</b>를 채점합니다. 속지 않으려 점점 예리해집니다.</div>
+      <div class="cd">진짜 슬라이스와 생성 슬라이스를 받아 <b>"진짜 암석 단면인가?"</b>를 채점한다. 속지 않으려 점점 예리해진다.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">= 새로 만드는 작은 CNN</div>
     </div>
   </div>
-  <div class="row" style="margin-top:22px;flex:1;align-items:stretch">
-    <div class="tint" style="flex:1.2">
-      <div class="ct" style="font-size:26px">경쟁의 나선</div>
-      <div class="cd" style="font-size:24px">위조가 정교해지면 감별 기준이 올라가고, 기준이 올라가면 위조는 더 정교해집니다. 이 반복이 생성자를 <b>사람이 설계한 어떤 손실보다 까다로운 기준</b>으로 몰아갑니다.</div>
+  <div class="row" style="margin-top:24px;flex:1;align-items:stretch;gap:26px">
+    <div class="figbox" style="flex:1.55;justify-content:center;padding:24px 30px">
+      <div style="font-size:22px;font-weight:600;color:var(--ink);margin-bottom:6px">경쟁의 나선 · 라운드마다 둘 다 실력이 오른다</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+        <div style="text-align:center"><img src="assets/figures/W3_round1.png" style="width:118px;height:118px;border-radius:10px;border:1px solid var(--line)"><div style="font-size:16px;color:var(--muted);margin-top:7px">R1 · 조잡한 위조<br><span style="color:var(--green)">감별사가 쉽게 간파</span></div></div>
+        <div style="font-size:26px;color:var(--muted)">→</div>
+        <div style="text-align:center"><img src="assets/figures/W3_round2.png" style="width:118px;height:118px;border-radius:10px;border:1px solid var(--line)"><div style="font-size:16px;color:var(--muted);margin-top:7px">R2 · 정교해진 위조<br>감별사도 예리해짐</div></div>
+        <div style="font-size:26px;color:var(--muted)">→</div>
+        <div style="text-align:center"><img src="assets/figures/W3_round3.png" style="width:118px;height:118px;border-radius:10px;border:2px solid var(--orange)"><div style="font-size:16px;color:var(--muted);margin-top:7px">R3 · 거의 진짜<br><span style="color:var(--orange-d)">50:50, 구별 불가</span></div></div>
+      </div>
+      <div class="cd" style="font-size:20px;margin-top:16px;text-align:center">위조가 정교해지면 기준이 오르고, 기준이 오르면 위조는 더 정교해진다. 이 반복이 <b>사람이 설계한 어떤 손실보다 까다로운 기준</b>을 만든다.</div>
     </div>
-    <div class="card tg" style="flex:1.2">
+    <div class="card tg" style="flex:1;display:flex;flex-direction:column;justify-content:center">
       <div class="ct" style="font-size:26px">§1의 해답이 되는 이유</div>
-      <div class="cd" style="font-size:24px">진짜 단면에 <b>회색 경계는 없습니다</b>. 회색을 내는 순간 감별사에게 들키므로, 생성자는 <span class="hl">확신 있는 흑백 구조</span>를 그리는 쪽으로 학습됩니다.</div>
+      <div class="cd" style="font-size:24px;margin-top:10px">진짜 단면에 <b>회색 경계는 없다</b>. 회색을 내는 순간 감별사에게 들키므로, 생성자는 <span class="hl">확신 있는 흑백 구조</span>를 그리는 쪽으로 학습된다.</div>
+      <div style="margin-top:20px;padding-top:18px;border-top:1px dashed var(--tintline);font-size:23px;color:var(--green);font-weight:600">→ 그래서 §1의 흐림이 사라진다</div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>11</b> / 39</span></div>
@@ -415,7 +430,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       <div class="node"><img src="assets/figures/W3_tile_target.png" alt="진짜"><div class="nl" style="color:var(--green)">진짜 슬라이스</div><div class="ns">y · 정답</div></div>
     </div>
     <div class="pipe" style="justify-content:center">
-      <div class="cd" style="font-size:22px;max-width:360px;text-align:right">생성(가짜)과 진짜가 <b>같은 이웃(조건)과 함께</b><br>번갈아 판별자에 들어갑니다</div>
+      <div class="cd" style="font-size:22px;max-width:470px;text-align:right;line-height:1.5">생성(가짜)과 진짜가 <b>같은 이웃(조건)과 함께</b> 번갈아 판별자에 들어간다</div>
       <div class="arrow">→</div>
       <div class="gbox d">D<div style="font-size:17px;font-weight:500;font-family:var(--mono)">판별자 CNN</div></div>
       <div class="arrow">→</div>
@@ -425,7 +440,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       </div>
     </div>
     <div class="tint" style="align-self:center;max-width:1300px">
-      <div class="cd" style="font-size:23px;text-align:center">판별자의 점수가 <b>생성자에게 흘러 들어가는 새로운 손실</b>이 됩니다. "이 부분이 가짜 티가 난다"는, 픽셀 손실이 주지 못하던 신호입니다.</div>
+      <div class="cd" style="font-size:23px;text-align:center">판별자의 점수가 <b>생성자에게 흘러 들어가는 새로운 손실</b>이 된다. "이 부분이 가짜 티가 난다"는, 픽셀 손실이 주지 못하던 신호다.</div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>12</b> / 39</span></div>
@@ -438,8 +453,12 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div class="tt">한 줄의 게임 · min-max</div>
   </div>
   <div class="body" style="justify-content:center;gap:26px">
-    <div class="eq" style="text-align:center;font-size:28px;padding:30px">
-      $$\min_{G}\;\max_{D}\;\;\underbrace{\mathbb{E}_{y}\big[\log D(y)\big]}_{\text{진짜를 진짜로}}\;+\;\underbrace{\mathbb{E}_{x}\big[\log\big(1-D(G(x))\big)\big]}_{\text{가짜를 가짜로}}$$
+    <div class="eq" style="text-align:center;font-size:28px;padding:28px 30px 22px">
+      $$\min_{G}\;\max_{D}\;\;\textcolor{#1f3a5f}{\mathbb{E}_{y}\big[\log D(y)\big]}\;+\;\textcolor{#d4760f}{\mathbb{E}_{x}\big[\log\big(1-D(G(x))\big)\big]}$$
+      <div style="display:flex;justify-content:center;gap:60px;margin-top:6px;font-size:19px">
+        <span style="color:var(--navy)"><b>왼쪽 항</b> · 진짜를 진짜로</span>
+        <span style="color:var(--orange-d)"><b>오른쪽 항</b> · 가짜를 가짜로</span>
+      </div>
     </div>
     <div class="row">
       <div class="card tn" style="flex:1">
@@ -448,15 +467,15 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       </div>
       <div class="card to" style="flex:1">
         <div class="tag" style="color:var(--orange-d)">생성자 G · 최소화 (min)</div>
-        <div class="cd" style="margin-top:10px;font-size:24px">G가 건드릴 수 있는 것은 <b>두 번째 항뿐</b>. $D(G(x))\!\to\!1$ 로 만들어 그 항을 무너뜨립니다 = 판별자를 속이는 방향.</div>
+        <div class="cd" style="margin-top:10px;font-size:24px">G가 건드릴 수 있는 것은 <b>두 번째 항뿐</b>. $D(G(x))\!\to\!1$ 로 만들어 그 항을 무너뜨린다 = 판별자를 속이는 방향.</div>
       </div>
       <div class="card ts" style="flex:1">
         <div class="tag" style="color:var(--navy-2)">경쟁의 종착점</div>
-        <div class="cd" style="margin-top:10px;font-size:24px">이론상 균형에서 생성 분포는 진짜 분포와 일치하고, $D$ 는 어느 쪽인지 못 맞혀 <b>모든 입력에 ½</b> 을 내놓습니다.</div>
+        <div class="cd" style="margin-top:10px;font-size:24px">이론상 균형에서 생성 분포는 진짜 분포와 일치하고, $D$ 는 어느 쪽인지 못 맞혀 <b>모든 입력에 ½</b> 을 내놓는다.</div>
       </div>
     </div>
     <div class="tint">
-      <div class="cd" style="font-size:23px"><b>실전 메모.</b> 원식의 log 손실은 초반에 gradient가 약해 학습이 잘 멈춥니다. 우리는 §3에서 같은 게임을 안정적으로 구현한 <span class="nv">hinge 손실</span>을 사용합니다.</div>
+      <div class="cd" style="font-size:23px"><b>실전 메모.</b> 원식의 log 손실은 초반에 gradient가 약해 학습이 잘 멈춘다. 우리는 §3에서 같은 게임을 안정적으로 구현한 <span class="nv">hinge 손실</span>을 사용한다.</div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>13</b> / 39</span></div>
@@ -466,26 +485,26 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="교대 학습" data-speaker-notes="한 배치마다 두 번의 갱신. 먼저 D: 진짜/가짜를 채점해 D만 갱신하는데, 이때 가짜에 detach를 걸어 G로 gradient가 새지 않게 한다. 다음 G: D를 얼려두고 D의 점수를 손실로 받아 G만 갱신. 서로의 최신 버전을 상대로 번갈아 연습한다.">
   <div class="hd">
     <div class="eb">§2 · Training Loop</div>
-    <div class="tt">한 배치, 두 번의 갱신 · 교대로 배웁니다</div>
+    <div class="tt">한 배치, 두 번의 갱신 · 교대로 배운다</div>
   </div>
   <div class="row" style="margin-top:10px">
     <div class="card tn" style="flex:1">
       <div class="tag">STEP A · 판별자 갱신</div>
       <div class="ct" style="margin-top:8px;font-size:26px">감별 연습</div>
-      <div class="cd">진짜 $y$ 와 생성 $G(x)$ 를 채점하고, 구별을 잘하는 방향으로 <b>D의 가중치만</b> 갱신합니다.</div>
-      <div class="cd" style="margin-top:8px;font-size:21px;color:var(--red)"><b>주의.</b> 생성물에 <span style="font-family:var(--mono)">.detach()</span>: 이 단계에서 G까지 흔들리면 안 됩니다.</div>
+      <div class="cd">진짜 $y$ 와 생성 $G(x)$ 를 채점하고, 구별을 잘하는 방향으로 <b>D의 가중치만</b> 갱신한다.</div>
+      <div class="cd" style="margin-top:8px;font-size:21px;color:var(--red)"><b>주의.</b> 생성물에 <span style="font-family:var(--mono)">.detach()</span>: 이 단계에서 G까지 흔들리면 안 된다.</div>
     </div>
     <div class="arrow">→</div>
     <div class="card to" style="flex:1">
       <div class="tag" style="color:var(--orange-d)">STEP B · 생성자 갱신</div>
       <div class="ct" style="margin-top:8px;font-size:26px">위조 연습</div>
-      <div class="cd">D를 <b>얼려둔 채</b> 그 점수를 손실로 받아, 더 잘 속이는 방향으로 <b>G의 가중치만</b> 갱신합니다. 여기에 L1·SSIM 재구성 손실을 함께 더합니다.</div>
+      <div class="cd">D를 <b>얼려둔 채</b> 그 점수를 손실로 받아, 더 잘 속이는 방향으로 <b>G의 가중치만</b> 갱신한다. 여기에 L1·SSIM 재구성 손실을 함께 더한다.</div>
     </div>
     <div class="arrow">↻</div>
     <div class="card ts" style="flex:1">
       <div class="tag" style="color:var(--navy-2)">반복</div>
       <div class="ct" style="margin-top:8px;font-size:26px">서로의 최신판과 대결</div>
-      <div class="cd">매 배치 A→B를 반복합니다. 항상 <b>방금 갱신된 상대</b>를 상대로 연습하므로 기준이 계속 올라갑니다.</div>
+      <div class="cd">매 배치 A→B를 반복한다. 항상 <b>방금 갱신된 상대</b>를 상대로 연습하므로 기준이 계속 올라간다.</div>
     </div>
   </div>
   <div class="row" style="margin-top:24px;flex:1;align-items:center">
@@ -497,7 +516,7 @@ d_loss.backward(); opt_D.step()<br>
 g_loss = w1*<span class="f">L1</span> + ws*<span class="f">SSIM</span> + λ*<span class="f">g_hinge_loss</span>(D, cond, G(x))<br>
 g_loss.backward(); opt_G.step()
     </div>
-    <div class="cd" style="flex:1;font-size:25px;line-height:1.6">W2에서 배운 <span class="nv">4박자 학습 루프</span>가 두 벌로 늘어난 것뿐입니다.<br><br>옵티마이저도 <b>opt_D · opt_G 두 개</b>로, 각자 자기 가중치만 책임집니다.</div>
+    <div class="cd" style="flex:1;font-size:25px;line-height:1.6">W2에서 배운 <span class="nv">4박자 학습 루프</span>가 두 벌로 늘어난 것뿐이다.<br><br>옵티마이저도 <b>opt_D · opt_G 두 개</b>로, 각자 자기 가중치만 책임진다.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>14</b> / 39</span></div>
 </section>
@@ -506,17 +525,17 @@ g_loss.backward(); opt_G.step()
 <section class="s" data-label="균형점" data-speaker-notes="학습이 잘 끝나면 D는 50:50 근처, 곧 더 가르칠 것이 없다는 뜻. D는 코치이고 시합(배포)에는 G만 나간다. 저장·배포 시 D는 버려도 된다.">
   <div class="hd">
     <div class="eb">§2 · Equilibrium</div>
-    <div class="tt">판별자는 코치입니다 · 시합에는 생성자만 나갑니다</div>
+    <div class="tt">판별자는 코치다 · 시합에는 생성자만 나간다</div>
   </div>
-  <div class="row" style="margin-top:16px;flex:1;align-items:stretch">
+  <div class="row" style="margin-top:16px;flex:1;align-items:center">
     <div class="card tn" style="flex:1">
       <div class="ct">균형의 신호</div>
-      <div class="cd" style="font-size:24px">위조가 완벽해지면 감별사는 찍기와 다름없는 <b>50:50</b> 근처를 냅니다. "판별자 정확도가 낮아지는 것"이 오히려 <span class="nv">성공의 신호</span>가 되는, GAN 특유의 뒤집힌 해석입니다.</div>
-      <div class="cd" style="margin-top:12px;font-size:22px;color:var(--muted)">반대로 D가 완벽하게 구별하면(정확도 100%), 그건 G가 아직 어설프다는 뜻입니다.</div>
+      <div class="cd" style="font-size:24px">위조가 완벽해지면 감별사는 찍기와 다름없는 <b>50:50</b> 근처를 낸다. "판별자 정확도가 낮아지는 것"이 오히려 <span class="nv">성공의 신호</span>가 되는, GAN 특유의 뒤집힌 해석이다.</div>
+      <div class="cd" style="margin-top:12px;font-size:22px;color:var(--muted)">반대로 D가 완벽하게 구별하면(정확도 100%), 그건 G가 아직 어설프다는 뜻이다.</div>
     </div>
     <div class="card to" style="flex:1">
       <div class="ct">배포 시점의 역할 분담</div>
-      <div class="cd" style="font-size:24px">학습이 끝나면 판별자의 임무는 끝납니다. 저장하고 배포하는 것은 <b>생성자 하나</b>이고, 추론 비용은 W2의 UNet과 <span class="hl">동일</span>합니다.</div>
+      <div class="cd" style="font-size:24px">학습이 끝나면 판별자의 임무는 끝난다. 저장하고 배포하는 것은 <b>생성자 하나</b>이고, 추론 비용은 W2의 UNet과 <span class="hl">동일</span>하다.</div>
       <div class="code" style="margin-top:16px;font-size:20px">
 <span class="c"># 배포: G만 사용 · W2와 같은 비용</span><br>
 pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학습에서만</span></div>
@@ -531,7 +550,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="eb">§2 · 실측</div>
     <div class="tt">학습된 판별자가 실제로 보는 것</div>
   </div>
-  <div class="lead">우리가 노트북에서 학습시킨 mini 판별자에게 <b>진짜 슬라이스 · 흐린 L1 출력 · GAN 출력</b>을 채점시킨 실제 점수 map입니다.</div>
+  <div class="lead">우리가 노트북에서 학습시킨 mini 판별자에게 <b>진짜 슬라이스 · 흐린 L1 출력 · GAN 출력</b>을 채점시킨 실제 점수 map이다.</div>
   <div class="body" style="justify-content:center;margin-top:12px">
     <div class="figbox" style="align-self:center;max-width:1140px">
       <img src="assets/figures/W3_discriminator_view.png" style="width:100%" alt="판별자 점수 map">
@@ -545,7 +564,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
   <div class="num">03</div>
   <div class="k">Part 3 · Make it Fit</div>
   <div class="t">우리 문제에 맞추는<br>세 가지 장치</div>
-  <div class="d">조건부 입력 · PatchGAN · spectral normalization. pix2pix 계열이 10년 가까이 검증해 온 조합입니다. 실전 손실(hinge)과 전체 균형까지.</div>
+  <div class="d">조건부 입력 · PatchGAN · spectral normalization. pix2pix 계열이 10년 가까이 검증해 온 조합이다. 실전 손실(hinge)과 전체 균형까지.</div>
   <div class="foot"><span class="b">Digital Rock · W3</span><span class="pg"><b>17</b> / 39</span></div>
 </section>
 
@@ -555,7 +574,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="eb">§3 · Overview</div>
     <div class="tt">먼저 전체 구조를 한눈에</div>
   </div>
-  <div class="lead">이웃 슬라이스가 <b>생성자(UNet)</b>를 지나 생성 슬라이스가 되고, 진짜와 생성이 조건과 함께 <b>판별자(PatchGAN)</b>로 들어가 점수를 받습니다. 손실은 <b>재구성(L1, SSIM)</b>과 <b>적대(hinge)</b> 둘로 나뉩니다. 각 부품은 이어서 자세히 봅니다.</div>
+  <div class="lead">이웃 슬라이스가 <b>생성자(UNet)</b>를 지나 생성 슬라이스가 되고, 진짜와 생성이 조건과 함께 <b>판별자(PatchGAN)</b>로 들어가 점수를 받는다. 손실은 <b>재구성(L1, SSIM)</b>과 <b>적대(hinge)</b> 둘로 나뉜다. 각 부품은 이어서 자세히 본다.</div>
   <div class="body" style="justify-content:center;margin-top:6px">
     <div class="figbox" style="align-self:center;max-width:1520px"><img src="assets/figures/W3_architecture.png" style="width:100%" alt="pix2pix 슬라이스 보간 전체 구조"></div>
   </div>
@@ -566,20 +585,24 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="장치 ① 조건부" data-speaker-notes="조건 없는 D는 '진짜 암석처럼 생긴' 아무 단면에나 속는다. 이웃(조건)을 함께 주면 '이 이웃 사이에 올 법한 단면인가'까지 심사한다. 구현은 채널 concat 한 줄.">
   <div class="hd">
     <div class="eb">§3 · 장치 ①</div>
-    <div class="tt">조건부 · 판별자도 문제지를 봅니다</div>
+    <div class="tt">조건부 · 판별자도 문제지를 본다</div>
   </div>
   <div class="row" style="margin-top:14px;flex:1;align-items:stretch">
-    <div style="flex:1.1;display:flex;flex-direction:column;gap:16px">
+    <div style="flex:1.1;display:flex;flex-direction:column;justify-content:center;gap:16px">
       <div class="card tr">
         <div class="tag" style="color:var(--red)">조건이 없다면</div>
-        <div class="cd" style="font-size:24px">판별자는 <b>"진짜 암석처럼 생겼는가"</b>만 봅니다. 생성자는 이웃과 무관한, 그럴듯한 <b>아무 단면</b>이나 그려도 통과하고, 그러면 보간 문제가 무너집니다.</div>
+        <div class="cd" style="font-size:24px">판별자는 <b>"진짜 암석처럼 생겼는가"</b>만 본다. 생성자는 이웃과 무관한, 그럴듯한 <b>아무 단면</b>이나 그려도 통과하고, 그러면 보간 문제가 무너진다.</div>
       </div>
       <div class="card tg">
         <div class="tag" style="color:var(--green)">이웃을 함께 주면</div>
-        <div class="cd" style="font-size:24px">채점 기준이 <b>"이 두 이웃 사이에 올 법한 단면인가"</b>로 바뀝니다. 사실성과 <span class="hl">이웃과의 일관성</span>을 동시에 심사합니다.</div>
+        <div class="cd" style="font-size:24px">채점 기준이 <b>"이 두 이웃 사이에 올 법한 단면인가"</b>로 바뀐다. 사실성과 <span class="hl">이웃과의 일관성</span>을 동시에 심사한다.</div>
       </div>
       <div class="eq" style="text-align:center">
-        $D\big(\underbrace{x}_{\text{조건 · 이웃 2장}},\;\underbrace{y}_{\text{심사 대상}}\big)$
+        <span style="font-size:30px">$D(\ \textcolor{#d4760f}{x}\ ,\ \textcolor{#2e8b57}{y}\ )$</span>
+        <div style="display:flex;justify-content:center;gap:44px;margin-top:12px;font-size:20px">
+          <span style="color:var(--orange-d)"><b>x</b> = 조건 (이웃 2장)</span>
+          <span style="color:var(--green)"><b>y</b> = 심사 대상</span>
+        </div>
       </div>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px">
@@ -589,11 +612,11 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
         <img src="assets/figures/W3_tile_target.png" style="width:110px;height:110px;border-radius:8px;border:3px solid var(--orange)" alt="">
         <div style="flex:1">
           <div style="font-family:var(--mono);font-size:22px;color:var(--navy);font-weight:600">torch.cat([x, y], dim=1)</div>
-          <div class="cd" style="font-size:21px;margin-top:6px">이웃 2채널 + 심사 대상 1채널 = <b>3채널 입력</b>. 구현은 concat 한 줄입니다.</div>
+          <div class="cd" style="font-size:21px;margin-top:6px">이웃 2채널 + 심사 대상 1채널 = <b>3채널 입력</b>. 구현은 concat 한 줄이다.</div>
         </div>
       </div>
       <div class="tint">
-        <div class="cd" style="font-size:23px"><b>같은 원리의 다른 예.</b> 흑백→컬러, 스케치→사진, 지도→항공사진. pix2pix 계열은 전부 "조건과 어울리는 출력인가"를 심사합니다.</div>
+        <div class="cd" style="font-size:23px"><b>같은 원리의 다른 예.</b> 흑백→컬러, 스케치→사진, 지도→항공사진. pix2pix 계열은 전부 "조건과 어울리는 출력인가"를 심사한다.</div>
       </div>
     </div>
   </div>
@@ -607,17 +630,17 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="tt">PatchGAN · 조각조각 돋보기 심사</div>
   </div>
   <div class="row" style="margin-top:14px;flex:1;align-items:stretch">
-    <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px">
       <div class="card tn">
         <div class="tag">점수 하나 vs 점수 map</div>
-        <div class="cd" style="font-size:24px">이미지 전체에 점수 <b>하나</b>만 내면 "어디가 가짜 티인지" 신호가 뭉개집니다. PatchGAN은 <b>겹치는 영역(patch)마다</b> 점수를 내 국소 결함을 정확히 짚습니다.</div>
+        <div class="cd" style="font-size:24px">이미지 전체에 점수 <b>하나</b>만 내면 "어디가 가짜 티인지" 신호가 뭉개진다. PatchGAN은 <b>겹치는 영역(patch)마다</b> 점수를 내 국소 결함을 정확히 짚는다.</div>
       </div>
       <div class="card to">
         <div class="tag" style="color:var(--orange-d)">왜 우리 문제에 맞나</div>
-        <div class="cd" style="font-size:24px">L1이 망가뜨리는 것은 전역 구도가 아니라 <b>국소 경계와 미세 텍스처</b>입니다. 심사도 같은 배율에서 이루어져야 합니다.</div>
+        <div class="cd" style="font-size:24px">L1이 망가뜨리는 것은 전역 구도가 아니라 <b>국소 경계와 미세 텍스처</b>다. 심사도 같은 배율에서 이루어져야 한다.</div>
       </div>
       <div class="tint">
-        <div class="cd" style="font-size:23px"><b>§2 슬라이드 16의 점수 map</b>이 정확히 이것입니다. 15×15 격자의 각 칸이 한 patch의 판정입니다 (그림은 4×4로 단순화).</div>
+        <div class="cd" style="font-size:23px"><b>§2 슬라이드 16의 점수 map</b>이 정확히 이것이다. 15×15 격자의 각 칸이 한 patch의 판정이다 (그림은 4×4로 단순화).</div>
       </div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center">
@@ -700,9 +723,9 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
       <defs><marker id="da" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#8a93a3"/></marker></defs>
     </svg>
     <div class="row">
-      <div class="card" style="flex:1"><div class="cd" style="font-size:23px"><b>W2 문법 그대로입니다.</b> stride-2 합성곱으로 크기를 절반씩 줄이고 채널을 두 배씩 늘립니다. 마지막 1채널이 곧 점수 map. 파라미터 약 <span style="font-family:var(--mono)">168K</span>.</div></div>
-      <div class="card" style="flex:1"><div class="cd" style="font-size:23px"><b>마지막 층에 활성화가 없는 이유.</b> 점수를 0~1로 눌러 담지 않고 <span class="nv">날것 그대로의 실수(logit)</span>로 둡니다. 다음 장의 hinge 손실이 이 값을 그대로 사용합니다.</div></div>
-      <div class="card" style="flex:1"><div class="cd" style="font-size:23px"><b>모든 층의 <span style="font-family:var(--mono)">sn( )</span></b>은 spectral normalization입니다. 판별자가 너무 세지지 않도록 거는 안전장치입니다 (§4에서 상세히).</div></div>
+      <div class="card" style="flex:1"><div class="cd" style="font-size:23px"><b>W2 문법 그대로다.</b> stride-2 합성곱으로 크기를 절반씩 줄이고 채널을 두 배씩 늘린다. 마지막 1채널이 곧 점수 map. 파라미터 약 <span style="font-family:var(--mono)">168K</span>.</div></div>
+      <div class="card" style="flex:1"><div class="cd" style="font-size:23px"><b>마지막 층에 활성화가 없는 이유.</b> 점수를 0~1로 눌러 담지 않고 <span class="nv">날것 그대로의 실수(logit)</span>로 둔다. 다음 장의 hinge 손실이 이 값을 그대로 사용한다.</div></div>
+      <div class="card" style="flex:1"><div class="cd" style="font-size:23px"><b>모든 층의 <span style="font-family:var(--mono)">sn( )</span></b>은 spectral normalization이다. 판별자가 너무 세지지 않도록 거는 안전장치다 (§4에서 상세히).</div></div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §3</span><span class="pg"><b>21</b> / 39</span></div>
@@ -724,7 +747,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
       <div class="eq"><div class="lbl">생성자 적대 손실</div>
         $$\mathcal{L}_G^{\text{adv}}=-\,\mathbb{E}\big[D(G(x))\big]$$</div>
       <div class="tint">
-        <div class="cd" style="font-size:23px">진짜를 +1 이상, 가짜를 −1 이하로 <b>여유 있게</b> 밀어내되, 이미 확실한 표본은 더 건드리지 않습니다. log 원식보다 gradient가 안정적이어서 <b>실전 표준</b>으로 자리 잡았습니다.</div>
+        <div class="cd" style="font-size:23px">진짜를 +1 이상, 가짜를 −1 이하로 <b>여유 있게</b> 밀어내되, 이미 확실한 표본은 더 건드리지 않는다. log 원식보다 gradient가 안정적이어서 <b>실전 표준</b>으로 자리 잡았다.</div>
       </div>
     </div>
   </div>
@@ -735,7 +758,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="숫자로 계산" data-speaker-notes="표로 직접 계산. 진짜에 +1.5를 주면 벌점 0, +0.8이면 0.2. 가짜에 −1.5면 0, +0.3이면 1.3. G 손실은 −D(fake)라 가짜 점수가 오를수록 줄어든다. 시험에 나올 수 있는 계산.">
   <div class="hd">
     <div class="eb">§3 · 손으로 계산</div>
-    <div class="tt">점수 세 개로 벌점을 직접 계산해 봅니다</div>
+    <div class="tt">점수 세 개로 벌점을 직접 계산해 본다</div>
   </div>
   <div class="row" style="margin-top:16px;flex:1;align-items:stretch">
     <div style="flex:1.3">
@@ -746,7 +769,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
         <tr><td>가짜를 확실히 판별</td><td class="m">D(G(x)) = −1.5</td><td class="m" style="color:var(--green)">0</td><td class="m">max(0, 1+(−1.5)) = 0</td></tr>
         <tr><td style="color:var(--red);font-weight:600">가짜에 속음</td><td class="m">D(G(x)) = +0.3</td><td class="m" style="color:var(--red)">1.3</td><td class="m">max(0, 1+0.3) = 1.3</td></tr>
       </table>
-      <div class="cap" style="margin-top:12px">margin(±1)을 넘긴 표본은 벌점 0. 판별자는 <b>애매한 표본에만</b> 집중합니다.</div>
+      <div class="cap" style="margin-top:12px">margin(±1)을 넘긴 표본은 벌점 0. 판별자는 <b>애매한 표본에만</b> 집중한다.</div>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
       <div class="card to">
@@ -756,7 +779,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
         D(G(x)) = +0.8 → 손실 <b>−0.8</b> (속임, 보상)</div>
       </div>
       <div class="tint">
-        <div class="cd" style="font-size:23px">G는 판별자의 점수를 <b>올리는</b> 방향으로, D는 그 점수를 <b>바로잡는</b> 방향으로, 정확히 반대 목표를 최적화합니다.</div>
+        <div class="cd" style="font-size:23px">G는 판별자의 점수를 <b>올리는</b> 방향으로, D는 그 점수를 <b>바로잡는</b> 방향으로, 정확히 반대 목표를 최적화한다.</div>
       </div>
     </div>
   </div>
@@ -769,24 +792,29 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="eb">§3 · Balance</div>
     <div class="tt">전체 손실 · 정확도 위에 사실감을 조금</div>
   </div>
-  <div class="eq" style="text-align:center;font-size:27px;margin-top:8px">
-    $$\mathcal{L}_G=\underbrace{w_{1}\,\mathcal{L}_{\text{L1}}}_{\text{정확도}}\;+\;\underbrace{w_{s}\,\mathcal{L}_{\text{SSIM}}}_{\text{구조 유사}}\;+\;\underbrace{\lambda\,\mathcal{L}_G^{\text{adv}}}_{\text{사실감}}$$
+  <div class="eq" style="text-align:center;font-size:27px;margin-top:8px;padding-bottom:16px">
+    $$\mathcal{L}_G=\textcolor{#1f3a5f}{w_{1}\,\mathcal{L}_{\text{L1}}}\;+\;\textcolor{#475067}{w_{s}\,\mathcal{L}_{\text{SSIM}}}\;+\;\textcolor{#d4760f}{\lambda\,\mathcal{L}_G^{\text{adv}}}$$
+    <div style="display:flex;justify-content:center;gap:48px;margin-top:2px;font-size:19px">
+      <span style="color:var(--navy)"><b>정확도</b></span>
+      <span style="color:var(--navy-2)"><b>구조</b></span>
+      <span style="color:var(--orange-d)"><b>사실감</b></span>
+    </div>
   </div>
   <div class="row" style="margin-top:22px">
     <div class="card tn" style="flex:1">
       <div class="tag">L1 · $w_1 = 1.0$</div>
       <div class="ct" style="margin-top:8px;font-size:26px">주식 · 정답에 가깝게</div>
-      <div class="cd">이것이 없으면 정답과 무관한 그림이 됩니다. 보간의 뼈대.</div>
+      <div class="cd">이것이 없으면 정답과 무관한 그림이 된다. 보간의 뼈대.</div>
     </div>
     <div class="card tn" style="flex:1">
       <div class="tag">SSIM · $w_s = 0.3$</div>
       <div class="ct" style="margin-top:8px;font-size:26px">구조 · 패턴을 닮게</div>
-      <div class="cd">W2에서 평가지표였던 SSIM을 <b>손실로 승격</b>. 밝기·대비·구조의 유사성을 챙깁니다.</div>
+      <div class="cd">W2에서 평가지표였던 SSIM을 <b>손실로 승격</b>. 밝기·대비·구조의 유사성을 챙긴다.</div>
     </div>
     <div class="card to" style="flex:1">
       <div class="tag" style="color:var(--orange-d)">Adversarial · $\lambda \approx 0.1$</div>
       <div class="ct" style="margin-top:8px;font-size:26px">양념 · 회색을 벌하게</div>
-      <div class="cd">작게 넣습니다. 실제 연구도 <span style="font-family:var(--mono)">0.09–0.13</span> 범위입니다. 사실감은 <b>정확도 위에</b> 얹는 것입니다.</div>
+      <div class="cd">작게 넣는다. 실제 연구도 <span style="font-family:var(--mono)">0.09–0.13</span> 범위다. 사실감은 <b>정확도 위에</b> 얹는 것이다.</div>
     </div>
   </div>
   <div class="row" style="margin-top:22px;flex:1;align-items:center">
@@ -796,7 +824,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
         <div style="position:absolute;left:47%;top:-7px;width:24px;height:24px;border-radius:50%;background:var(--green);border:4px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>
       </div>
       <div style="font-family:var(--mono);font-size:21px;color:var(--muted);flex:none">λ 큼</div>
-      <div class="cd" style="flex:1.4;font-size:22px"><b>왼쪽 끝</b>: W2와 동일 = 흐림 · <b>오른쪽 끝</b>: 이웃과 안 맞는 <span class="hl">환각</span> 위험 · <b style="color:var(--green)">가운데(≈0.1)</b>: 선명하면서 정확. 노트북 §6.5에서 직접 sweep 합니다.</div>
+      <div class="cd" style="flex:1.4;font-size:22px"><b>왼쪽 끝</b>: W2와 동일 = 흐림 · <b>오른쪽 끝</b>: 이웃과 안 맞는 <span class="hl">환각</span> 위험 · <b style="color:var(--green)">가운데(≈0.1)</b>: 선명하면서 정확. 노트북 §6.5에서 직접 sweep 한다.</div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §3</span><span class="pg"><b>24</b> / 39</span></div>
@@ -807,7 +835,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
   <div class="num">04</div>
   <div class="k">Part 4 · Keep it Stable</div>
   <div class="t">줄다리기를<br>무너지지 않게</div>
-  <div class="d">min-max 게임은 한쪽이 독주하는 순간 무너집니다. 실패 신호 세 가지와, 검증된 안정화 레시피를 실측 곡선으로 확인합니다.</div>
+  <div class="d">min-max 게임은 한쪽이 독주하는 순간 무너진다. 실패 신호 세 가지와, 검증된 안정화 레시피를 실측 곡선으로 확인한다.</div>
   <div class="foot"><span class="b">Digital Rock · W3</span><span class="pg"><b>25</b> / 39</span></div>
 </section>
 
@@ -817,24 +845,24 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="eb">§4 · Failure Modes</div>
     <div class="tt">무너질 때 나타나는 세 가지 신호</div>
   </div>
-  <div class="lead">셋 모두 <b>G·D 손실 곡선을 함께</b> 보면 진단할 수 있습니다. 한쪽만 보면 놓칩니다.</div>
+  <div class="lead">셋 모두 <b>G·D 손실 곡선을 함께</b> 보면 진단할 수 있다. 한쪽만 보면 놓친다.</div>
   <div class="row" style="margin-top:22px;flex:1;align-items:stretch">
     <div class="card tr" style="flex:1">
       <div class="tag" style="color:var(--red)">신호 ① 판별자 독주</div>
       <div class="ct" style="margin-top:8px;font-size:26px">D 손실 → 0 고착</div>
-      <div class="cd">D가 완벽해지면 어떤 생성물이든 "가짜 확정"이 되고, hinge가 평평한 구간에 들어가 <b>G에게 갈 gradient가 사라집니다</b>. 학습 정지.</div>
+      <div class="cd">D가 완벽해지면 어떤 생성물이든 "가짜 확정"이 되고, hinge가 평평한 구간에 들어가 <b>G에게 갈 gradient가 사라진다</b>. 학습 정지.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">D_loss ≈ 0 + 결과 정체</div>
     </div>
     <div class="card tr" style="flex:1">
       <div class="tag" style="color:var(--red)">신호 ② 진동 · 발산</div>
       <div class="ct" style="margin-top:8px;font-size:26px">곡선이 널뛰거나 NaN</div>
-      <div class="cd">학습률이 크거나 균형이 깨지면 두 손실이 <b>서로를 밀치며 요동</b>칩니다. 심하면 수치가 폭주해 NaN.</div>
+      <div class="cd">학습률이 크거나 균형이 깨지면 두 손실이 <b>서로를 밀치며 요동</b>친다. 심하면 수치가 폭주해 NaN.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">loss ↑↓ 반복 · NaN</div>
     </div>
     <div class="card tr" style="flex:1">
       <div class="tag" style="color:var(--red)">신호 ③ mode collapse</div>
       <div class="ct" style="margin-top:8px;font-size:26px">한 가지 답만 반복</div>
-      <div class="cd">G가 "판별자를 속이는 한 가지 패턴"을 찾아 <b>모든 입력에 비슷한 출력</b>을 냅니다. 손실은 그럴듯한데 다양성이 죽습니다.</div>
+      <div class="cd">G가 "판별자를 속이는 한 가지 패턴"을 찾아 <b>모든 입력에 비슷한 출력</b>을 낸다. 손실은 그럴듯한데 다양성이 죽는다.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">출력들이 서로 닮음</div>
     </div>
   </div>
@@ -850,33 +878,33 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
   <div class="row" style="margin-top:14px">
     <div class="card tn" style="flex:1">
       <div class="tag">① warmup</div>
-      <div class="cd" style="margin-top:6px;font-size:23px">처음 몇 epoch은 <b>λ=0</b>으로 재구성만 하며 몸을 풀고, 기본기가 생긴 뒤 판별자를 붙입니다.</div>
+      <div class="cd" style="margin-top:6px;font-size:23px">처음 몇 epoch은 <b>λ=0</b>으로 재구성만 하며 몸을 풀고, 기본기가 생긴 뒤 판별자를 붙인다.</div>
     </div>
     <div class="card tn" style="flex:1">
       <div class="tag">② 작은 λ + 감쇠</div>
-      <div class="cd" style="margin-top:6px;font-size:23px">적대 손실은 <b>≈0.1</b>로 시작해 후반에 서서히 줄입니다. 마무리는 정확도가 주도합니다.</div>
+      <div class="cd" style="margin-top:6px;font-size:23px">적대 손실은 <b>≈0.1</b>로 시작해 후반에 서서히 줄인다. 마무리는 정확도가 주도한다.</div>
     </div>
     <div class="card tn" style="flex:1">
       <div class="tag">③ spectral norm</div>
-      <div class="cd" style="margin-top:6px;font-size:23px">D 각 층의 가중치를 최대 특이값으로 나눠 $\|D\|_{\text{Lip}}\le 1$로 만들어, <b>독주를 구조적으로 막습니다</b>.</div>
+      <div class="cd" style="margin-top:6px;font-size:23px">D 각 층의 가중치를 최대 특이값으로 나눠 $\|D\|_{\text{Lip}}\le 1$로 만들어, <b>독주를 구조적으로 막는다</b>.</div>
     </div>
   </div>
   <div class="row" style="margin-top:18px">
     <div class="card ts" style="flex:1">
       <div class="tag" style="color:var(--navy-2)">④ 균형 잡힌 학습률</div>
-      <div class="cd" style="margin-top:6px;font-size:23px">G·D 모두 <span style="font-family:var(--mono)">2e-4, β₁=0.5</span>로, 한쪽만 빨리 배우지 않게 합니다.</div>
+      <div class="cd" style="margin-top:6px;font-size:23px">G·D 모두 <span style="font-family:var(--mono)">2e-4, β₁=0.5</span>로, 한쪽만 빨리 배우지 않게 한다.</div>
     </div>
     <div class="card ts" style="flex:1">
       <div class="tag" style="color:var(--navy-2)">⑤ 곡선 모니터링</div>
-      <div class="cd" style="margin-top:6px;font-size:23px">D 손실이 0에 붙으면 λ↓ 또는 D 학습을 늦춥니다. <b>곡선을 보면서 그때그때 조정</b>해 줍니다.</div>
+      <div class="cd" style="margin-top:6px;font-size:23px">D 손실이 0에 붙으면 λ↓ 또는 D 학습을 늦춘다. <b>곡선을 보면서 그때그때 조정</b>해 준다.</div>
     </div>
     <div class="card ts" style="flex:1">
       <div class="tag" style="color:var(--navy-2)">⑥ detach</div>
-      <div class="cd" style="margin-top:6px;font-size:23px">D 갱신 때 <span style="font-family:var(--mono)">G(x).detach()</span>로, 감별 연습이 <b>위조범을 흔들지 않게</b> 합니다.</div>
+      <div class="cd" style="margin-top:6px;font-size:23px">D 갱신 때 <span style="font-family:var(--mono)">G(x).detach()</span>로, 감별 연습이 <b>위조범을 흔들지 않게</b> 한다.</div>
     </div>
   </div>
   <div class="tint" style="margin-top:20px">
-    <div class="cd" style="font-size:23px">여섯 가지 모두 실습 함수 <span style="font-family:var(--mono);color:var(--navy);font-weight:600">train_gan( )</span> 에 이미 구현되어 있습니다. 노트북에서는 <b>warmup 길이와 λ만 바꿔도</b> 안정성이 어떻게 변하는지 볼 수 있습니다.</div>
+    <div class="cd" style="font-size:23px">여섯 가지 모두 실습 함수 <span style="font-family:var(--mono);color:var(--navy);font-weight:600">train_gan( )</span> 에 이미 구현되어 있다. 노트북에서는 <b>warmup 길이와 λ만 바꿔도</b> 안정성이 어떻게 변하는지 볼 수 있다.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §4</span><span class="pg"><b>27</b> / 39</span></div>
 </section>
@@ -885,15 +913,15 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="실측 곡선" data-speaker-notes="우리 mini GAN의 실제 학습 곡선. 왼쪽: 재구성 손실이 warmup 후에도 계속 내려감, 곧 적대 손실이 정확도를 해치지 않았다. 오른쪽: D 손실이 0에 붙지 않고 유지, 균형 잡힌 줄다리기의 전형.">
   <div class="hd">
     <div class="eb">§4 · 실측</div>
-    <div class="tt">균형 잡힌 줄다리기는 이렇게 생겼습니다</div>
+    <div class="tt">균형 잡힌 줄다리기는 이렇게 생겼다</div>
   </div>
-  <div class="body" style="justify-content:center;gap:18px">
-    <div class="figbox" style="align-self:center;max-width:1400px">
+  <div class="body" style="justify-content:center;gap:26px">
+    <div class="figbox" style="align-self:center;max-width:1620px">
       <img src="assets/figures/W3_training_curves.png" style="width:100%" alt="학습 곡선 실측">
     </div>
-    <div class="row" style="max-width:1400px;align-self:center">
-      <div class="tint" style="flex:1"><div class="cd" style="font-size:22px"><b>읽는 법 ①.</b> GAN이 켜진 뒤에도 재구성 손실(L1·SSIM)이 계속 내려가면, 사실감이 <b>정확도를 해치지 않고</b> 얹히고 있는 것입니다.</div></div>
-      <div class="tint" style="flex:1"><div class="cd" style="font-size:22px"><b>읽는 법 ②.</b> D 손실이 0으로 붙지 않고 일정 범위에서 <b>출렁이며 유지</b>되면 건강한 균형입니다. 0 고착 = 독주(신호 ①).</div></div>
+    <div class="row" style="max-width:1620px;align-self:center">
+      <div class="tint" style="flex:1"><div class="cd" style="font-size:22px"><b>읽는 법 ①.</b> GAN이 켜진 뒤에도 재구성 손실(L1·SSIM)이 계속 내려가면, 사실감이 <b>정확도를 해치지 않고</b> 얹히고 있는 것이다.</div></div>
+      <div class="tint" style="flex:1"><div class="cd" style="font-size:22px"><b>읽는 법 ②.</b> D 손실이 0으로 붙지 않고 일정 범위에서 <b>출렁이며 유지</b>되면 건강한 균형이다. 0 고착 = 독주(신호 ①).</div></div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §4</span><span class="pg"><b>28</b> / 39</span></div>
@@ -903,8 +931,8 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="dv" data-label="§5 물성 검증" data-speaker-notes="5부. 좋아졌다는 것을 무엇으로 증명하나. 이미지 → 공극률 → 구조 통계(S2) → 흐름 물리(투과율) 순서로 지표의 사다리를 올라가며 GAN의 이득을 검증한다. 전부 실제 연구 결과.">
   <div class="num">05</div>
   <div class="k">Part 5 · Verify with Physics</div>
-  <div class="t">결과 · 물성으로<br>검증합니다</div>
-  <div class="d">눈으로 보이는 개선을 넘어, 공극률, 두점 상관 S2, 그리고 유체 시뮬레이션(LBM) 투과율까지. 실제 연구 결과로 확인합니다.</div>
+  <div class="t">결과 · 물성으로<br>검증한다</div>
+  <div class="d">눈으로 보이는 개선을 넘어, 공극률, 두점 상관 S2, 그리고 유체 시뮬레이션(LBM) 투과율까지. 실제 연구 결과로 확인한다.</div>
   <div class="foot"><span class="b">Digital Rock · W3</span><span class="pg"><b>29</b> / 39</span></div>
 </section>
 
@@ -914,7 +942,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="eb">§5 · 검증 1 · 눈</div>
     <div class="tt">어디가 달라졌는가 · 차이가 큰 곳을 짚어서</div>
   </div>
-  <div class="lead">두 모델 출력이 다르고 <b>GAN 쪽이 정답과 일치</b>하는 지점을 찾아 표시했습니다(주황 원). 가운데 원이 핵심입니다. GAN 없음은 pore 통로를 끊어 <b>가짜 solid 섬</b>을 만들었지만, GAN은 정답과 같게 복원했습니다.</div>
+  <div class="lead">두 모델 출력이 다르고 <b>GAN 쪽이 정답과 일치</b>하는 지점을 찾아 표시했다(주황 원). 가운데 원이 핵심이다. GAN 없음은 pore 통로를 끊어 <b>가짜 solid 섬</b>을 만들었지만, GAN은 정답과 같게 복원했다.</div>
   <div class="body" style="justify-content:center;margin-top:12px">
     <div class="figbox" style="align-self:center;max-width:900px">
       <img src="assets/figures/W3_gan_zoom_v2.png" style="width:100%" alt="GAN 유무 시각 비교 (차이 마킹)">
@@ -928,7 +956,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="검증 2 · 공극률" data-speaker-notes="볼륨 전체 공극률 오차. 선형 3.10 → UNet 0.30 → GAN 0.19%p. 단계마다 줄고 GAN이 최저. 단 이 지표는 부피 비율만 봐서 구조를 다 담지 못하고, 그래서 다음 두 지표로 넘어간다.">
   <div class="hd">
     <div class="eb">§5 · 검증 2 · 공극률</div>
-    <div class="tt">볼륨 전체 |Δφ| · 단계마다 줄어듭니다</div>
+    <div class="tt">볼륨 전체 |Δφ| · 단계마다 줄어든다</div>
   </div>
   <div class="row" style="margin-top:12px;flex:1;align-items:center">
     <div style="flex:1.5" class="figbox">
@@ -941,9 +969,9 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
         <tr><td>UNet · L1</td><td class="m">0.30 %p</td></tr>
         <tr><td style="font-weight:600">UNet + GAN</td><td class="m" style="color:var(--orange-d)">0.19 %p</td></tr>
       </table>
-      <div class="cap">실제 연구 모델 · 256³ 서브볼륨 · k=3 기준. 슬라이드 2의 6.87 / 0.47 %p는 노트북 mini 모델(k=1) 조건으로, 서로 다른 실험입니다.</div>
+      <div class="cap">실제 연구 모델 · 256³ 서브볼륨 · k=3 기준. 슬라이드 2의 6.87 / 0.47 %p는 노트북 mini 모델(k=1) 조건으로, 서로 다른 실험이다.</div>
       <div class="tint">
-        <div class="cd" style="font-size:23px"><b>단, 이 지표에는 한계가 있습니다.</b> 공극률은 <b>부피 비율</b>만 봅니다. pore가 <b>어떻게 이어지는지</b>는 담지 못합니다. 그래서 다음 두 지표가 필요합니다.</div>
+        <div class="cd" style="font-size:23px"><b>단, 이 지표에는 한계가 있다.</b> 공극률은 <b>부피 비율</b>만 본다. pore가 <b>어떻게 이어지는지</b>는 담지 못한다. 그래서 다음 두 지표가 필요하다.</div>
       </div>
     </div>
   </div>
@@ -954,9 +982,9 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="검증 3 · S2" data-speaker-notes="두점 상관 S2(r): 거리 r만큼 떨어진 두 점이 모두 pore일 확률로, 구조의 지문. GT와의 평균 편차: 선형 2.0e-2, UNet L1 8.7e-4, GAN 5.5e-4로 GAN이 최근접. 다만 L1과의 차이는 근소하고, 결정적 차이는 다음 장의 흐름 물리에서 갈린다.">
   <div class="hd">
     <div class="eb">§5 · 검증 3 · 구조 통계</div>
-    <div class="tt">S2 두점 상관 · 구조의 지문을 비교합니다</div>
+    <div class="tt">S2 두점 상관 · 구조의 지문을 비교한다</div>
   </div>
-  <div class="lead">$S_2(r)$ = 거리 $r$ 만큼 떨어진 두 점이 <b>둘 다 pore일 확률</b>. pore의 크기·간격·배치가 담기는 <b>구조의 지문</b>입니다. 복원이 좋다면 이 곡선이 정답과 겹쳐야 합니다.</div>
+  <div class="lead">$S_2(r)$ = 거리 $r$ 만큼 떨어진 두 점이 <b>둘 다 pore일 확률</b>. pore의 크기·간격·배치가 담기는 <b>구조의 지문</b>이다. 복원이 좋다면 이 곡선이 정답과 겹쳐야 한다.</div>
   <div class="row" style="margin-top:14px;flex:1;align-items:center">
     <div style="flex:1.6" class="figbox">
       <img src="assets/figures/W3_s2_curves.png" style="width:100%" alt="S2 두점 상관 곡선">
@@ -969,7 +997,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
         <tr><td style="font-weight:600">UNet + GAN</td><td class="m" style="color:var(--orange-d)">5.5 × 10⁻⁴</td></tr>
       </table>
       <div class="tint">
-        <div class="cd" style="font-size:23px">GAN이 전 구간에서 <b>정답에 가장 가깝습니다</b> (오차가 선형의 약 1/37). 다만 UNet과의 차이는 근소하고, <b>결정적 차이는 다음 장</b>, 흐름 물리에서 갈립니다.</div>
+        <div class="cd" style="font-size:23px">GAN이 전 구간에서 <b>정답에 가장 가깝다</b> (오차가 선형의 약 1/37). 다만 UNet과의 차이는 근소하고, <b>결정적 차이는 다음 장</b>, 흐름 물리에서 갈린다.</div>
       </div>
     </div>
   </div>
@@ -980,16 +1008,16 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="검증 4 · 투과율" data-speaker-notes="최종 시험이다. 복원 볼륨에 유체를 흘려(LBM) 투과율을 계산하고 정답 볼륨과 비교한다. 8개 도메인 평균: 선형 14.2%, UNet+GAN 6.3% 오차. 세 축 통합(W5)까지 더하면 1.3%, BB는 0.32%. 연결성을 살린 복원의 가치가 흐름 물리에서 가장 크게 드러난다.">
   <div class="hd">
     <div class="eb">§5 · 검증 4 · 흐름 물리</div>
-    <div class="tt">투과율 · 복원한 암석에 유체를 흘려 봅니다</div>
+    <div class="tt">투과율 · 복원한 암석에 유체를 흘려 본다</div>
   </div>
-  <div class="lead">최종 시험입니다. 복원 볼륨에 유체 시뮬레이션(LBM)을 돌려 <b>투과율</b>을 계산하고 정답 볼륨과 비교합니다. pore <b>연결성</b>이 조금만 틀려도 크게 벌어지는, 가장 까다로운 지표입니다.</div>
+  <div class="lead">최종 시험이다. 복원 볼륨에 유체 시뮬레이션(LBM)을 돌려 <b>투과율</b>을 계산하고 정답 볼륨과 비교한다. pore <b>연결성</b>이 조금만 틀려도 크게 벌어지는, 가장 까다로운 지표다.</div>
   <div class="body" style="justify-content:center;margin-top:10px;gap:14px">
     <div class="figbox" style="align-self:center;max-width:1250px">
       <img src="assets/figures/W3_lbm_permeability.png" style="width:100%" alt="LBM 투과율 오차 · 8개 도메인">
     </div>
     <div class="row" style="max-width:1250px;align-self:center">
-      <div class="card to" style="flex:1.2"><div class="cd" style="font-size:22px"><b>8개 도메인 평균.</b> 선형 <span style="font-family:var(--mono);color:var(--red)">14.2%</span> → UNet+GAN <span style="font-family:var(--mono);color:var(--orange-d)">6.3%</span> 오차. 학습 도메인(BB) 밖에서도 일관된 개선입니다.</div></div>
-      <div class="tint" style="flex:1"><div class="cd" style="font-size:22px"><b>W5 예고.</b> 세 축의 복원을 통합하면 평균 <span style="font-family:var(--mono);color:var(--navy)">1.3%</span>, BB는 <span style="font-family:var(--mono);color:var(--navy)">0.32%</span>까지 내려갑니다.</div></div>
+      <div class="card to" style="flex:1.2"><div class="cd" style="font-size:22px"><b>8개 도메인 평균.</b> 선형 <span style="font-family:var(--mono);color:var(--red)">14.2%</span> → UNet+GAN <span style="font-family:var(--mono);color:var(--orange-d)">6.3%</span> 오차. 학습 도메인(BB) 밖에서도 일관된 개선이다.</div></div>
+      <div class="tint" style="flex:1"><div class="cd" style="font-size:22px"><b>W5 예고.</b> 세 축의 복원을 통합하면 평균 <span style="font-family:var(--mono);color:var(--navy)">1.3%</span>, BB는 <span style="font-family:var(--mono);color:var(--navy)">0.32%</span>까지 내려간다.</div></div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §5</span><span class="pg"><b>33</b> / 39</span></div>
@@ -999,32 +1027,34 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="s" data-label="평가의 교훈" data-speaker-notes="오늘의 평가 교훈을 사다리로 정리. 공극률(부피) → S2(구조 통계) → 투과율(흐름 물리)로 올라갈수록 연결성에 민감해지고, GAN의 이득도 위로 갈수록 뚜렷하다. 단일 숫자 하나로 복원 품질을 판단하지 말 것.">
   <div class="hd">
     <div class="eb">§5 · Takeaway</div>
-    <div class="tt">지표의 사다리 · 위로 갈수록 구조에 민감합니다</div>
+    <div class="tt">지표의 사다리 · 위로 갈수록 구조에 민감하다</div>
   </div>
-  <div class="row" style="margin-top:16px">
+  <div class="body" style="justify-content:center;gap:24px">
+  <div class="row" style="margin-top:0">
     <div class="card tn" style="flex:1">
       <div class="tag">1단 · 공극률 |Δφ|</div>
       <div class="ct" style="margin-top:8px;font-size:26px">부피의 비율</div>
-      <div class="cd">계산이 가장 쉽지만 <b>배치·연결은 못 봅니다</b>. 구조가 달라도 값이 같을 수 있습니다.</div>
+      <div class="cd">계산이 가장 쉽지만 <b>배치·연결은 못 본다</b>. 구조가 달라도 값이 같을 수 있다.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">GAN 이득: 있음 (0.30→0.19)</div>
     </div>
     <div class="arrow">→</div>
     <div class="card ts" style="flex:1">
       <div class="tag" style="color:var(--navy-2)">2단 · S2 상관</div>
       <div class="ct" style="margin-top:8px;font-size:26px">구조의 통계</div>
-      <div class="cd">pore의 크기·간격 분포를 봅니다. 부피가 같아도 <b>배치가 다르면</b> 여기서 갈립니다.</div>
+      <div class="cd">pore의 크기·간격 분포를 본다. 부피가 같아도 <b>배치가 다르면</b> 여기서 갈린다.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:12px">GAN 이득: 최근접 (5.5e-4)</div>
     </div>
     <div class="arrow">→</div>
     <div class="card to" style="flex:1">
       <div class="tag" style="color:var(--orange-d)">3단 · 투과율 (LBM)</div>
       <div class="ct" style="margin-top:8px;font-size:26px">흐름의 물리</div>
-      <div class="cd">유체가 실제로 흐르는가를 봅니다. <b>연결성이 전부</b>인 지표라 목이 하나 끊겨도 크게 벌어집니다.</div>
+      <div class="cd">유체가 실제로 흐르는가를 본다. <b>연결성이 전부</b>인 지표라 목이 하나 끊겨도 크게 벌어진다.</div>
       <div style="font-family:var(--mono);font-size:19px;color:var(--orange-d);margin-top:12px">GAN 이득: 가장 뚜렷 (14.2→6.3%)</div>
     </div>
   </div>
-  <div class="tint" style="margin-top:24px">
-    <div class="cd" style="font-size:24px;text-align:center"><b>오늘의 평가 교훈.</b> 복원의 품질은 숫자 하나로 판단할 수 없습니다. <span class="nv">용도(흐름 해석)가 요구하는 지표까지 올라가서</span> 검증해야 하고, GAN의 가치는 그 꼭대기에서 가장 크게 드러납니다.</div>
+  <div class="tint" style="margin-top:0">
+    <div class="cd" style="font-size:24px;text-align:center"><b>오늘의 평가 교훈.</b> 복원의 품질은 숫자 하나로 판단할 수 없다. <span class="nv">용도(흐름 해석)가 요구하는 지표까지 올라가서</span> 검증해야 하고, GAN의 가치는 그 꼭대기에서 가장 크게 드러난다.</div>
+  </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §5</span><span class="pg"><b>34</b> / 39</span></div>
 </section>
@@ -1033,8 +1063,8 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 <section class="dv" data-label="§6 실습" data-speaker-notes="6부. 실습 안내. model_utils에 판별자와 train_gan이 추가됐다. 처음부터 학습과 W2 체크포인트 미세조정, 두 경로 모두 CPU로 가능하다.">
   <div class="num">06</div>
   <div class="k">Part 6 · Hands-on</div>
-  <div class="t">이제 직접<br>경쟁시켜 봅니다</div>
-  <div class="d">노트북에서 판별자를 만들고, 두 가지 경로(처음부터 · W2 이어받기)로 GAN을 학습합니다. 오늘 본 곡선과 이미지 전부를 직접 재현할 수 있습니다.</div>
+  <div class="t">이제 직접<br>경쟁시켜 본다</div>
+  <div class="d">노트북에서 판별자를 만들고, 두 가지 경로(처음부터 · W2 이어받기)로 GAN을 학습한다. 오늘 본 곡선과 이미지 전부를 직접 재현할 수 있다.</div>
   <div class="foot"><span class="b">Digital Rock · W3</span><span class="pg"><b>35</b> / 39</span></div>
 </section>
 
@@ -1048,7 +1078,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div style="flex:1;display:flex;flex-direction:column;gap:14px">
       <div class="card tn" style="flex:none">
         <div class="tag">경로 ① 처음부터</div>
-        <div class="cd" style="font-size:22px;margin-top:6px">새 UNet을 만들어 warmup부터 시작하면 GAN 학습의 <b>전 과정을 관찰</b>할 수 있습니다.</div>
+        <div class="cd" style="font-size:22px;margin-top:6px">새 UNet을 만들어 warmup부터 시작하면 GAN 학습의 <b>전 과정을 관찰</b>할 수 있다.</div>
       </div>
       <div class="code" style="flex:1;font-size:21px">
 G, D, hist = <span class="f">train_gan</span>(bb, k=<span class="v">5</span>, preset=<span class="v">'fast'</span>,<br>
@@ -1059,7 +1089,7 @@ G, D, hist = <span class="f">train_gan</span>(bb, k=<span class="v">5</span>, pr
     <div style="flex:1;display:flex;flex-direction:column;gap:14px">
       <div class="card to" style="flex:none">
         <div class="tag" style="color:var(--orange-d)">경로 ② W2 이어받기</div>
-        <div class="cd" style="font-size:22px;margin-top:6px">W2에서 저장한 체크포인트를 생성자 초기값으로 씁니다. 이미 기본기가 있어 <b>warmup을 짧게</b> 줄일 수 있습니다.</div>
+        <div class="cd" style="font-size:22px;margin-top:6px">W2에서 저장한 체크포인트를 생성자 초기값으로 쓴다. 이미 기본기가 있어 <b>warmup을 짧게</b> 줄일 수 있다.</div>
       </div>
       <div class="code" style="flex:1;font-size:21px">
 G0, _ = <span class="f">load_ckpt</span>(<span class="v">'unet_mini_fast.pth'</span>)<br>
@@ -1071,7 +1101,7 @@ G, D, hist = <span class="f">train_gan</span>(bb, k=<span class="v">5</span>,<br
       <div class="tint" style="flex:1">
         <div class="ct" style="font-size:23px">새로 추가된 도구</div>
         <div class="cd" style="font-size:21px;line-height:1.7;font-family:var(--mono)">PatchDiscriminatorMini<br>train_gan<br>d_hinge_loss · g_hinge_loss<br>ssim_loss<br>predict_continuous<br>save/load_gan_ckpt</div>
-        <div class="cd" style="font-size:20px;margin-top:10px">warmup · hinge · spectral norm · λ 감쇠가 <b>모두 내장</b>되어, 인자만 바꾸면 됩니다.</div>
+        <div class="cd" style="font-size:20px;margin-top:10px">warmup · hinge · spectral norm · λ 감쇠가 <b>모두 내장</b>되어, 인자만 바꾸면 된다.</div>
       </div>
     </div>
   </div>
@@ -1084,7 +1114,7 @@ G, D, hist = <span class="f">train_gan</span>(bb, k=<span class="v">5</span>,<br
     <div class="eb">§6 · Notebook & Tasks</div>
     <div class="tt">노트북 흐름과 탐구 과제</div>
   </div>
-  <div class="row" style="margin-top:14px;flex:1;align-items:stretch">
+  <div class="row" style="margin-top:14px;flex:1;align-items:center">
     <div class="card" style="flex:1">
       <div class="tag">W3_pix2pix_gan.ipynb · 6단계</div>
       <div class="cd" style="font-size:22.5px;line-height:1.85;margin-top:10px">
@@ -1114,7 +1144,7 @@ G, D, hist = <span class="f">train_gan</span>(bb, k=<span class="v">5</span>,<br
 <section class="s" data-label="자기 점검" data-speaker-notes="여섯 질문에 스스로 답해보기. 전부 오늘 슬라이드 안에 답이 있다.">
   <div class="hd">
     <div class="eb">§6 · Self-check</div>
-    <div class="tt">스스로 답해 봅니다</div>
+    <div class="tt">확인 문제</div>
   </div>
   <div class="body" style="justify-content:center">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 24px">
@@ -1133,21 +1163,21 @@ G, D, hist = <span class="f">train_gan</span>(bb, k=<span class="v">5</span>,<br
 <section class="s" data-label="마무리" data-speaker-notes="정리: L1의 흐림은 수학적 필연 → 판별자와의 경쟁이 회색을 벌한다 → pix2pix 세 장치와 안정화 → 물성(투과율)에서 가장 뚜렷한 이득. 체크포인트는 꼭 보존한다. W4에서 다른 아키텍처와 비교한다.">
   <div class="hd">
     <div class="eb">Wrap-up</div>
-    <div class="tt">오늘의 네 문장, 그리고 다음 주</div>
+    <div class="tt">핵심 요약, 그리고 다음 주</div>
   </div>
   <div class="row" style="margin-top:14px">
-    <div class="card tn" style="flex:1"><div class="cd" style="font-size:23px"><b>1.</b> 흐림은 버그가 아니라 <b>픽셀 손실의 수학적 귀결</b>입니다.</div></div>
-    <div class="card to" style="flex:1"><div class="cd" style="font-size:23px"><b>2.</b> 판별자와의 <b>경쟁</b>이 픽셀 손실에는 없는 "회색 벌점"을 만듭니다.</div></div>
+    <div class="card tn" style="flex:1"><div class="cd" style="font-size:23px"><b>1.</b> 흐림은 버그가 아니라 <b>픽셀 손실의 수학적 귀결</b>이다.</div></div>
+    <div class="card to" style="flex:1"><div class="cd" style="font-size:23px"><b>2.</b> 판별자와의 <b>경쟁</b>이 픽셀 손실에는 없는 "회색 벌점"을 만든다.</div></div>
   </div>
   <div class="row" style="margin-top:14px">
-    <div class="card to" style="flex:1"><div class="cd" style="font-size:23px"><b>3.</b> 조건부 · PatchGAN · spectral norm, 그리고 <b>작은 λ</b>가 실전 레시피입니다.</div></div>
-    <div class="card tg" style="flex:1"><div class="cd" style="font-size:23px"><b>4.</b> 이득은 <b>물성의 사다리 위쪽</b>(투과율)에서 가장 뚜렷합니다.</div></div>
+    <div class="card to" style="flex:1"><div class="cd" style="font-size:23px"><b>3.</b> 조건부 · PatchGAN · spectral norm, 그리고 <b>작은 λ</b>가 실전 레시피다.</div></div>
+    <div class="card tg" style="flex:1"><div class="cd" style="font-size:23px"><b>4.</b> 이득은 <b>물성의 사다리 위쪽</b>(투과율)에서 가장 뚜렷하다.</div></div>
   </div>
   <div class="row" style="margin-top:22px;flex:1;align-items:center">
     <div class="tint" style="flex:1.4;display:flex;align-items:center;gap:24px">
       <div style="flex:1">
         <div class="ct" style="font-size:25px">다음 주 · W4 · 다른 아키텍처</div>
-        <div class="cd" style="font-size:22px">Transformer 기반 모델과 3D 합성곱을 같은 문제에 적용해 <b>오늘의 GAN과 정면 비교</b>합니다. 학습한 체크포인트(<span style="font-family:var(--mono)">w3_gan_mini.pth</span>)를 꼭 보존하세요.</div>
+        <div class="cd" style="font-size:22px">Transformer 기반 모델과 3D 합성곱을 같은 문제에 적용해 <b>오늘의 GAN과 정면 비교</b>한다. 학습한 체크포인트(<span style="font-family:var(--mono)">w3_gan_mini.pth</span>)를 꼭 보존하라.</div>
       </div>
     </div>
     <div class="card" style="flex:1">

@@ -7483,13 +7483,13 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="Week-3---%EC%A0%81%EB%8C%80%EC%A0%81-%ED%95%99%EC%8A%B5:-pix2pix-GAN">Week 3 - 적대적 학습: pix2pix GAN<a class="anchor-link" href="#Week-3---%EC%A0%81%EB%8C%80%EC%A0%81-%ED%95%99%EC%8A%B5:-pix2pix-GAN">¶</a></h1><h2 id="%EC%98%A4%EB%8A%98-%ED%95%A0-%EA%B2%83">오늘 할 것<a class="anchor-link" href="#%EC%98%A4%EB%8A%98-%ED%95%A0-%EA%B2%83">¶</a></h2><ol>
-<li>L1 손실만 쓰면 왜 결과가 뿌옇게 나오는지 눈으로 확인합니다.</li>
-<li>두 번째 신경망인 <strong>판별자(Discriminator)</strong> 를 만들고, hinge 손실을 숫자로 이해합니다.</li>
-<li>GAN을 직접 학습합니다. 처음부터 학습하는 방법과, W2 체크포인트를 이어받아 미세조정하는 방법 둘 다 해봅니다.</li>
-<li>복원 결과를 원본과 비교하고, GAN이 무엇을 바꾸는지 정직하게 평가합니다.</li>
+<li>L1 손실만 쓰면 왜 결과가 뿌옇게 나오는지 눈으로 확인한다.</li>
+<li>두 번째 신경망인 <strong>판별자(Discriminator)</strong> 를 만들고, hinge 손실을 숫자로 이해한다.</li>
+<li>GAN을 직접 학습한다. 처음부터 학습하는 방법과, W2 체크포인트를 이어받아 미세조정하는 방법 둘 다 다룬다.</li>
+<li>복원 결과를 원본과 비교하고, GAN이 무엇을 바꾸는지 정직하게 평가한다.</li>
 </ol>
 <blockquote>
-<p>이번 주는 <strong>Bentheimer 사암</strong>으로 실습합니다. 균질한 암석이라 구조가 단순해서 복원이 잘 되는 편이라, 모델이 슬라이스를 얼마나 잘 되살리는지 눈으로 보기 좋습니다. 이웃 거리는 <strong>k=2</strong>(측정한 슬라이스 사이에 2칸씩 비어 있는 상황)로 잡습니다.</p>
+<p>이번 주는 <strong>Bentheimer 사암</strong>으로 실습한다. 균질한 암석이라 구조가 단순해서 복원이 잘 되는 편이라, 모델이 슬라이스를 얼마나 잘 되살리는지 눈으로 보기 좋다. 이웃 거리는 <strong>k=2</strong>(측정한 슬라이스 사이에 2칸씩 비어 있는 상황)로 잡는다.</p>
 </blockquote>
 </div>
 </div>
@@ -7516,7 +7516,7 @@ a.anchor-link {
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="c1"># helpers(dr_utils.py, model_utils.py)는 같은 폴더(다운로드 zip)나 ../helpers(저장소)에 있습니다.</span>
+<span class="c1"># helpers(dr_utils.py, model_utils.py)는 같은 폴더(다운로드 zip)나 ../helpers(저장소)에 있다.</span>
 <span class="k">for</span> <span class="n">_cand</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="s1">'.'</span><span class="p">),</span> <span class="n">Path</span><span class="p">(</span><span class="s1">'..'</span><span class="p">)</span> <span class="o">/</span> <span class="s1">'helpers'</span><span class="p">]:</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">_cand</span> <span class="o">/</span> <span class="s1">'dr_utils.py'</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">_cand</span><span class="o">.</span><span class="n">resolve</span><span class="p">()));</span> <span class="k">break</span>
@@ -7573,8 +7573,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.-W2-%EB%B3%B5%EC%8A%B5,-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%98%A4%EB%8A%98%EC%9D%98-%EB%AC%B8%EC%A0%9C">1. W2 복습, 그리고 오늘의 문제<a class="anchor-link" href="#1.-W2-%EB%B3%B5%EC%8A%B5,-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%98%A4%EB%8A%98%EC%9D%98-%EB%AC%B8%EC%A0%9C">¶</a></h2><p>W2에서 만든 UNet은 선형 보간을 크게 이겼습니다. 그런데 결과를 자세히 보면 아직 아쉬운 점이 있습니다. 이진화(0/1)하기 전의 출력을 그대로 보면, pore 경계가 <strong>회색으로 번져</strong> 있습니다.</p>
-<p>왜 그럴까요? 이웃 두 장만으로는 가운데 픽셀이 pore인지 solid인지 확실하지 않은 자리가 생깁니다. 이럴 때 L1 손실은 위험을 줄이려고 그냥 <strong>중간값(회색)</strong> 을 내놓습니다. 어느 쪽도 아닌, 진짜 암석에는 없는 값이죠. 이걸 "평균의 함정"이라고 부릅니다.</p>
+<h2 id="1.-W2-%EB%B3%B5%EC%8A%B5,-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%98%A4%EB%8A%98%EC%9D%98-%EB%AC%B8%EC%A0%9C">1. W2 복습, 그리고 오늘의 문제<a class="anchor-link" href="#1.-W2-%EB%B3%B5%EC%8A%B5,-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%98%A4%EB%8A%98%EC%9D%98-%EB%AC%B8%EC%A0%9C">¶</a></h2><p>W2에서 만든 UNet은 선형 보간을 크게 이겼다. 그런데 결과를 자세히 보면 아직 아쉬운 점이 있다. 이진화(0/1)하기 전의 출력을 그대로 보면, pore 경계가 <strong>회색으로 번져</strong> 있다.</p>
+<p>왜 그럴까? 이웃 두 장만으로는 가운데 픽셀이 pore인지 solid인지 확실하지 않은 자리가 생깁니다. 이럴 때 L1 손실은 위험을 줄이려고 그냥 <strong>중간값(회색)</strong> 을 내놓는다. 어느 쪽도 아닌, 진짜 암석에는 없는 값이다. 이걸 "평균의 함정"이라고 부른다.</p>
 </div>
 </div>
 </div>
@@ -7590,12 +7590,12 @@ a.anchor-link {
 <span class="n">vol</span> <span class="o">=</span> <span class="n">load_volume</span><span class="p">(</span><span class="n">DATA</span> <span class="o">/</span> <span class="s1">'Bentheimer_256.bin'</span><span class="p">)</span>
 <span class="n">K</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># 이웃 거리 (측정 슬라이스 사이 간격)</span>
 
-<span class="c1"># 선형 보간 baseline. 우리가 이겨야 할 대상입니다.</span>
+<span class="c1"># 선형 보간 baseline. 우리가 이겨야 할 대상이다.</span>
 <span class="n">m_lin</span> <span class="o">=</span> <span class="n">eval_targets</span><span class="p">(</span><span class="n">predict_linear_k</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="n">vol</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'선형 보간 (k=</span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s1">)   |Δφ|=</span><span class="si">{</span><span class="n">m_lin</span><span class="p">[</span><span class="s2">"dphi_pp"</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%p   SSIM=</span><span class="si">{</span><span class="n">m_lin</span><span class="p">[</span><span class="s2">"ssim"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-<span class="c1"># L1만 쓴 모델을 하나 학습합니다 (판별자 없이 재구성 손실만).</span>
-<span class="c1">#   train_gan(lambda_gan=0) 이면 GAN 없이 L1+SSIM만 학습합니다.</span>
+<span class="c1"># L1만 쓴 모델을 하나 학습한다 (판별자 없이 재구성 손실만).</span>
+<span class="c1">#   train_gan(lambda_gan=0) 이면 GAN 없이 L1+SSIM만 학습한다.</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">L1 위주 모델 학습 중...'</span><span class="p">)</span>
 <span class="n">G_l1</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">train_gan</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">preset</span><span class="o">=</span><span class="s1">'fast'</span><span class="p">,</span> <span class="n">lambda_gan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">w_ssim</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                        <span class="n">epochs</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">warmup</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d_base</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -7652,7 +7652,7 @@ L1 위주 모델 학습 중...
 <div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># 고정 위치의 patch 하나로 관찰합니다.</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># 고정 위치의 patch 하나로 관찰한다.</span>
 <span class="n">z</span><span class="p">,</span> <span class="n">c0</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">192</span>
 <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">vol</span><span class="p">[</span><span class="n">z</span><span class="o">-</span><span class="n">K</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">],</span> <span class="n">vol</span><span class="p">[</span><span class="n">z</span><span class="o">+</span><span class="n">K</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">],</span> <span class="n">vol</span><span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">]</span>
 
@@ -7668,7 +7668,7 @@ L1 위주 모델 학습 중...
 <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cont_l1</span><span class="p">[</span><span class="n">row</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">RED</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'L1 (완만 = 회색)'</span><span class="p">)</span>
 <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GRAY</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">':'</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">);</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'가로 단면'</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'경계에서 값이 0.5 근처로 완만하게 넘어갑니다. 이게 회색 번짐입니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'경계에서 값이 0.5 근처로 완만하게 넘어간다. 이게 회색 번짐이다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7687,7 +7687,7 @@ L1 위주 모델 학습 중...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>경계에서 값이 0.5 근처로 완만하게 넘어갑니다. 이게 회색 번짐입니다.
+<pre>경계에서 값이 0.5 근처로 완만하게 넘어간다. 이게 회색 번짐이다.
 </pre>
 </div>
 </div>
@@ -7700,13 +7700,13 @@ L1 위주 모델 학습 중...
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2.-%ED%8C%90%EB%B3%84%EC%9E%90-%EB%A7%8C%EB%93%A4%EA%B8%B0">2. 판별자 만들기<a class="anchor-link" href="#2.-%ED%8C%90%EB%B3%84%EC%9E%90-%EB%A7%8C%EB%93%A4%EA%B8%B0">¶</a></h2><p>GAN의 핵심은 두 번째 신경망인 <strong>판별자 D</strong> 입니다. 슬라이스를 받아서 "이게 진짜 암석 단면이야?" 하고 점수를 매깁니다. 우리 판별자는 세 가지 장치를 씁니다.</p>
+<h2 id="2.-%ED%8C%90%EB%B3%84%EC%9E%90-%EB%A7%8C%EB%93%A4%EA%B8%B0">2. 판별자 만들기<a class="anchor-link" href="#2.-%ED%8C%90%EB%B3%84%EC%9E%90-%EB%A7%8C%EB%93%A4%EA%B8%B0">¶</a></h2><p>GAN의 핵심은 두 번째 신경망인 <strong>판별자 D</strong> 다. 슬라이스를 받아서 "이게 진짜 암석 단면이야?" 하고 점수를 매긴다. 우리 판별자는 세 가지 장치를 쓴다.</p>
 <ul>
-<li><strong>조건부(conditional)</strong>: 이웃 슬라이스도 같이 넣습니다. 그래서 "사실적이면서 이웃과도 맞는가"를 봅니다.</li>
-<li><strong>PatchGAN</strong>: 이미지를 조각(patch)으로 나눠서 조각마다 점수를 냅니다. 국소적인 경계와 텍스처에 민감해집니다.</li>
-<li><strong>spectral norm</strong>: 판별자의 힘에 상한을 걸어 학습을 안정시킵니다.</li>
+<li><strong>조건부(conditional)</strong>: 이웃 슬라이스도 같이 넣는다. 그래서 "사실적이면서 이웃과도 맞는가"를 본다.</li>
+<li><strong>PatchGAN</strong>: 이미지를 조각(patch)으로 나눠서 조각마다 점수를 낸다. 국소적인 경계와 텍스처에 민감해진다.</li>
+<li><strong>spectral norm</strong>: 판별자의 힘에 상한을 걸어 학습을 안정시킨다.</li>
 </ul>
-<p>한 가지 더. 우리 생성자(mini UNet)는 아주 작기 때문에, 판별자를 너무 크게 만들면 판별자가 일방적으로 이겨서 학습이 망가집니다. 그래서 판별자 폭을 <code>d_base=16</code> 정도로 작게 잡습니다.</p>
+<p>한 가지 더. 우리 생성자(mini UNet)는 아주 작기 때문에, 판별자를 너무 크게 만들면 판별자가 일방적으로 이겨서 학습이 망가진다. 그래서 판별자 폭을 <code>d_base=16</code> 정도로 작게 잡는다.</p>
 </div>
 </div>
 </div>
@@ -7726,7 +7726,7 @@ L1 위주 모델 학습 중...
 <span class="n">y</span>    <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
 <span class="n">score</span> <span class="o">=</span> <span class="n">D</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">'입력 조건'</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="s1">'+ 대상'</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="s1">'-&gt; 점수 map'</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'점수 map의 각 칸이 한 patch에 대한 진짜(+)/가짜(-) 판정입니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'점수 map의 각 칸이 한 patch에 대한 진짜(+)/가짜(-) 판정이다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7741,7 +7741,7 @@ L1 위주 모델 학습 중...
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>D 파라미터: 42,865
 입력 조건 (1, 2, 64, 64) + 대상 (1, 1, 64, 64) -&gt; 점수 map (1, 1, 7, 7)
-점수 map의 각 칸이 한 patch에 대한 진짜(+)/가짜(-) 판정입니다.
+점수 map의 각 칸이 한 patch에 대한 진짜(+)/가짜(-) 판정이다.
 </pre>
 </div>
 </div>
@@ -7754,9 +7754,9 @@ L1 위주 모델 학습 중...
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3.-%EC%A0%81%EB%8C%80%EC%A0%81-%EC%86%90%EC%8B%A4-(hinge)">3. 적대적 손실 (hinge)<a class="anchor-link" href="#3.-%EC%A0%81%EB%8C%80%EC%A0%81-%EC%86%90%EC%8B%A4-(hinge)">¶</a></h2><p><strong>판별자 D</strong> 는 진짜에 +1 이상, 가짜에 -1 이하를 주려고 합니다.</p>
-$$\mathcal{L}_D = \mathbb{E}\,[\max(0,\,1-D(y))] + \mathbb{E}\,[\max(0,\,1+D(G(x)))]$$<p><strong>생성자 G</strong> 는 판별자를 속이려고, 즉 점수를 올리려고 합니다.</p>
-$$\mathcal{L}_G^{\text{adv}} = -\,\mathbb{E}\,[D(G(x))]$$<p>"확실히 맞힌 것에는 벌점 0, 애매한 것에만 벌점"이라는 규칙입니다. 숫자로 직접 확인해 봅시다.</p>
+<h2 id="3.-%EC%A0%81%EB%8C%80%EC%A0%81-%EC%86%90%EC%8B%A4-(hinge)">3. 적대적 손실 (hinge)<a class="anchor-link" href="#3.-%EC%A0%81%EB%8C%80%EC%A0%81-%EC%86%90%EC%8B%A4-(hinge)">¶</a></h2><p><strong>판별자 D</strong> 는 진짜에 +1 이상, 가짜에 -1 이하를 주려고 한다.</p>
+$$\mathcal{L}_D = \mathbb{E}\,[\max(0,\,1-D(y))] + \mathbb{E}\,[\max(0,\,1+D(G(x)))]$$<p><strong>생성자 G</strong> 는 판별자를 속이려고, 즉 점수를 올리려고 한다.</p>
+$$\mathcal{L}_G^{\text{adv}} = -\,\mathbb{E}\,[D(G(x))]$$<p>"확실히 맞힌 것에는 벌점 0, 애매한 것에만 벌점"이라는 규칙이다. 숫자로 직접 확인해 본다.</p>
 </div>
 </div>
 </div>
@@ -7774,7 +7774,7 @@ $$\mathcal{L}_G^{\text{adv}} = -\,\mathbb{E}\,[D(G(x))]$$<p>"확실히 맞힌 �
 <span class="n">g_adv</span> <span class="o">=</span> <span class="o">-</span><span class="n">fake_score</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">'D 벌점 (진짜는 +1 이상, 가짜는 -1 이하면 0):'</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">d_pen</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">'G 손실 (-D(fake), 작을수록 잘 속인 것):'</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">g_adv</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애매해서 벌점이 생깁니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애매해서 벌점이 생긴다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7789,7 +7789,7 @@ $$\mathcal{L}_G^{\text{adv}} = -\,\mathbb{E}\,[D(G(x))]$$<p>"확실히 맞힌 �
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>D 벌점 (진짜는 +1 이상, 가짜는 -1 이하면 0): 1.1
 G 손실 (-D(fake), 작을수록 잘 속인 것): 0.533
-real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애매해서 벌점이 생깁니다.
+real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애매해서 벌점이 생긴다.
 </pre>
 </div>
 </div>
@@ -7802,7 +7802,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4.-GAN-%ED%95%99%EC%8A%B5-(%EA%B2%BD%EB%A1%9C-1:-%EC%B2%98%EC%9D%8C%EB%B6%80%ED%84%B0)">4. GAN 학습 (경로 1: 처음부터)<a class="anchor-link" href="#4.-GAN-%ED%95%99%EC%8A%B5-(%EA%B2%BD%EB%A1%9C-1:-%EC%B2%98%EC%9D%8C%EB%B6%80%ED%84%B0)">¶</a></h2><p><code>train_gan</code> 이 warmup, hinge, spectral norm을 다 처리합니다. 처음 몇 epoch은 재구성 손실(L1, SSIM)만으로 몸을 풀고(λ=0), 그 다음에 판별자를 붙입니다. <code>snapshot</code> 을 주면 학습 중간의 출력을 저장해서 나중에 변화를 볼 수 있습니다.</p>
+<h2 id="4.-GAN-%ED%95%99%EC%8A%B5-(%EA%B2%BD%EB%A1%9C-1:-%EC%B2%98%EC%9D%8C%EB%B6%80%ED%84%B0)">4. GAN 학습 (경로 1: 처음부터)<a class="anchor-link" href="#4.-GAN-%ED%95%99%EC%8A%B5-(%EA%B2%BD%EB%A1%9C-1:-%EC%B2%98%EC%9D%8C%EB%B6%80%ED%84%B0)">¶</a></h2><p><code>train_gan</code> 이 warmup, hinge, spectral norm을 다 처리한다. 처음 몇 epoch은 재구성 손실(L1, SSIM)만으로 몸을 풀고(λ=0), 그 다음에 판별자를 붙인다. <code>snapshot</code> 을 주면 학습 중간의 출력을 저장해서 나중에 변화를 볼 수 있다.</p>
 </div>
 </div>
 </div>
@@ -7859,10 +7859,10 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="%ED%95%99%EC%8A%B5-%EA%B3%A1%EC%84%A0-%EC%9D%BD%EB%8A%94-%EB%B2%95">학습 곡선 읽는 법<a class="anchor-link" href="#%ED%95%99%EC%8A%B5-%EA%B3%A1%EC%84%A0-%EC%9D%BD%EB%8A%94-%EB%B2%95">¶</a></h3><p>두 신경망이 서로 당기는 학습이라, 곡선을 보면 상태를 알 수 있습니다.</p>
+<h3 id="%ED%95%99%EC%8A%B5-%EA%B3%A1%EC%84%A0-%EC%9D%BD%EB%8A%94-%EB%B2%95">학습 곡선 읽는 법<a class="anchor-link" href="#%ED%95%99%EC%8A%B5-%EA%B3%A1%EC%84%A0-%EC%9D%BD%EB%8A%94-%EB%B2%95">¶</a></h3><p>두 신경망이 서로 당기는 학습이라, 곡선을 보면 상태를 알 수 있다.</p>
 <ul>
-<li>왼쪽: 재구성 손실(L1, SSIM). GAN이 켜진 뒤에도 계속 내려가면, 사실감을 더하면서도 정확도를 해치지 않는다는 뜻입니다.</li>
-<li>오른쪽: 판별자 손실(D)과 생성자 적대 손실(G). <strong>D 손실이 0에 딱 붙지 않고 어느 정도 값을 유지</strong>하면 건강한 균형입니다. D 손실이 0으로 떨어지면 판별자가 일방적으로 이긴 것이라, 생성자가 배우지 못합니다.</li>
+<li>왼쪽: 재구성 손실(L1, SSIM). GAN이 켜진 뒤에도 계속 내려가면, 사실감을 더하면서도 정확도를 해치지 않는다는 뜻이다.</li>
+<li>오른쪽: 판별자 손실(D)과 생성자 적대 손실(G). <strong>D 손실이 0에 딱 붙지 않고 어느 정도 값을 유지</strong>하면 건강한 균형이다. D 손실이 0으로 떨어지면 판별자가 일방적으로 이긴 것이라, 생성자가 배우지 못한다.</li>
 </ul>
 </div>
 </div>
@@ -7889,7 +7889,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'적대적 손실 (D와 G의 줄다리기)'</span><span class="p">);</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'epoch'</span><span class="p">);</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">.2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">d_post</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">'D_loss'</span><span class="p">])[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">'lam'</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'GAN 구간 D 손실 평균 </span><span class="si">{</span><span class="n">d_post</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> (0.2~0.8 사이면 건강한 균형). 0에 안 붙었으면 정상입니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'GAN 구간 D 손실 평균 </span><span class="si">{</span><span class="n">d_post</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> (0.2~0.8 사이면 건강한 균형). 0에 안 붙었으면 정상이다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7908,7 +7908,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>GAN 구간 D 손실 평균 0.65 (0.2~0.8 사이면 건강한 균형). 0에 안 붙었으면 정상입니다.
+<pre>GAN 구간 D 손실 평균 0.65 (0.2~0.8 사이면 건강한 균형). 0에 안 붙었으면 정상이다.
 </pre>
 </div>
 </div>
@@ -7921,7 +7921,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5.-%EB%B3%B5%EC%9B%90-%EA%B2%B0%EA%B3%BC%EB%A5%BC-%EC%9B%90%EB%B3%B8%EA%B3%BC-%EB%B9%84%EA%B5%90">5. 복원 결과를 원본과 비교<a class="anchor-link" href="#5.-%EB%B3%B5%EC%9B%90-%EA%B2%B0%EA%B3%BC%EB%A5%BC-%EC%9B%90%EB%B3%B8%EA%B3%BC-%EB%B9%84%EA%B5%90">¶</a></h2><p>이제 학습한 GAN 모델로 빠진 슬라이스를 복원해서 원본과 나란히 봅니다. 오른쪽 끝은 원본과 복원의 차이(밝을수록 틀린 부분)입니다.</p>
+<h2 id="5.-%EB%B3%B5%EC%9B%90-%EA%B2%B0%EA%B3%BC%EB%A5%BC-%EC%9B%90%EB%B3%B8%EA%B3%BC-%EB%B9%84%EA%B5%90">5. 복원 결과를 원본과 비교<a class="anchor-link" href="#5.-%EB%B3%B5%EC%9B%90-%EA%B2%B0%EA%B3%BC%EB%A5%BC-%EC%9B%90%EB%B3%B8%EA%B3%BC-%EB%B9%84%EA%B5%90">¶</a></h2><p>이제 학습한 GAN 모델로 빠진 슬라이스를 복원해서 원본과 나란히 본다. 오른쪽 끝은 원본과 복원의 차이(밝을수록 틀린 부분)이다.</p>
 </div>
 </div>
 </div>
@@ -7945,7 +7945,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
     <span class="n">a</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span> <span class="k">if</span> <span class="n">col</span> <span class="k">else</span> <span class="s1">'k'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">'bold'</span><span class="p">);</span> <span class="n">a</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([]);</span> <span class="n">a</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'선형 |Δφ|=</span><span class="si">{</span><span class="n">m_lin</span><span class="p">[</span><span class="s2">"dphi_pp"</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%p  -&gt;  GAN |Δφ|=</span><span class="si">{</span><span class="n">res_gan</span><span class="p">[</span><span class="s2">"dphi_pp"</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%p, SSIM=</span><span class="si">{</span><span class="n">res_gan</span><span class="p">[</span><span class="s2">"ssim"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'균질한 Bentheimer라 복원이 원본에 꽤 가깝게 나옵니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'균질한 Bentheimer라 복원이 원본에 꽤 가깝게 나온다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7965,7 +7965,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>선형 |Δφ|=11.75%p  -&gt;  GAN |Δφ|=0.53%p, SSIM=0.557
-균질한 Bentheimer라 복원이 원본에 꽤 가깝게 나옵니다.
+균질한 Bentheimer라 복원이 원본에 꽤 가깝게 나온다.
 </pre>
 </div>
 </div>
@@ -7996,7 +7996,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
                       <span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cont_gan</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'GAN · 회색 </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_gan</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%'</span><span class="p">,</span> <span class="n">GREEN</span><span class="p">)]:</span>
     <span class="n">a</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'gray_r'</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span> <span class="n">a</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">);</span> <span class="n">a</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([]);</span> <span class="n">a</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'회색(불확실) 비율: L1 </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_l1</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">% -&gt; GAN </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_gan</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%. GAN 쪽이 더 또렷합니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'회색(불확실) 비율: L1 </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_l1</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">% -&gt; GAN </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_gan</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%. GAN 쪽이 더 또렷하다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8015,7 +8015,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>회색(불확실) 비율: L1 18% -&gt; GAN 5%. GAN 쪽이 더 또렷합니다.
+<pre>회색(불확실) 비율: L1 18% -&gt; GAN 5%. GAN 쪽이 더 또렷하다.
 </pre>
 </div>
 </div>
@@ -8028,7 +8028,7 @@ real=1.5, fake=-1.5 는 확실히 맞혀서 벌점 0. real=0.8, fake=0.3 은 애
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="6.-%EC%A0%95%EC%A7%81%ED%95%9C-%ED%8F%89%EA%B0%80:-%EC%84%A0%ED%98%95-vs-L1-vs-GAN">6. 정직한 평가: 선형 vs L1 vs GAN<a class="anchor-link" href="#6.-%EC%A0%95%EC%A7%81%ED%95%9C-%ED%8F%89%EA%B0%80:-%EC%84%A0%ED%98%95-vs-L1-vs-GAN">¶</a></h2><p>여기서 이번 주의 중요한 포인트가 나옵니다. 세 방법을 같은 조건에서 비교해 봅니다.</p>
+<h2 id="6.-%EC%A0%95%EC%A7%81%ED%95%9C-%ED%8F%89%EA%B0%80:-%EC%84%A0%ED%98%95-vs-L1-vs-GAN">6. 정직한 평가: 선형 vs L1 vs GAN<a class="anchor-link" href="#6.-%EC%A0%95%EC%A7%81%ED%95%9C-%ED%8F%89%EA%B0%80:-%EC%84%A0%ED%98%95-vs-L1-vs-GAN">¶</a></h2><p>여기서 이번 주의 중요한 포인트가 나온다. 세 방법을 같은 조건에서 비교해 본다.</p>
 </div>
 </div>
 </div>
@@ -8077,8 +8077,8 @@ UNet + GAN           0.53    0.557
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <blockquote>
-<p><strong>관찰</strong>: 선형 보간에서 딥러닝으로 넘어가면 오차가 크게 줄어듭니다(11.75 → 1.2 아래로). GAN을 켜면 여기서는 |Δφ|가 한 번 더 내려갔습니다. 다만 이 차이는 크지 않고, 학습의 무작위성에 따라 비슷하게 나오거나 살짝 반대로 뒤집힐 수도 있습니다. 여러 번 돌려 보면 감이 옵니다.</p>
-<p>확실한 것은 <strong>GAN이 연속 출력을 더 선명하게</strong> 만든다는 점입니다(위에서 본 회색 비율). GAN의 목표는 픽셀 오차를 더 줄이는 게 아니라 결과를 진짜처럼 만드는 것이라, 그 효과가 선명도에서 먼저 보입니다. 큰 모델로 가면 투과율 같은 물성 지표에서 이득이 뚜렷해집니다(강의 슬라이드의 LBM 결과). 픽셀 지표 하나로는 이 차이를 다 잡지 못해서, 우리는 S2나 투과율 같은 물리 지표도 함께 봅니다(W5).</p>
+<p><strong>관찰</strong>: 선형 보간에서 딥러닝으로 넘어가면 오차가 크게 줄어든다(11.75 → 1.2 아래로). GAN을 켜면 여기서는 |Δφ|가 한 번 더 내려갔다. 다만 이 차이는 크지 않고, 학습의 무작위성에 따라 비슷하게 나오거나 살짝 반대로 뒤집힐 수도 있다. 여러 번 돌려 보면 감이 온다.</p>
+<p>확실한 것은 <strong>GAN이 연속 출력을 더 선명하게</strong> 만든다는 점이다(위에서 본 회색 비율). GAN의 목표는 픽셀 오차를 더 줄이는 게 아니라 결과를 진짜처럼 만드는 것이라, 그 효과가 선명도에서 먼저 보인다. 큰 모델로 가면 투과율 같은 물성 지표에서 이득이 뚜렷해진다(강의 슬라이드의 LBM 결과). 픽셀 지표 하나로는 이 차이를 다 잡지 못해서, 우리는 S2나 투과율 같은 물리 지표도 함께 본다(W5).</p>
 </blockquote>
 </div>
 </div>
@@ -8090,7 +8090,7 @@ UNet + GAN           0.53    0.557
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="7.-%EA%B2%BD%EB%A1%9C-2:-W2-%EC%B2%B4%ED%81%AC%ED%8F%AC%EC%9D%B8%ED%8A%B8-%EC%9D%B4%EC%96%B4%EB%B0%9B%EC%95%84-%EB%AF%B8%EC%84%B8%EC%A1%B0%EC%A0%95">7. 경로 2: W2 체크포인트 이어받아 미세조정<a class="anchor-link" href="#7.-%EA%B2%BD%EB%A1%9C-2:-W2-%EC%B2%B4%ED%81%AC%ED%8F%AC%EC%9D%B8%ED%8A%B8-%EC%9D%B4%EC%96%B4%EB%B0%9B%EC%95%84-%EB%AF%B8%EC%84%B8%EC%A1%B0%EC%A0%95">¶</a></h2><p>처음부터 학습하는 대신, W2에서 만든 UNet을 생성자 초기값으로 이어받을 수도 있습니다. 이미 기본기가 있어서 warmup을 짧게 줄일 수 있습니다. (여기서는 W2 모델을 즉석에서 하나 만들어 보여줍니다. 실제로는 W2에서 저장한 <code>unet_mini_*.pth</code> 를 <code>load_ckpt</code> 로 불러오면 됩니다.)</p>
+<h2 id="7.-%EA%B2%BD%EB%A1%9C-2:-W2-%EC%B2%B4%ED%81%AC%ED%8F%AC%EC%9D%B8%ED%8A%B8-%EC%9D%B4%EC%96%B4%EB%B0%9B%EC%95%84-%EB%AF%B8%EC%84%B8%EC%A1%B0%EC%A0%95">7. 경로 2: W2 체크포인트 이어받아 미세조정<a class="anchor-link" href="#7.-%EA%B2%BD%EB%A1%9C-2:-W2-%EC%B2%B4%ED%81%AC%ED%8F%AC%EC%9D%B8%ED%8A%B8-%EC%9D%B4%EC%96%B4%EB%B0%9B%EC%95%84-%EB%AF%B8%EC%84%B8%EC%A1%B0%EC%A0%95">¶</a></h2><p>처음부터 학습하는 대신, W2에서 만든 UNet을 생성자 초기값으로 이어받을 수도 있다. 이미 기본기가 있어서 warmup을 짧게 줄일 수 있다. (여기서는 W2 모델을 즉석에서 하나 만들어 보여준다. 실제로는 W2에서 저장한 <code>unet_mini_*.pth</code> 를 <code>load_ckpt</code> 로 불러오면 된다.)</p>
 </div>
 </div>
 </div>
@@ -8107,7 +8107,7 @@ UNet + GAN           0.53    0.557
 <span class="n">G_ft</span><span class="p">,</span> <span class="n">D_ft</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">train_gan</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">G0</span><span class="p">,</span> <span class="n">lambda_gan</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">w_ssim</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
                           <span class="n">epochs</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">warmup</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">d_base</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">cont_ft</span> <span class="o">=</span> <span class="n">predict_continuous</span><span class="p">(</span><span class="n">G_ft</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="se">\n</span><span class="s1">미세조정 결과 회색 비율: </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_ft</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%. W2 이어받기는 warmup을 짧게 줄여도 됩니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="se">\n</span><span class="s1">미세조정 결과 회색 비율: </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">cont_ft</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%. W2 이어받기는 warmup을 짧게 줄여도 된다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8140,7 +8140,7 @@ UNet + GAN           0.53    0.557
   epoch  14/15  L1=0.0952 SSIM_loss=0.4357 G_gan=+0.170 D=1.884  [λ=0.100]
   epoch  15/15  L1=0.0953 SSIM_loss=0.4336 G_gan=+0.114 D=1.908  [λ=0.100]
 
-미세조정 결과 회색 비율: 2%. W2 이어받기는 warmup을 짧게 줄여도 됩니다.
+미세조정 결과 회색 비율: 2%. W2 이어받기는 warmup을 짧게 줄여도 된다.
 </pre>
 </div>
 </div>
@@ -8153,7 +8153,7 @@ UNet + GAN           0.53    0.557
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="8.-%EC%8B%AC%ED%99%94:-%CE%BB%EB%A1%9C-%ED%9D%90%EB%A6%BC%EA%B3%BC-%ED%99%98%EA%B0%81-%EC%82%AC%EC%9D%B4-%EC%A1%B0%EC%A0%88">8. 심화: λ로 흐림과 환각 사이 조절<a class="anchor-link" href="#8.-%EC%8B%AC%ED%99%94:-%CE%BB%EB%A1%9C-%ED%9D%90%EB%A6%BC%EA%B3%BC-%ED%99%98%EA%B0%81-%EC%82%AC%EC%9D%B4-%EC%A1%B0%EC%A0%88">¶</a></h2><p>adversarial 가중치 <strong>λ</strong> 가 균형을 정합니다. 너무 작으면 L1과 같아서 뿌옇고, 너무 크면 이웃과 안 맞는 구조를 지어내는 환각이 생깁니다. λ를 몇 개 바꿔서 선명도(회색 비율)와 |Δφ|가 어떻게 움직이는지 봅니다.</p>
+<h2 id="8.-%EC%8B%AC%ED%99%94:-%CE%BB%EB%A1%9C-%ED%9D%90%EB%A6%BC%EA%B3%BC-%ED%99%98%EA%B0%81-%EC%82%AC%EC%9D%B4-%EC%A1%B0%EC%A0%88">8. 심화: λ로 흐림과 환각 사이 조절<a class="anchor-link" href="#8.-%EC%8B%AC%ED%99%94:-%CE%BB%EB%A1%9C-%ED%9D%90%EB%A6%BC%EA%B3%BC-%ED%99%98%EA%B0%81-%EC%82%AC%EC%9D%B4-%EC%A1%B0%EC%A0%88">¶</a></h2><p>adversarial 가중치 <strong>λ</strong> 가 균형을 정한다. 너무 작으면 L1과 같아서 뿌옇고, 너무 크면 이웃과 안 맞는 구조를 지어내는 환각이 생긴다. λ를 몇 개 바꿔서 선명도(회색 비율)와 |Δφ|가 어떻게 움직이는지 본다.</p>
 </div>
 </div>
 </div>
@@ -8171,9 +8171,9 @@ UNet + GAN           0.53    0.557
     <span class="n">ci</span> <span class="o">=</span> <span class="n">predict_continuous</span><span class="p">(</span><span class="n">Gi</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">)</span>
     <span class="n">ri</span> <span class="o">=</span> <span class="n">evaluate_model</span><span class="p">(</span><span class="n">Gi</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'λ=</span><span class="si">{</span><span class="n">lam</span><span class="si">:</span><span class="s1">&lt;4</span><span class="si">}</span><span class="s1">  회색 </span><span class="si">{</span><span class="n">grey</span><span class="p">(</span><span class="n">ci</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">4.0f</span><span class="si">}</span><span class="s1">%   |Δφ| </span><span class="si">{</span><span class="n">ri</span><span class="p">[</span><span class="s2">"dphi_pp"</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">%p   SSIM </span><span class="si">{</span><span class="n">ri</span><span class="p">[</span><span class="s2">"ssim"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">GAN 학습은 예민합니다. λ를 바꾸면 결과가 꽤 흔들리죠.'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'특히 λ를 크게 넣으면 |Δφ|가 오히려 나빠지기 쉽습니다(위 표).'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'그래서 실전에서는 λ를 작게(0.1 근처) 넣어 재구성 손실이 주도하게 합니다. GAN은 살짝 얹는 양념입니다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">GAN 학습은 예민하다. λ를 바꾸면 결과가 꽤 흔들린다.'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'특히 λ를 크게 넣으면 |Δφ|가 오히려 나빠지기 쉽다(위 표).'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'그래서 실전에서는 λ를 작게(0.1 근처) 넣어 재구성 손실이 주도하게 한다. GAN은 살짝 얹는 양념이다.'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8190,9 +8190,9 @@ UNet + GAN           0.53    0.557
 λ=0.1   회색   11%   |Δφ| 2.23%p   SSIM 0.553
 λ=0.3   회색    9%   |Δφ| 3.53%p   SSIM 0.506
 
-GAN 학습은 예민합니다. λ를 바꾸면 결과가 꽤 흔들리죠.
-특히 λ를 크게 넣으면 |Δφ|가 오히려 나빠지기 쉽습니다(위 표).
-그래서 실전에서는 λ를 작게(0.1 근처) 넣어 재구성 손실이 주도하게 합니다. GAN은 살짝 얹는 양념입니다.
+GAN 학습은 예민하다. λ를 바꾸면 결과가 꽤 흔들린다.
+특히 λ를 크게 넣으면 |Δφ|가 오히려 나빠지기 쉽다(위 표).
+그래서 실전에서는 λ를 작게(0.1 근처) 넣어 재구성 손실이 주도하게 한다. GAN은 살짝 얹는 양념이다.
 </pre>
 </div>
 </div>
@@ -8207,13 +8207,13 @@ GAN 학습은 예민합니다. λ를 바꾸면 결과가 꽤 흔들리죠.
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="9.-%EC%A0%95%EB%A6%AC,-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EB%8B%A4%EC%9D%8C-%EC%A3%BC">9. 정리, 그리고 다음 주<a class="anchor-link" href="#9.-%EC%A0%95%EB%A6%AC,-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EB%8B%A4%EC%9D%8C-%EC%A3%BC">¶</a></h2><p><strong>오늘 배운 것</strong></p>
 <ul>
-<li>L1 손실은 애매한 자리에서 회색을 냅니다. "평균의 함정"입니다.</li>
-<li>GAN은 생성자와 판별자를 경쟁시켜, 회색 대신 진짜 같은 구조를 만들게 합니다.</li>
-<li>조건부, PatchGAN, spectral norm, hinge 손실, 그리고 작은 λ가 실전 레시피입니다.</li>
-<li>판별자가 너무 세면(D 손실이 0에 붙으면) 학습이 망가집니다. 판별자를 작게(<code>d_base=16</code>) 잡아 균형을 맞췄습니다.</li>
-<li>GAN은 출력을 더 선명하게 만들고, 여기서는 |Δφ|도 함께 좋아졌습니다. 다만 픽셀 지표만으로는 GAN의 이득을 다 못 보기 때문에, 큰 모델에서는 투과율 같은 물성 지표로 확인합니다.</li>
+<li>L1 손실은 애매한 자리에서 회색을 낸다. "평균의 함정"이다.</li>
+<li>GAN은 생성자와 판별자를 경쟁시켜, 회색 대신 진짜 같은 구조를 만들게 한다.</li>
+<li>조건부, PatchGAN, spectral norm, hinge 손실, 그리고 작은 λ가 실전 레시피다.</li>
+<li>판별자가 너무 세면(D 손실이 0에 붙으면) 학습이 망가진다. 판별자를 작게(<code>d_base=16</code>) 잡아 균형을 맞췄다.</li>
+<li>GAN은 출력을 더 선명하게 만들고, 여기서는 |Δφ|도 함께 좋아졌다. 다만 픽셀 지표만으로는 GAN의 이득을 다 못 보기 때문에, 큰 모델에서는 투과율 같은 물성 지표로 확인한다.</li>
 </ul>
-<p><strong>다음 주 (W4)</strong>: 다른 아키텍처(Transformer 기반, 3D)를 같은 문제에 적용해 오늘의 GAN과 비교합니다. 학습한 체크포인트(<code>w3_gan_mini.pth</code>)를 보관해 두세요.</p>
+<p><strong>다음 주 (W4)</strong>: 다른 아키텍처(Transformer 기반, 3D)를 같은 문제에 적용해 오늘의 GAN과 비교한다. 학습한 체크포인트(<code>w3_gan_mini.pth</code>)를 보관하라.</p>
 <p><strong>탐구 과제</strong>(핸드아웃 §5): GAN 유무 비교, λ sweep, warmup·spectral norm 실험, "숫자는 비슷한데 구조가 다른" 사례 찾기.</p>
 </div>
 </div>
