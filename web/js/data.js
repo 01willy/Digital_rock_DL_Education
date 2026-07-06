@@ -452,7 +452,7 @@ window.COURSE = {
     groups: {
       // 두 조 공통 — 동일 내용(통합 트랙)
       g1: {
-        slides:30, cells:26, tryits:5,
+        slides:38, cells:26, tryits:5,
         notebook:'W3_pix2pix_gan.ipynb',
         tasks:[
           { t:'GAN 있음/없음 비교', req:true, d:'같은 조건에서 L1만 모델과 GAN 모델의 연속 출력·경계·작은 pore를 비교. 회색(불확실) 비율과 함께 무엇이 달라졌는지 서술.' },
@@ -462,7 +462,7 @@ window.COURSE = {
         ],
       },
       g2: {
-        slides:30, cells:26, tryits:5,
+        slides:38, cells:26, tryits:5,
         notebook:'W3_pix2pix_gan.ipynb',
         tasks:[
           { t:'GAN 있음/없음 비교', req:true, d:'같은 조건에서 L1만 모델과 GAN 모델의 연속 출력·경계·작은 pore를 비교. 회색(불확실) 비율과 함께 무엇이 달라졌는지 서술.' },
