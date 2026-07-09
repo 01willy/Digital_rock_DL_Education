@@ -452,16 +452,16 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
     <div class="eb">§2 · 목적 함수</div>
     <div class="tt">목적 함수: min–max</div>
   </div>
-  <div class="body" style="justify-content:center;gap:26px">
-    <div class="eq" style="text-align:center;font-size:28px;padding:28px 30px 22px">
+  <div class="body" style="justify-content:center;gap:16px">
+    <div class="eq" style="text-align:center;font-size:26px;padding:18px 30px 14px">
       $$\min_{G}\;\max_{D}\;\;\textcolor{#1f3a5f}{\mathbb{E}_{y}\big[\log D(y)\big]}\;+\;\textcolor{#d4760f}{\mathbb{E}_{x}\big[\log\big(1-D(G(x))\big)\big]}$$
       <div style="display:flex;justify-content:center;gap:60px;margin-top:6px;font-size:19px">
         <span style="color:var(--navy)"><b>왼쪽 항</b> · 진짜를 진짜로</span>
         <span style="color:var(--orange-d)"><b>오른쪽 항</b> · 가짜를 가짜로</span>
       </div>
     </div>
-    <div class="figbox" style="align-self:center;max-width:1240px;padding:14px 20px">
-      <img src="assets/figures/W3_minmax.png" style="width:100%" alt="하나의 수평 값 축 D(G(x)) 위에서 주황색 화살표(생성자 G, max)가 오른쪽으로, 남색 화살표(판별자 D, min)가 왼쪽으로 당기는 반대 방향 도식. 축 중앙에 초록 균형점 'D(G(x))≈0, 진짜인지 가짜인지 구별 불가'가 표시되고 하단에 min_G max_D 보조 문구가 있음.">
+    <div class="figbox" style="align-self:center;max-width:900px;padding:8px 16px">
+      <img src="assets/figures/W3_minmax.png" style="width:100%;max-height:250px;object-fit:contain" alt="하나의 수평 값 축 D(G(x)) 위에서 주황색 화살표(생성자 G, max)가 오른쪽으로, 남색 화살표(판별자 D, min)가 왼쪽으로 당기는 반대 방향 도식. 축 중앙에 초록 균형점 'D(G(x))≈0, 진짜인지 가짜인지 구별 불가'가 표시되고 하단에 min_G max_D 보조 문구가 있음.">
       <div class="cap" style="text-align:center">min–max의 직관 · 생성자 G는 판별자 점수를 +방향으로, 판별자 D는 −방향으로 당기며 D(G(x))≈0 균형점에서 멈춘다</div>
     </div>
     <div class="row">
@@ -478,9 +478,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
         <div class="cd" style="margin-top:10px;font-size:24px">이론상 균형에서 생성 분포는 진짜 분포와 일치하고, $D$ 는 어느 쪽인지 못 맞혀 <b>모든 입력에 ½</b> 을 내놓는다.</div>
       </div>
     </div>
-    <div class="tint">
-      <div class="cd" style="font-size:23px"><b>실전 참고.</b> 원식의 log 손실은 초반에 gradient가 약해 학습이 정체되기 쉽다. §3에서는 같은 목적을 안정적으로 구현한 <span class="nv">hinge 손실</span>을 사용한다.</div>
-    </div>
+    <div class="cap" style="text-align:center;font-size:20px">원식의 log 손실은 초반 gradient가 약해 정체되기 쉽다. §3에서는 같은 목적을 안정적으로 구현한 <span class="nv" style="font-weight:600">hinge 손실</span>을 사용한다.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>13</b> / 39</span></div>
 </section>
@@ -764,7 +762,7 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
     <div class="eb">§3 · 계산 예시</div>
     <div class="tt">벌점 계산 예시</div>
   </div>
-  <div class="row" style="margin-top:14px;align-items:stretch">
+  <div class="row" style="margin-top:12px;align-items:stretch">
     <div style="flex:1.3">
       <table class="tb">
         <tr><th>상황</th><th>D의 점수</th><th>D의 벌점</th><th>계산</th></tr>
@@ -787,9 +785,9 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
       </div>
     </div>
   </div>
-  <div class="figbox" style="align-self:center;max-width:1560px;margin-top:16px;flex:1;display:flex;flex-direction:column;justify-content:center;padding:12px 18px">
-    <img src="assets/figures/W3_hinge_calc.png" style="width:100%" alt="가로 2패널 그래프. 왼쪽은 진짜 표본 벌점 relu(1−D(y)) 곡선 위에 D=+1.5(벌점0, 초록점)와 D=+0.8(벌점0.2, 빨강점), 오른쪽은 가짜 표본 벌점 relu(1+D(G(x))) 곡선 위에 D=−1.5(벌점0)와 D=+0.3(벌점1.3). 각 점에 max(0,·) 계산식과 작은 벌점 막대, ±1 margin 점선이 표시됨.">
-    <div class="cap" style="text-align:center">표의 네 상황을 그래프로 · 진짜(왼쪽)·가짜(오른쪽) 표본별 hinge 벌점 곡선 위에 각 예시점의 점수·max(0,·) 계산식·벌점 막대·margin ±1 경계를 표기</div>
+  <div class="figbox" style="align-self:center;max-width:1120px;margin-top:12px;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 16px">
+    <img src="assets/figures/W3_hinge_calc.png" style="width:100%;max-height:330px;object-fit:contain" alt="가로 2패널 그래프. 왼쪽은 진짜 표본 벌점 relu(1−D(y)) 곡선 위에 D=+1.5(벌점0, 초록점)와 D=+0.8(벌점0.2, 빨강점), 오른쪽은 가짜 표본 벌점 relu(1+D(G(x))) 곡선 위에 D=−1.5(벌점0)와 D=+0.3(벌점1.3). 각 점에 max(0,·) 계산식과 작은 벌점 막대, ±1 margin 점선이 표시됨.">
+    <div class="cap" style="text-align:center">표의 네 상황을 그래프로 · 각 예시점의 점수·max(0,·) 계산식·벌점 막대·margin ±1 경계를 표기</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §3</span><span class="pg"><b>23</b> / 39</span></div>
 </section>
@@ -825,19 +823,9 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
       <div class="cd">작은 가중치로 더한다. 실제 연구도 <span style="font-family:var(--mono)">0.09–0.13</span> 범위다. 사실감은 <b>정확도 위에</b> 더하는 항이다.</div>
     </div>
   </div>
-  <div class="figbox" style="align-self:center;max-width:1560px;margin-top:18px;flex:1;display:flex;flex-direction:column;justify-content:center;padding:12px 22px">
-    <img src="assets/figures/W3_loss_composition.png" style="width:100%" alt="가로 누적 막대 하나가 세 구간으로 나뉨: NAVY의 L1(w=1.0, 기여 0.200), 회청색 SSIM(w_s=0.3, 기여 0.036), ORANGE의 adv(λ=0.1, 기여 0.040). 각 구간 아래 원손실과 계산식이 있고 오른쪽 위에 가중합 L_G=0.276, 하단에 'λ=0이면 W2로 회귀(흐림), λ 과대면 이웃 불일치(환각)' 해설이 표시됨.">
-    <div class="cap" style="text-align:center">세 손실항의 가중 기여 · L1(w=1.0)·SSIM(w_s=0.3)·adv(λ=0.1) → 가중합 L_G=0.276</div>
-  </div>
-  <div class="row" style="margin-top:14px;align-items:center">
-    <div class="tint" style="flex:1;display:flex;align-items:center;gap:26px;padding:22px 30px">
-      <div style="font-family:var(--mono);font-size:21px;color:var(--muted);flex:none">λ = 0</div>
-      <div style="flex:1;height:10px;border-radius:6px;background:linear-gradient(90deg,#c83a3a22,#2e8b5766 40%,#2e8b5766 60%,#c83a3a22);position:relative">
-        <div style="position:absolute;left:47%;top:-7px;width:24px;height:24px;border-radius:50%;background:var(--green);border:4px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>
-      </div>
-      <div style="font-family:var(--mono);font-size:21px;color:var(--muted);flex:none">λ 큼</div>
-      <div class="cd" style="flex:1.4;font-size:22px"><b>왼쪽 끝</b>: W2와 동일하며 흐림 발생 · <b>오른쪽 끝</b>: 이웃과 어긋나는 <span class="hl">환각</span> 위험 · <b style="color:var(--green)">가운데(≈0.1)</b>: 선명하면서 정확. 노트북 §6.5에서 직접 sweep 한다.</div>
-    </div>
+  <div class="figbox" style="align-self:center;max-width:1180px;margin-top:14px;flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 20px">
+    <img src="assets/figures/W3_loss_composition.png" style="width:100%;max-height:340px;object-fit:contain" alt="가로 누적 막대 하나가 세 구간으로 나뉨: NAVY의 L1(w=1.0, 기여 0.200), 회청색 SSIM(w_s=0.3, 기여 0.036), ORANGE의 adv(λ=0.1, 기여 0.040). 각 구간 아래 원손실과 계산식이 있고 오른쪽 위에 가중합 L_G=0.276, 하단에 'λ=0이면 W2로 회귀(흐림), λ 과대면 이웃 불일치(환각)' 해설이 표시됨.">
+    <div class="cap" style="text-align:center">세 손실항의 가중 기여 · L1(w=1.0)·SSIM(w_s=0.3)·adv(λ=0.1) → 가중합 L_G=0.276 · <b style="color:var(--green)">가운데 λ≈0.1</b>에서 선명하면서 정확(노트북 §6.5에서 sweep)</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §3</span><span class="pg"><b>24</b> / 39</span></div>
 </section>
