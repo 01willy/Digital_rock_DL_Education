@@ -230,58 +230,112 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 </section>
 
 <!-- ═══════════ 05 · L1 복습 + 픽셀 하나의 수학 ═══════════ -->
-<section class="s" data-label="픽셀 하나의 수학" data-speaker-notes="한 픽셀이 50% 확률로 0(고체) 또는 1(공극)일 때: L2 최적해는 기대값 0.5(회색), L1은 0~1 사이 어디든 기대손실이 같아 중간값을 골라도 벌점이 없다. 픽셀 단위 손실은 회색을 벌하지 않고, 이것이 흐림의 근원이다.">
+<section class="s" data-label="픽셀 하나의 수학" data-speaker-notes="한 픽셀이 50% 확률로 0(고체) 또는 1(공극)일 때: L2 최적해는 기대값 0.5(회색), L1은 0~1 사이 어디든 기대손실이 같아 중간값을 골라도 벌점이 없다. 직관: L2는 실수를 제곱해 크게 벌하므로 극단(0·1)을 골랐다 틀리면 손해가 커 안전하게 0.5를 고르고, L1은 실수를 그대로 더하므로 0.5든 0이든 평균 실수가 같아 확신할 이유가 없다. 곡선 그림으로 L2가 아래로 볼록(최소 0.5), L1이 평평함을 보인다. 표에서 세 예측값의 기대손실을 직접 확인. 결론: 픽셀 단위 손실은 확신을 유도하는 압력을 주지 못한다. 이것이 흐림의 근원이고, §2 판별자가 필요한 이유다.">
   <div class="hd">
     <div class="eb">§1 · 손실의 성질</div>
-    <div class="tt">픽셀 단위로 본 흐림의 원인</div>
+    <div class="tt">픽셀 하나의 수학: 왜 회색이 나오나</div>
   </div>
-  <div class="lead">이웃 두 장만으로는 가운데 픽셀이 pore(1)인지 solid(0)인지 확정할 수 없는 경우가 생긴다. <b>절반 확률로 0 또는 1</b>인 픽셀 하나에 대해, 모델이 어떤 값 ŷ를 낼 때 손실이 최소가 되는지 계산한다.</div>
-  <div class="row" style="margin-top:24px;flex:1;align-items:stretch">
-    <div style="flex:1.15;display:flex;flex-direction:column;gap:16px">
-      <div class="eq"><div class="lbl">L2 (MSE) · 기대 손실</div>
-        $\mathbb{E}[(y-\hat{y})^2] = \tfrac{1}{2}\hat{y}^2 + \tfrac{1}{2}(1-\hat{y})^2$ &nbsp;→&nbsp; 최소는 $\hat{y}=0.5$, <b style="color:var(--red)">정확히 회색</b></div>
-      <div class="eq"><div class="lbl">L1 (MAE) · 기대 손실</div>
-        $\mathbb{E}[|y-\hat{y}|] = \tfrac{1}{2}\hat{y} + \tfrac{1}{2}(1-\hat{y}) = \tfrac{1}{2}$ &nbsp;→&nbsp; $0\le\hat{y}\le1$ <b>어디든 동일</b>, 중간값이어도 벌점 없음</div>
-      <div class="tint">
-        <div class="cd" style="font-size:24px"><b>결론.</b> 픽셀 단위 손실(L1·L2)은 애매한 곳에서 <span class="hl">회색을 벌하지 않거나(L1), 오히려 보상한다(L2)</span>. 모델은 중간값으로 수렴한다.</div>
+  <div class="lead" style="margin-bottom:16px">이웃 두 장만으로는 가운데 픽셀이 공극(pore, 값 1)인지 고체(solid, 값 0)인지 확정 못 하는 경계가 생긴다. 이런 픽셀 하나가 <b>절반 확률로 0, 절반 확률로 1</b>일 때, 모델이 어떤 값 $\hat{y}$ 를 내야 손실이 가장 작아지는지 계산한다. $\hat{y}$ 는 모델의 예측값, $y$ 는 정답이다. $\mathbb{E}[\cdot]$ 는 두 경우(0일 때·1일 때)를 확률로 평균낸 <b>기대값</b>이다.</div>
+  <div class="row" style="flex:1;align-items:stretch;gap:20px">
+    <!-- 왼쪽: 수식 + 표 -->
+    <div style="flex:1.02;display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="eq" style="padding:16px 24px"><div class="lbl">L2 (오차 제곱) · 기대손실</div>
+        $\mathbb{E}[(y-\hat{y})^2]=\tfrac{1}{2}\hat{y}^2+\tfrac{1}{2}(1-\hat{y})^2$ &nbsp;→&nbsp; 최소는 $\hat{y}=0.5$, <b style="color:var(--red)">정확히 회색</b></div>
+      <div class="eq" style="padding:16px 24px"><div class="lbl">L1 (오차 절댓값) · 기대손실</div>
+        $\mathbb{E}[|y-\hat{y}|]=\tfrac{1}{2}\hat{y}+\tfrac{1}{2}(1-\hat{y})=\tfrac{1}{2}$ &nbsp;→&nbsp; $0\le\hat{y}\le1$ <b>어디든 0.5</b>, 회색도 벌점 없음</div>
+      <table class="tb">
+        <tr><th>모델 예측 $\hat{y}$</th><th>L1 기대손실</th><th>L2 기대손실</th></tr>
+        <tr><td>0.0 · solid 확신</td><td class="m">0.50</td><td class="m">0.50</td></tr>
+        <tr><td style="color:var(--red);font-weight:600">0.5 · 회색(가운데)</td><td class="m">0.50</td><td class="m" style="color:var(--red)">0.25 ← 최소</td></tr>
+        <tr><td>1.0 · pore 확신</td><td class="m">0.50</td><td class="m">0.50</td></tr>
+      </table>
+      <div class="cap" style="margin-top:2px">예: 정답이 0 또는 1로 반반 갈리는 경계 픽셀 하나. L2는 회색(0.5)에서만 손실이 0.25로 가장 작고, L1은 세 값 모두 0.50으로 같다. 확신(0·1)을 택할 이유가 어느 쪽에도 없다.</div>
+    </div>
+    <!-- 가운데: 곡선 그림 -->
+    <div style="flex:1.12;display:flex;flex-direction:column;min-width:0">
+      <div class="figbox" style="padding:12px 14px">
+        <img src="assets/figures/W3_loss_vs_pred.png" style="width:100%" alt="가로축은 모델 예측값 ŷ(0=solid, 0.5=회색, 1=pore), 세로축은 기대손실. 남색 L2 곡선은 아래로 볼록해 ŷ=0.5에서 최소 0.25를 찍고, 주황색 L1 선은 0.5 높이의 수평선으로 어디서나 값이 같다.">
+        <div class="cap" style="text-align:center;margin-top:8px">L2는 회색(0.5)에서 손실이 가장 작아 <b>회색을 보상</b>한다. L1은 평평해 <b>회색을 벌하지 않는다</b>. 두 손실 모두 확신 쪽으로 미는 힘이 없다.</div>
       </div>
     </div>
-    <div style="flex:1">
-      <table class="tb">
-        <tr><th>모델의 출력 ŷ</th><th>L1 기대 손실</th><th>L2 기대 손실</th></tr>
-        <tr><td>0.0 (solid 확신)</td><td class="m">0.50</td><td class="m">0.50</td></tr>
-        <tr><td style="color:var(--red);font-weight:600">0.5 (회색)</td><td class="m">0.50</td><td class="m" style="color:var(--red)">0.25 ← 최소</td></tr>
-        <tr><td>1.0 (pore 확신)</td><td class="m">0.50</td><td class="m">0.50</td></tr>
-      </table>
-      <div class="cap" style="margin-top:14px">정답이 50:50으로 갈리는 픽셀 하나의 기대 손실. L2는 회색(0.5)이 유일한 최적해이고, L1은 확신과 중간값의 벌점이 같다. 어느 쪽도 확신을 유도하는 압력을 주지 않는다.</div>
+    <!-- 오른쪽: 직관 카드 -->
+    <div style="flex:0.86;display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="card tn" style="padding:18px 22px">
+        <div class="ct" style="font-size:24px">L2가 회색을 고르는 이유</div>
+        <div class="cd" style="font-size:22px">L2는 실수를 <b>제곱</b>해 크게 벌한다. 0이나 1을 골랐다 틀리면 오차가 1, 제곱하면 손해가 1로 커진다. 그래서 크게 틀릴 위험을 피해 가운데 <span class="hl">0.5</span>로 <b>몸을 사린다</b>.</div>
+      </div>
+      <div class="card to" style="padding:18px 22px">
+        <div class="ct" style="font-size:24px">L1이 확신을 안 하는 이유</div>
+        <div class="cd" style="font-size:22px">L1은 실수를 <b>그대로</b> 더한다. 0.5를 내든 0을 내든 평균 실수가 똑같이 0.5다. 손해가 같으니 굳이 <span class="hl">확신할 이유가 없다</span>.</div>
+      </div>
+      <div class="tint" style="padding:16px 22px">
+        <div class="cd" style="font-size:21px"><b>결론.</b> 픽셀 하나씩 보는 손실(L1·L2)은 애매한 경계에서 회색을 벌하지 못한다. 그래서 <b>"실제 암석처럼 보이는가"</b>를 판정할 새 신호가 필요하다. <span class="nv">§2 판별자</span>가 그 역할이다.</div>
+      </div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §1</span><span class="pg"><b>05</b> / 45</span></div>
 </section>
 
 <!-- ═══════════ 06 · 평균의 함정 (2D) ═══════════ -->
-<section class="s" data-label="L1과 평균" data-speaker-notes="픽셀 하나의 논리를 2D로 확장. 정답 후보가 A(왼쪽 pore)일 수도 B(오른쪽)일 수도 있으면, 손실 최소화는 둘의 평균 = 겹치는 회색 두 덩어리를 만든다. 진짜 암석엔 존재하지 않는 이미지다.">
+<section class="s" data-label="L1과 평균" data-speaker-notes="픽셀 하나의 논리를 2D로 확장한다. 정답 후보가 A(왼쪽 pore)일 수도 B(오른쪽)일 수도 있으면, L1 손실 최소화의 답은 둘의 중앙값이고, 후보가 반반이면 A와 B를 겹친 회색이 된다. 핵심 수식의 기호를 하나씩 푼다: argmin은 뒤 식을 가장 작게 만드는 예측값을 찾으라는 뜻, E는 가능한 정답들에 대한 평균, ‖y−ŷ‖는 정답과 예측의 거리(틀린 정도), median은 L1 거리 합을 최소로 만드는 값이 중앙값이라는 수학적 사실이다. 후보 {0,0,1}의 중앙값은 0이지만, {0,1}처럼 반반이면 0과 1 사이 전체가 동률이라 확신이 없고, 2D 이미지에서는 A와 B를 반씩 겹친 회색 이미지가 된다. 진짜 암석에는 없는 이미지다.">
   <div class="hd">
     <div class="eb">§1 · 2D로 확장</div>
     <div class="tt">정답이 여럿일 때 L1의 선택: 평균</div>
   </div>
-  <div class="row" style="flex:1;align-items:center;margin-top:6px">
-    <div style="flex:1.35" class="figbox">
-      <img src="assets/figures/W3_average_trap.png" style="width:100%" alt="평균의 함정">
+  <div class="body" style="justify-content:center">
+  <div class="row" style="align-items:center;gap:24px">
+
+    <!-- 왼쪽: 그림 + 도입 -->
+    <div style="flex:1.1;display:flex;flex-direction:column;gap:12px">
+      <div class="cd" style="font-size:22px;line-height:1.5">가운데 슬라이스의 정답이 <b>A(왼쪽에 pore)</b>일 수도, <b>B(오른쪽에 pore)</b>일 수도 있다. 이때 L1 손실을 가장 작게 만드는 예측을 오른쪽 수식으로 구한다.</div>
+      <div class="figbox"><img src="assets/figures/W3_average_trap.png" style="width:100%" alt="정답 후보 A(왼쪽 pore)와 B(오른쪽 pore)를 반씩 겹치면 두 위치 모두 회색이 되는 평균 이미지가 나온다는 도식"></div>
+      <div class="cap" style="text-align:center">후보 A와 B를 반씩 겹치면 A 자리도 B 자리도 <b>회색</b>이 된다. 진짜 암석에는 없는 이미지다.</div>
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;gap:16px">
-      <div class="eq" style="text-align:center"><div class="lbl">픽셀별 최적해</div>
-        $\hat{y}^{*}=\arg\min_{\hat{y}}\ \mathbb{E}\big[\,\|y-\hat{y}\|\,\big]=\mathrm{median}(y)$
-        <div style="font-size:19px;color:var(--sub);margin-top:10px">정답 후보들의 <b>평균 · 중앙값</b></div></div>
-      <div class="card tn">
-        <div class="ct" style="font-size:25px">모든 후보를 반씩 섞은 이미지</div>
-        <div class="cd">pore가 A에 있을 수도, B에 있을 수도 있으면, 손실을 최소화하는 답은 <b>A도 B도 아닌, 둘을 겹친 회색</b>이다.</div>
+
+    <!-- 오른쪽: 수식 + 기호 풀이 + 결론 -->
+    <div style="flex:1.4;display:flex;flex-direction:column;gap:12px">
+
+      <!-- 핵심 수식 -->
+      <div class="eq" style="text-align:center;padding:14px 24px 10px">
+        <div class="lbl">픽셀별 L1 최적해</div>
+        $$\hat{y}^{*}=\arg\min_{\hat{y}}\ \mathbb{E}\big[\,\|y-\hat{y}\|\,\big]=\mathrm{median}(y)$$
+        <div style="font-size:19px;color:var(--sub);margin-top:4px">읽는 법: <b>거리(틀린 정도)의 평균을 가장 작게 만드는 예측값 <span class="nv">ŷ</span></b>는 정답 후보들의 <b>중앙값</b>이다.</div>
       </div>
-      <div class="card to">
-        <div class="ct" style="font-size:25px">필요한 압력</div>
-        <div class="cd">평균이 아니라 <span class="hl">그럴듯한 후보 하나를 확신 있게</span> 선택하도록 유도해야 한다. 픽셀 손실은 이 압력을 만들지 못한다. 새로운 종류의 신호가 필요하다.</div>
+
+      <!-- 기호 풀이 표: argmin · E · 거리 · median 각 한 줄 -->
+      <table class="tb" style="font-size:20px">
+        <tr><th style="width:22%">기호</th><th>한 줄 풀이 (처음 보는 기준)</th></tr>
+        <tr>
+          <td class="m">$\arg\min_{\hat{y}}$</td>
+          <td>뒤 식을 <b>가장 작게 만드는 예측값 ŷ를 찾아라</b> (그때의 ŷ).</td>
+        </tr>
+        <tr>
+          <td class="m">$\mathbb{E}[\,\cdot\,]$</td>
+          <td><b>가능한 정답들에 대한 평균</b>. 정답이 A일 수도 B일 수도 있으니 평균한다.</td>
+        </tr>
+        <tr>
+          <td class="m">$\|y-\hat{y}\|$</td>
+          <td>정답 <b>y</b>와 예측 <b>ŷ</b>의 <b>거리</b>, 곧 <span class="hl">틀린 정도</span>.</td>
+        </tr>
+        <tr>
+          <td class="m">$\mathrm{median}$</td>
+          <td><b>중앙값</b>. L1 거리의 합을 최소로 만드는 값은 중앙값이라는 <b>수학적 사실</b>.</td>
+        </tr>
+      </table>
+
+      <!-- median 숫자 예시 + 결론 -->
+      <div class="tint" style="padding:14px 22px">
+        <div class="tag" style="font-size:18px">중앙값 예시 (숫자로)</div>
+        <div class="cd" style="font-size:20px;margin-top:5px;line-height:1.45">
+          후보 <b>{0, 0, 1}</b>의 중앙값은 <span class="nv">0</span>, solid로 <b>확신</b>한다. 후보가 <b>{0, 1} 반반</b>이면 0과 1 사이 <span class="hl">전체가 동률(벌점 같음)</span>이라 확신할 근거가 없다.
+        </div>
       </div>
+      <div class="cd" style="font-size:20px;line-height:1.45;color:var(--red)">
+        <b>결론.</b> 반반인 픽셀들이 모이면 2D에서는 <b>A와 B를 반씩 겹친 회색(평균 이미지)</b>이 된다. 후보 하나를 확신 있게 고르게 하려면 픽셀 손실 밖의 <span class="nv">새 신호</span>가 필요하다.
+      </div>
+
     </div>
+  </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §1</span><span class="pg"><b>06</b> / 45</span></div>
 </section>
@@ -346,23 +400,43 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 </section>
 
 <!-- ═══════════ 10 · 역사 ═══════════ -->
-<section class="s" data-label="역사·배경" data-speaker-notes="2014 Goodfellow가 GAN 제안, 손실을 사람이 설계하지 않고 네트워크가 배운다는 발상. 2015 DCGAN이 합성곱으로 안정화, 2017 pix2pix가 조건부 image-to-image 표준을 만들었고 같은 해 Mosser 등이 다공성 매질 재구성에 GAN을 도입. 우리 연구는 이 pix2pix 계열이다.">
+<section class="s" data-label="역사·배경" data-speaker-notes="GAN 이전에는 무엇이 진짜 같은지를 사람이 손실 공식으로 써야 했다. 픽셀 평균 손실(L1)을 쓰면 §1에서 본 흐림이 나온다. 여러 정답의 평균을 그리기 때문이다. 2014년 Goodfellow의 착상은 그 판정을 두 번째 신경망(판별자)에 맡기고 생성자와 경쟁시켜, 손실 자체를 데이터에서 학습하게 한 것이다. 위조지폐(생성자)와 감별사(판별자)가 서로를 훈련시키듯, 경쟁이 사람이 못 쓴 기준을 만들어 낸다. 이후 2015 DCGAN이 합성곱으로 안정화, 2017 pix2pix가 조건부 image-to-image 표준을 세웠고 같은 해 Mosser 등이 다공성 매질 재구성에 GAN을 도입했다. 우리 연구는 이 pix2pix 계열이다.">
   <div class="hd">
-    <div class="eb">Background · 2014~</div>
-    <div class="tt">GAN · 손실 함수를 학습으로 대체</div>
+    <div class="eb">§2 · Background · 2014~</div>
+    <div class="tt">GAN의 등장 · 손실을 학습으로 대체</div>
   </div>
-  <div class="lead">2014년 Ian Goodfellow가 제안했다. 핵심은 <b>"무엇이 진짜 같은가"를 수식으로 설계하는 대신, 그것을 판정하는 신경망을 함께 학습시킨다</b>는 것이다. 손실 함수 자체를 데이터에서 학습하는 방식이다.</div>
-  <div style="position:relative;margin-top:38px;display:flex;">
-    <div style="position:absolute;left:7%;right:7%;top:17px;height:3px;background:#d8d2c4;"></div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid #8a93a3;"></div><div style="font-family:var(--mono);font-size:24px;color:var(--sub);">GAN · 2014</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">Goodfellow<br>생성자 vs 판별자</div></div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid #8a93a3;"></div><div style="font-family:var(--mono);font-size:24px;color:var(--sub);">DCGAN · 2015</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">합성곱 기반<br>학습 안정화</div></div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--navy);border:4px solid var(--navy);box-shadow:0 0 0 4px #cfdbe9;"></div><div style="font-family:var(--mono);font-size:24px;color:var(--navy);font-weight:600;">pix2pix · 2017</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">조건부 image-to-image<br>UNet 생성자 + PatchGAN</div></div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid var(--orange);"></div><div style="font-family:var(--mono);font-size:24px;color:var(--orange-d);">Mosser · 2017</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">다공성 매질 재구성에<br>GAN 도입</div></div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:0 12px;z-index:1;"><div style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:4px solid #475067;"></div><div style="font-family:var(--mono);font-size:24px;color:#475067;">오늘</div><div style="font-size:22px;color:var(--muted);line-height:1.4;">슬라이스 보간에<br>pix2pix 적용</div></div>
-  </div>
-  <div style="display:flex;gap:22px;margin-top:36px;flex:1;align-items:center;">
-    <div class="card" style="flex:1"><div class="ct" style="font-size:26px">효과의 근거</div><div class="cd">"진짜 같음"은 픽셀 공식으로 표현하기 어렵다. 판별자는 그 기준을 <b>데이터에서 스스로 학습하고</b>, 생성자가 개선될수록 기준도 함께 정교해진다.</div></div>
-    <div class="tint" style="flex:1"><div class="ct" style="font-size:26px">적용 계열</div><div class="cd">생성자가 UNet인 <span class="hl">pix2pix</span>다. W2에서 만든 모델을 <b>그대로 생성자로</b> 사용한다. 새로 추가하는 것은 판별자 하나뿐이다.</div></div>
+  <div class="body" style="justify-content:center;gap:20px">
+
+    <!-- 핵심 메시지 카드 -->
+    <div class="row" style="gap:20px">
+      <div class="card tr" style="flex:1">
+        <div class="tag" style="color:var(--red)">이전 방식 · 손실을 사람이 설계</div>
+        <div class="cd" style="margin-top:8px;font-size:22px"><b>"무엇이 진짜 같은가"를 사람이 손실 공식으로</b> 써야 했다. 픽셀 평균 손실(L1)을 쓰면 여러 정답의 평균을 그려 §1의 흐림이 나온다.</div>
+        <div style="font-family:var(--mono);font-size:18px;color:var(--muted);margin-top:10px">문제 · 복잡한 이미지에선 그 공식을 손으로 적기가 불가능</div>
+      </div>
+      <div class="card to" style="flex:1">
+        <div class="tag" style="color:var(--orange-d)">GAN · 손실을 데이터에서 학습</div>
+        <div class="cd" style="margin-top:8px;font-size:22px">2014년 Goodfellow는 그 판정을 <b>두 번째 신경망(판별자)</b>에게 맡기고 생성자와 경쟁시켰다. <span class="hl">손실 자체를 데이터에서 학습</span>한다.</div>
+        <div style="font-family:var(--mono);font-size:18px;color:var(--muted);margin-top:10px">비유 · 위조지폐(생성자)와 감별사(판별자)가 서로를 훈련</div>
+      </div>
+    </div>
+
+    <!-- 핵심 그림 -->
+    <div class="figbox" style="align-self:center;max-width:1500px;padding:12px 16px">
+      <img src="assets/figures/W3_gan_why.png" style="width:100%;max-height:348px;object-fit:contain" alt="두 방식의 대비. 왼쪽: 사람이 픽셀 평균 손실(L1) 공식을 손으로 설계하면 회색 경계가 남는 흐린 결과가 나온다. 오른쪽: 판별자 D라는 두 번째 신경망이 진짜 같은지를 스스로 채점하며 생성자와 경쟁해, 손실을 데이터에서 학습하고 선명한 흑백 구조를 만든다.">
+      <div class="cap" style="text-align:center">사람이 손실을 설계하면(왼쪽) 회색 경계가 남고, 판별자가 손실을 학습하면(오른쪽) 확신 있는 흑백 경계가 나온다. 경쟁이 사람이 못 쓴 기준을 만들어 낸다.</div>
+    </div>
+
+    <!-- 압축 타임라인 -->
+    <div style="position:relative;display:flex;padding:0 2%">
+      <div style="position:absolute;left:9%;right:9%;top:16px;height:3px;background:#d8d2c4;"></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:0 8px;z-index:1;"><div style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:4px solid var(--orange);"></div><div style="font-family:var(--mono);font-size:20px;color:var(--orange-d);font-weight:600;">GAN · 2014</div><div style="font-size:18px;color:var(--muted);line-height:1.35;">Goodfellow<br>생성자 vs 판별자</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:0 8px;z-index:1;"><div style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:4px solid #8a93a3;"></div><div style="font-family:var(--mono);font-size:20px;color:var(--sub);">DCGAN · 2015</div><div style="font-size:18px;color:var(--muted);line-height:1.35;">합성곱 기반<br>학습 안정화</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:0 8px;z-index:1;"><div style="width:32px;height:32px;border-radius:50%;background:var(--navy);border:4px solid var(--navy);box-shadow:0 0 0 4px #cfdbe9;"></div><div style="font-family:var(--mono);font-size:20px;color:var(--navy);font-weight:600;">pix2pix · 2017</div><div style="font-size:18px;color:var(--muted);line-height:1.35;">조건부 image-to-image<br>UNet 생성자 + PatchGAN</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:0 8px;z-index:1;"><div style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:4px solid var(--orange);"></div><div style="font-family:var(--mono);font-size:20px;color:var(--orange-d);">Mosser · 2017</div><div style="font-size:18px;color:var(--muted);line-height:1.35;">다공성 매질 재구성에<br>GAN 도입</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:0 8px;z-index:1;"><div style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:4px solid #475067;"></div><div style="font-family:var(--mono);font-size:20px;color:#475067;">오늘</div><div style="font-size:18px;color:var(--muted);line-height:1.35;">슬라이스 보간에<br>pix2pix 적용</div></div>
+    </div>
+
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>10</b> / 45</span></div>
 </section>
@@ -487,107 +561,141 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 </section>
 
 <!-- ═══════════ 13 · min-max 수식 ═══════════ -->
-<section class="s" data-label="min-max" data-speaker-notes="Goodfellow의 원식. D는 진짜에 1, 가짜에 0을 주도록 가치함수를 최대화, G는 D(G(x))가 1이 되도록 최소화. 두 목적이 정반대라 min-max 게임. 해석: D는 두 항 모두 크게, G는 두 번째 항만 건드릴 수 있고 그걸 작게.">
+<section class="s" data-label="min-max" data-speaker-notes="이 장은 큰 그림만 준다. GAN은 손실을 사람이 손으로 정하지 않는다. 판별자 D가 이미지에 매기는 '진짜 같음' 점수가 곧 규칙이고, 생성자 G와 판별자 D가 그 점수 하나를 두고 겨룬다. 점수를 올리려는 쪽(G)과 내리려는 쪽(D)이 정반대라, 같은 값을 한쪽은 최대·한쪽은 최소로 당기는 min-max 게임이 된다. 왼쪽 항은 진짜를 진짜로, 오른쪽 항은 가짜를 가짜로 만드는 항이라는 정도만 짚는다. 기호 하나하나의 정의와 log를 쓰는 이유, 숫자 예시는 바로 다음 장(p16)에서 다룬다. 여기서는 '규칙이 곧 게임'이라는 직관만 남긴다.">
   <div class="hd">
     <div class="eb">§2 · 목적 함수</div>
-    <div class="tt">목적 함수: min–max</div>
+    <div class="tt">목적 함수: 게임의 규칙</div>
   </div>
-  <div class="body" style="justify-content:center;gap:16px">
+  <div class="body" style="justify-content:center;gap:18px">
+    <div class="lead" style="max-width:1620px">
+      GAN은 손실을 사람이 정하지 않는다. 판별자 <span class="nv">D</span>가 이미지에 매기는 <b>'진짜 같음' 점수</b>가 곧 규칙이고, 생성자 <span class="hl">G</span>와 판별자 <span class="nv">D</span>가 그 <b>점수 하나</b>를 두고 겨룬다.
+    </div>
+
     <div class="eq" style="text-align:center;font-size:26px;padding:18px 30px 14px">
+      <div class="lbl">가치 함수 · 점수를 두 항으로 나눠 적은 것 (각 항의 자세한 뜻은 다음 장)</div>
       $$\min_{G}\;\max_{D}\;\;\textcolor{#1f3a5f}{\mathbb{E}_{y}\big[\log D(y)\big]}\;+\;\textcolor{#d4760f}{\mathbb{E}_{x}\big[\log\big(1-D(G(x))\big)\big]}$$
-      <div style="display:flex;justify-content:center;gap:60px;margin-top:6px;font-size:19px">
+      <div style="display:flex;justify-content:center;gap:64px;margin-top:6px;font-size:20px">
         <span style="color:var(--navy)"><b>왼쪽 항</b> · 진짜를 진짜로</span>
         <span style="color:var(--orange-d)"><b>오른쪽 항</b> · 가짜를 가짜로</span>
       </div>
     </div>
-    <div class="figbox" style="align-self:center;max-width:900px;padding:8px 16px">
-      <img src="assets/figures/W3_minmax.png" style="width:100%;max-height:250px;object-fit:contain" alt="하나의 수평 값 축 D(G(x)) 위에서 주황색 화살표(생성자 G, max)가 오른쪽으로, 남색 화살표(판별자 D, min)가 왼쪽으로 당기는 반대 방향 도식. 축 중앙에 초록 균형점 'D(G(x))≈0, 진짜인지 가짜인지 구별 불가'가 표시되고 하단에 min_G max_D 보조 문구가 있음.">
-      <div class="cap" style="text-align:center">min–max의 직관 · 생성자 G는 판별자 점수를 +방향으로, 판별자 D는 −방향으로 당기며 D(G(x))≈0 균형점에서 멈춘다</div>
+
+    <div class="figbox" style="align-self:center;max-width:1280px;padding:10px 16px">
+      <img src="assets/figures/W3_objective_intuition.png" style="width:100%;max-height:300px;object-fit:contain" alt="판별자 D의 채점 게이지 두 개와 역할표. 왼쪽 게이지: 진짜 슬라이스는 D 점수 0.9(초록, 높음), 가짜 슬라이스는 D 점수 0.1(빨강, 낮음). 게이지의 0은 가짜, 1은 진짜를 뜻한다. 오른쪽 역할표: 진짜에 대해 D는 점수를 1로 올리려 하고, 가짜에 대해 D는 0으로 내리려 하며, 같은 가짜에 대해 생성자 G는 1로 올려 속이려 한다. 하단 결론: D와 G가 가짜 점수를 정반대로 당기는 min-max 게임.">
+      <div class="cap" style="text-align:center;font-size:20px">채점 게이지(왼쪽) · 역할표(오른쪽) · <span class="nv">D</span>는 점수를 내리고 <span class="hl">G</span>는 점수를 올린다</div>
     </div>
+
     <div class="row">
       <div class="card tn" style="flex:1">
-        <div class="tag">판별자 D · 최대화 (max)</div>
-        <div class="cd" style="margin-top:10px;font-size:24px">진짜 $y$ 에는 $D(y)\!\to\!1$, 생성 $G(x)$ 에는 $D(G(x))\!\to\!0$. <b>두 항을 모두 키우는</b> 방향이 잘 구별하는 방향이다.</div>
+        <div class="tag">D가 원하는 것</div>
+        <div class="cd" style="margin-top:10px;font-size:24px">진짜 이미지에는 <b>높은 점수</b>, 가짜 이미지에는 <b>낮은 점수</b>를 준다. 곧 진짜와 가짜를 잘 <span class="nv">구별</span>하려는 방향이다.</div>
       </div>
       <div class="card to" style="flex:1">
-        <div class="tag" style="color:var(--orange-d)">생성자 G · 최소화 (min)</div>
-        <div class="cd" style="margin-top:10px;font-size:24px">G가 조정할 수 있는 것은 <b>두 번째 항뿐이다</b>. $D(G(x))\!\to\!1$ 로 만들어 그 항을 낮추는 방향이 판별자를 속이는 방향이다.</div>
+        <div class="tag" style="color:var(--orange-d)">G가 원하는 것</div>
+        <div class="cd" style="margin-top:10px;font-size:24px">자기가 만든 가짜 이미지에 <b>높은 점수</b>가 매겨지길 바란다. 곧 판별자 D를 <span class="hl">속이려는</span> 방향이다.</div>
       </div>
       <div class="card ts" style="flex:1">
-        <div class="tag" style="color:var(--navy-2)">경쟁의 종착점</div>
-        <div class="cd" style="margin-top:10px;font-size:24px">이론상 균형에서 생성 분포는 진짜 분포와 일치하고, $D$ 는 어느 쪽인지 못 맞혀 <b>모든 입력에 ½</b> 을 내놓는다.</div>
+        <div class="tag" style="color:var(--navy-2)">그래서 min–max</div>
+        <div class="cd" style="margin-top:10px;font-size:24px">같은 점수를 두고 <b>목표가 정반대</b>다. 한쪽은 점수를 최소로, 한쪽은 최대로 당기므로 겨루는 게임이 된다.</div>
       </div>
     </div>
-    <div class="cap" style="text-align:center;font-size:20px">원식의 log 손실은 초반 gradient가 약해 정체되기 쉽다. §3에서는 같은 목적을 안정적으로 구현한 <span class="nv" style="font-weight:600">hinge 손실</span>을 사용한다.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>15</b> / 45</span></div>
 </section>
 
 <!-- ═══════════ DD1 · 목적함수 유도 ═══════════ -->
-<section class="s" data-label="목적함수 유도" data-speaker-notes="GAN의 핵심은 손실을 사람이 손으로 설계하지 않는다는 점이다. 대신 판별자 D가 매기는 점수 규칙, 곧 목적함수를 정하고 두 신경망이 그 점수를 두고 경쟁한다. 왼쪽 항은 진짜에 높은 점수를 주는 항이고, 오른쪽 항은 가짜에 낮은 점수를 주는 항이다. D는 두 항을 모두 키워 잘 구별하려 하고, G는 오른쪽 항의 D(G(z))를 1로 만들어 그 항을 낮춘다. 숫자 예시로 G가 좋아질수록 오른쪽 항이 어떻게 G에 유리하게 변하는지 보여준다. 같은 V를 두고 한쪽은 최대, 한쪽은 최소로 당기므로 min–max 게임이다.">
+<section class="s" data-label="목적함수 유도" data-speaker-notes="이 슬라이드는 p15(min-max 게임의 큰 그림)와 겹치지 않게, 목적 함수에 나오는 기호를 하나하나 처음 보는 사람 기준으로 뜯어 설명하는 주 슬라이드다. D(y)는 진짜 슬라이스 y에 매긴 진짜 같음 점수(0~1)로 1에 가까울수록 진짜라고 확신한다. D(G(x))는 가짜 슬라이스에 매긴 점수로 0에 가까울수록 가짜라고 확신한다. E[·]는 한 장이 아니라 여러 슬라이스에 대한 평균이다. log는 확신하고 틀리면 크게 벌한다를 만든다. 진짜인데 D=0.01이면 log(0.01)≈-4.6으로 손실이 매우 크고, D=0.5면 log(0.5)≈-0.69로 작다. max_D는 두 항 log D(y)와 log(1-D(G(x)))를 모두 크게 만드는 방향, 곧 진짜는 1 가짜는 0으로 나누는 방향이다. min_G는 오른쪽 항의 G(x)에만 영향을 주며 D(G(x))를 1로 만들어 그 항을 아주 작게(음의 방향) 당긴다. 숫자 예시로 진짜 D=0.9면 logD≈-0.11, 가짜 D(G)=0.1이면 log(1-0.1)≈-0.11로 D에 유리하고, G가 좋아져 D(G)=0.8이면 log(1-0.8)≈-1.6으로 G에 유리 D에 불리다. 같은 식을 D는 최대로 G는 최소로 당기므로 min_G max_D 게임이다.">
   <div class="hd">
-    <div class="eb">개념 심화 · §2</div>
-    <div class="tt">GAN 목적함수 유도</div>
+    <div class="eb">§2 · 목적 함수</div>
+    <div class="tt">목적 함수 뜯어보기: 기호 하나하나</div>
   </div>
-  <div class="body" style="justify-content:center;gap:20px">
-    <div class="eq" style="text-align:center;padding:20px 30px 14px">
-      <div class="lbl">value function · 손실을 사람이 아니라 판별자 D의 점수로 정의한다</div>
-      $$V(D,G)=\textcolor{#1f3a5f}{\mathbb{E}_{x\sim p_{\text{data}}}\big[\log D(x)\big]}+\textcolor{#d4760f}{\mathbb{E}_{z\sim p_z}\big[\log\big(1-D(G(z))\big)\big]}$$
-      <div style="display:flex;justify-content:center;gap:56px;margin-top:8px;font-size:20px">
-        <span style="color:var(--navy)"><b>왼쪽 항</b> · 진짜에 높은 점수</span>
-        <span style="color:var(--orange-d)"><b>오른쪽 항</b> · 가짜에 낮은 점수</span>
+  <div class="body" style="justify-content:center;gap:16px">
+
+    <div class="eq" style="text-align:center;padding:16px 30px 12px">
+      <div class="lbl">아래 식 하나만 보면 된다. 이제 이 안의 기호를 하나씩 푼다</div>
+      $$\min_{G}\;\max_{D}\;\;\textcolor{#1f3a5f}{\mathbb{E}_{y}\big[\log D(y)\big]}\;+\;\textcolor{#d4760f}{\mathbb{E}_{x}\big[\log\big(1-D(G(x))\big)\big]}$$
+    </div>
+
+    <div class="row">
+      <div class="card tn" style="flex:1;padding:18px 22px">
+        <div class="tag">기호 풀이</div>
+        <div class="cd" style="margin-top:10px;font-size:21px;line-height:1.55">
+          <b>$D(y)$</b> = 진짜 슬라이스 $y$ 에 매긴 <b>진짜 같음 점수</b>(0~1). 1에 가까울수록 진짜라고 확신한다.<br>
+          <b>$D(G(x))$</b> = 가짜(생성) 슬라이스에 매긴 점수. 0에 가까울수록 가짜라고 확신한다.<br>
+          <b>$\mathbb{E}[\cdot]$</b> = 한 장이 아니라 <b>여러 슬라이스에 대한 평균</b>(전체 경향).
+        </div>
+      </div>
+      <div class="card ts" style="flex:1;padding:18px 22px">
+        <div class="tag" style="color:var(--navy-2)">$\log$ 은 왜 쓰나</div>
+        <div class="cd" style="margin-top:10px;font-size:21px;line-height:1.55">
+          <b>확신하고 틀리면 크게 벌한다</b>를 만든다. 진짜인데 $D\!=\!0.01$ 이면 $\log(0.01)\approx-4.6$ 으로 손실이 매우 크고, $D\!=\!0.5$ 면 $\log(0.5)\approx-0.69$ 로 작다. 그래서 D가 함부로 확신해 틀리지 않도록, 진짜는 <span class="hl">강하게 1</span> 로 민다.
+        </div>
       </div>
     </div>
 
     <div class="row">
-      <div class="card tn" style="flex:1">
-        <div class="tag">D의 목표 · V 최대화</div>
-        <div class="cd" style="margin-top:10px;font-size:23px">$D(x)$ 는 <b>진짜일 확률</b>(0~1)이다. 진짜 $x$ 에는 $D\!\to\!1$ 이라 $\log D$ 가 커지고, 가짜 $G(z)$ 에는 $D\!\to\!0$ 이라 $\log(1-D)$ 가 커진다. <b>두 항을 모두 키우는 것</b>이 잘 구별하는 것이다.</div>
+      <div class="card to" style="flex:1;padding:18px 22px">
+        <div class="tag" style="color:var(--orange-d)">$\max_D$ · 왜 최대인가</div>
+        <div class="cd" style="margin-top:8px;font-size:21px;line-height:1.5">
+          D는 두 항 $\log D(y)$ 와 $\log(1-D(G(x)))$ 를 <b>모두 크게</b> 만들려 한다. 곧 진짜는 1, 가짜는 0으로 잘 나누는 방향이다.
+        </div>
       </div>
-      <div class="card to" style="flex:1">
-        <div class="tag" style="color:var(--orange-d)">G의 목표 · V 최소화</div>
-        <div class="cd" style="margin-top:10px;font-size:23px">G는 오른쪽 항의 $G(z)$ 에만 영향을 준다. $D(G(z))\!\to\!1$ 로 만들어 $\log(1-D(G(z)))$ 를 아주 <b>작게(음의 방향)</b> 만든다. 곧 <span class="hl">D를 속이는 방향</span>이다.</div>
+      <div class="card tn" style="flex:1;padding:18px 22px">
+        <div class="tag">$\min_G$ · 왜 최소인가</div>
+        <div class="cd" style="margin-top:8px;font-size:21px;line-height:1.5">
+          G는 오른쪽 항의 $G(x)$ 에만 영향을 준다. $D(G(x))\!\to\!1$ 로 만들면 $\log(1-D(G(x)))$ 가 아주 <b>작아진다</b>(음의 방향). 곧 <span class="nv">D를 속이는 방향</span>이다.
+        </div>
       </div>
-      <div class="card ts" style="flex:1">
-        <div class="tag" style="color:var(--navy-2)">숫자 예시</div>
-        <div class="cd" style="margin-top:10px;font-size:23px">진짜 $D\!=\!0.9\Rightarrow\log D\approx-0.11$. 가짜 $D(G)\!=\!0.1\Rightarrow\log(1-0.1)\approx-0.11$ (D에 유리). G가 좋아져 $D(G)\!=\!0.8$ 이 되면 $\log(1-0.8)\approx-1.6$ (G에 유리, D에 불리).</div>
+      <div class="card tg" style="flex:1;padding:18px 22px">
+        <div class="tag" style="color:var(--green)">숫자 예시</div>
+        <div class="cd" style="margin-top:8px;font-size:21px;line-height:1.5">
+          진짜 $D\!=\!0.9\Rightarrow\log D\approx-0.11$. 가짜 $D(G)\!=\!0.1\Rightarrow\log(1-0.1)\approx-0.11$ (D에 유리). G가 좋아져 $D(G)\!=\!0.8$ 이면 $\log(1-0.8)\approx-1.6$ (G에 유리, D에 불리).
+        </div>
       </div>
     </div>
 
     <div class="tint">
-      <div class="cd" style="font-size:24px">D와 G가 <b>같은 $V$ 를 두고</b> 한쪽은 최대, 한쪽은 최소로 당긴다. 그래서 $\min_G\max_D$ 게임이다.</div>
+      <div class="cd" style="font-size:23px">같은 식을 <b>D는 최대로, G는 최소로</b> 당긴다. 그래서 $\min_G\max_D$ 게임이다.</div>
     </div>
+
   </div>
-  <div class="foot"><span class="b">Digital Rock · W3 · 심화</span><span class="pg"><b>16</b> / 45</span></div>
+  <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>16</b> / 45</span></div>
 </section>
 
 <!-- ═══════════ DD2 · 균형점 유도 ═══════════ -->
-<section class="s" data-label="균형점 유도" data-speaker-notes="G를 고정하면 최적 판별자를 수식으로 직접 구할 수 있고, 여기서 균형에서 왜 50대 50인지가 나온다. 최적 D는 그 위치에서 진짜와 가짜가 나타나는 비율이다. 어떤 위치에서 진짜가 가짜보다 3배 자주 나오면 최선의 진짜 점수는 3/4=0.75다. 이 최적 D를 목적함수에 대입하면 두 분포의 다름(JSD)만 남고, 가짜 분포가 진짜 분포와 같아질 때 최소가 된다. 그때 D는 어디서나 0.5를 내며, 이것이 50대 50의 근거다. 가짜가 진짜와 통계적으로 같아지면 최고의 판별자도 찍기밖에 못 한다.">
+<section class="s" data-label="균형점 유도" data-speaker-notes="이 장의 동기부터 밝힌다. 지금까지 G와 D가 겨룬다고만 했는데, 이 경쟁이 어디서 끝나는지는 아직 말하지 않았다. 그것을 알려면 상대 G가 고정됐을 때 가장 똑똑한 판별자 D*를 수식으로 구하면 된다. 그 D*가 게임의 종착점(균형)을 알려준다. 그래서 최적 판별자를 여기서 유도한다. 최적 D는 그 위치에서 진짜와 가짜가 나타나는 비율이다. 어떤 위치에서 진짜가 가짜보다 3배 자주 나오면 최선의 진짜 점수는 3/4=0.75다. 가짜 분포가 진짜 분포와 같아지면(p_g=p_data) 그 비율은 어디서나 1/2이 되고, D는 어디서나 0.5를 낸다. 이것이 균형에서 50대 50인 근거다. 가짜가 진짜와 통계적으로 같아지면 최고의 판별자도 찍기밖에 못 한다. 오른쪽 그림 왼쪽 패널은 두 분포가 떨어져 있어 초록 D 곡선이 위치별로 0에서 1까지 갈리는 경우이고, 오른쪽 패널은 두 분포가 완전히 겹쳐 초록 선이 어디서나 0.5로 평평한 경우다. p16의 항별 설명과 겹치지 않게, 여기서는 종착점만 다룬다.">
   <div class="hd">
     <div class="eb">개념 심화 · §2</div>
     <div class="tt">최적 판별자와 균형점</div>
   </div>
-  <div class="body" style="justify-content:center;gap:20px">
-    <div class="eq" style="text-align:center;padding:18px 30px 12px">
-      <div class="lbl">고정된 G에 대한 최적 판별자 · 그 위치에서 진짜:가짜 비율</div>
+  <div class="body" style="justify-content:center;gap:14px">
+
+    <div class="lead" style="font-size:23px;max-width:1640px">
+      지금까지 생성자 $G$ 와 판별자 $D$ 가 서로 겨룬다고 했다. 그렇다면 <b>이 경쟁은 어디서 끝나는가.</b> 상대인 $G$ 가 정해졌다고 놓고 그때 <span class="nv">가장 똑똑한 판별자 $D^{*}$</span> 를 수식으로 구하면, 게임의 종착점(균형)을 알 수 있다. 그래서 최적 판별자를 먼저 구한다.
+    </div>
+
+    <div class="eq" style="text-align:center;padding:16px 30px 10px">
+      <div class="lbl">고정된 G에 대한 최적 판별자 · 그 위치의 진짜:가짜 비율</div>
       $$D^{*}(x)=\frac{p_{\text{data}}(x)}{p_{\text{data}}(x)+p_g(x)}$$
+      <div style="font-size:19px;color:var(--sub);margin-top:6px">$p_{\text{data}}$ = 진짜가 그 위치에 나타나는 빈도, $\;p_g$ = 가짜($G$의 출력)가 그 위치에 나타나는 빈도</div>
     </div>
 
     <div class="row">
-      <div class="card tn" style="flex:1">
-        <div class="tag">직관</div>
-        <div class="cd" style="margin-top:10px;font-size:23px">어떤 위치 $x$ 에서 진짜가 가짜보다 <b>3배 자주</b> 나오면, 최선의 '진짜' 점수는 $\tfrac{3}{3+1}=0.75$ 다. <span class="hl">비율이 곧 최적 점수</span>다.</div>
+      <div class="card tn" style="flex:1;padding:18px 24px">
+        <div class="tag">직관 · 비율이 곧 점수</div>
+        <div class="cd" style="margin-top:8px;font-size:22px">어떤 위치 $x$ 에서 진짜가 가짜보다 <b>3배 자주</b> 나온다면, 최선의 '진짜' 점수는 $\tfrac{3}{3+1}=0.75$ 다. 반대로 진짜:가짜가 $1:1$ 이면 $\tfrac{1}{1+1}=0.5$ 다. <span class="hl">D는 그 위치의 진짜 비율을 그대로 점수로 낸다.</span></div>
       </div>
-      <div class="card to" style="flex:1">
-        <div class="tag" style="color:var(--orange-d)">전역 최소</div>
-        <div class="cd" style="margin-top:10px;font-size:23px">최적 D를 목적함수에 대입하면 두 분포의 다름(JSD)만 남는다. 가짜가 진짜와 같아질 때($p_g\!=\!p_{\text{data}}$) 최소가 되고, 그때 $D^{*}(x)=\tfrac{p}{p+p}=\tfrac12$ 로 <b>모든 곳에서 0.5</b>다. 이것이 '50:50'의 근거다. 가짜가 진짜와 통계적으로 같아지면 최고의 판별자도 찍기밖에 못 한다.</div>
+      <div class="card to" style="flex:1;padding:18px 24px">
+        <div class="tag" style="color:var(--orange-d)">종착점 · 왜 50:50인가</div>
+        <div class="cd" style="margin-top:8px;font-size:22px">$G$ 가 완벽해져 <b>가짜가 진짜와 통계적으로 같아지면</b>($p_g\!=\!p_{\text{data}}$), 모든 위치에서 비율이 $\tfrac{p}{p+p}=\tfrac12$ 다. 곧 $D^{*}(x)=0.5$. 최고의 판별자조차 <b>어디서나 찍기(50:50)</b>밖에 못 한다. 이 상태가 경쟁의 균형이다.</div>
       </div>
     </div>
 
-    <div class="figbox" style="align-self:center;max-width:1120px">
-      <img src="assets/figures/W3_optimal_d.png" style="width:100%;max-height:300px;object-fit:contain" alt="진짜 분포와 가짜 분포가 분리된 경우 최적 판별자 D가 위치별로 0에서 1까지 크게 갈리고, 두 분포가 일치(p_g=p_data)한 경우 최적 D가 모든 위치에서 0.5의 평평한 선이 되는 두 패널 비교 그림.">
-      <div class="cap" style="text-align:center">분포가 분리되면 D가 잘 구별하고, $p_g\!=\!p_{\text{data}}$ 로 일치하면 D는 어디서나 0.5를 낸다</div>
+    <div class="figbox" style="align-self:center;max-width:1180px;padding:14px 16px 10px">
+      <img src="assets/figures/W3_optimal_d.png" style="width:100%;max-height:258px;object-fit:contain" alt="두 패널 비교 그림. 왼쪽 패널은 진짜 분포 p_data(남색)와 가짜 분포 p_g(주황)가 서로 떨어져 있고, 최적 판별자 D 곡선(초록)이 진짜 쪽에서 1, 가짜 쪽에서 0으로 위치별로 크게 갈린다. 오른쪽 패널은 두 분포가 완전히 겹쳐(p_g=p_data) 초록 D 곡선이 모든 위치에서 0.5의 평평한 수평선이 된다.">
+      <div class="cap" style="text-align:center;font-size:19px">그림 읽는 법 · <span class="nv" style="font-weight:600">왼쪽 패널</span>: 진짜(남색)·가짜(주황) 분포가 떨어져 있으면 초록 $D$ 곡선이 위치별로 0에서 1까지 갈려 잘 가른다 · <span style="color:var(--orange-d);font-weight:600">오른쪽 패널</span>: 두 분포가 겹치면($p_g\!=\!p_{\text{data}}$) 초록 선이 어디서나 0.5로 평평해 구별이 불가능하다</div>
     </div>
+
   </div>
   <div class="foot"><span class="b">Digital Rock · W3 · 심화</span><span class="pg"><b>17</b> / 45</span></div>
 </section>
