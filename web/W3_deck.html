@@ -266,10 +266,10 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
       </div>
       <div class="card to" style="padding:18px 22px">
         <div class="ct" style="font-size:24px">L1이 확신을 안 하는 이유</div>
-        <div class="cd" style="font-size:22px">L1은 실수를 <b>그대로</b> 더한다. 0.5를 내든 0을 내든 평균 실수가 똑같이 0.5다. 손해가 같으니 굳이 <span class="hl">확신할 이유가 없다</span>.</div>
+        <div class="cd" style="font-size:22px">L1은 실수를 <b>그대로</b> 더한다. 이 <b>반반 픽셀</b>에서는 0.5를 내든 0을 내든 평균 실수가 똑같이 0.5라, 굳이 <span class="hl">확신할 이유가 없다</span>.</div>
       </div>
       <div class="tint" style="padding:16px 22px">
-        <div class="cd" style="font-size:21px"><b>결론.</b> 픽셀 하나씩 보는 손실(L1·L2)은 애매한 경계에서 회색을 벌하지 못한다. 그래서 <b>"실제 암석처럼 보이는가"</b>를 판정할 새 신호가 필요하다. <span class="nv">§2 판별자</span>가 그 역할이다.</div>
+        <div class="cd" style="font-size:20px"><b>오해 주의.</b> '어디든 0.5'는 정답이 <b>반반인 애매한 픽셀</b>에만 해당한다. 대부분의 픽셀은 정답이 한쪽으로 치우쳐 L1이 더 그럴듯한 값을 분명히 고른다. <b>L1이 쓸모없다는 뜻이 아니라</b>(W2도 L1로 학습), 애매한 경계에서만 회색과 확신을 구별하지 못한다는 뜻이다. 그 경계에서 확신을 유도할 새 신호가 <span class="nv">§2 판별자</span>다.</div>
       </div>
     </div>
   </div>
@@ -564,7 +564,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="min-max" data-speaker-notes="이 장은 큰 그림만 준다. GAN은 손실을 사람이 손으로 정하지 않는다. 판별자 D가 이미지에 매기는 '진짜 같음' 점수가 곧 규칙이고, 생성자 G와 판별자 D가 그 점수 하나를 두고 겨룬다. 점수를 올리려는 쪽(G)과 내리려는 쪽(D)이 정반대라, 같은 값을 한쪽은 최대·한쪽은 최소로 당기는 min-max 게임이 된다. 왼쪽 항은 진짜를 진짜로, 오른쪽 항은 가짜를 가짜로 만드는 항이라는 정도만 짚는다. 기호 하나하나의 정의와 log를 쓰는 이유, 숫자 예시는 바로 다음 장(p16)에서 다룬다. 여기서는 '규칙이 곧 게임'이라는 직관만 남긴다.">
   <div class="hd">
     <div class="eb">§2 · 목적 함수</div>
-    <div class="tt">목적 함수: 게임의 규칙</div>
+    <div class="tt">목적 함수 개요</div>
   </div>
   <div class="body" style="justify-content:center;gap:18px">
     <div class="lead" style="max-width:1620px">
@@ -607,7 +607,7 @@ table.tb{border-collapse:collapse;width:100%;font-size:23px}
 <section class="s" data-label="목적함수 유도" data-speaker-notes="이 슬라이드는 p15(min-max 게임의 큰 그림)와 겹치지 않게, 목적 함수에 나오는 기호를 하나하나 처음 보는 사람 기준으로 뜯어 설명하는 주 슬라이드다. D(y)는 진짜 슬라이스 y에 매긴 진짜 같음 점수(0~1)로 1에 가까울수록 진짜라고 확신한다. D(G(x))는 가짜 슬라이스에 매긴 점수로 0에 가까울수록 가짜라고 확신한다. E[·]는 한 장이 아니라 여러 슬라이스에 대한 평균이다. log는 확신하고 틀리면 크게 벌한다를 만든다. 진짜인데 D=0.01이면 log(0.01)≈-4.6으로 손실이 매우 크고, D=0.5면 log(0.5)≈-0.69로 작다. max_D는 두 항 log D(y)와 log(1-D(G(x)))를 모두 크게 만드는 방향, 곧 진짜는 1 가짜는 0으로 나누는 방향이다. min_G는 오른쪽 항의 G(x)에만 영향을 주며 D(G(x))를 1로 만들어 그 항을 아주 작게(음의 방향) 당긴다. 숫자 예시로 진짜 D=0.9면 logD≈-0.11, 가짜 D(G)=0.1이면 log(1-0.1)≈-0.11로 D에 유리하고, G가 좋아져 D(G)=0.8이면 log(1-0.8)≈-1.6으로 G에 유리 D에 불리다. 같은 식을 D는 최대로 G는 최소로 당기므로 min_G max_D 게임이다.">
   <div class="hd">
     <div class="eb">§2 · 목적 함수</div>
-    <div class="tt">목적 함수 뜯어보기: 기호 하나하나</div>
+    <div class="tt">목적 함수: 기호별 해설</div>
   </div>
   <div class="body" style="justify-content:center;gap:16px">
 
@@ -702,7 +702,7 @@ g_loss.backward(); opt_G.step()
   <div class="foot"><span class="b">Digital Rock · W3 · §2</span><span class="pg"><b>17</b> / 45</span></div>
 </section>
 
-<section class="s" data-label="균형점 유도" data-speaker-notes="이 장의 동기부터 밝힌다. 지금까지 G와 D가 겨룬다고만 했는데, 이 경쟁이 어디서 끝나는지는 아직 말하지 않았다. 그것을 알려면 상대 G가 고정됐을 때 가장 똑똑한 판별자 D*를 수식으로 구하면 된다. 그 D*가 게임의 종착점(균형)을 알려준다. 그래서 최적 판별자를 여기서 유도한다. 최적 D는 그 위치에서 진짜와 가짜가 나타나는 비율이다. 어떤 위치에서 진짜가 가짜보다 3배 자주 나오면 최선의 진짜 점수는 3/4=0.75다. 가짜 분포가 진짜 분포와 같아지면(p_g=p_data) 그 비율은 어디서나 1/2이 되고, D는 어디서나 0.5를 낸다. 이것이 균형에서 50대 50인 근거다. 가짜가 진짜와 통계적으로 같아지면 최고의 판별자도 찍기밖에 못 한다. 오른쪽 그림 왼쪽 패널은 두 분포가 떨어져 있어 초록 D 곡선이 위치별로 0에서 1까지 갈리는 경우이고, 오른쪽 패널은 두 분포가 완전히 겹쳐 초록 선이 어디서나 0.5로 평평한 경우다. p16의 항별 설명과 겹치지 않게, 여기서는 종착점만 다룬다.">
+<section class="s" data-label="균형점 유도" data-speaker-notes="이 장의 동기부터 밝힌다. 지금까지 G와 D가 겨룬다고만 했는데, 이 경쟁이 어디서 끝나는지는 아직 말하지 않았다. 그것을 알려면 상대 G가 고정됐을 때 가장 똑똑한 판별자 D*를 수식으로 구하면 된다. 그 D*가 게임의 종착점(균형)을 알려준다. 그래서 최적 판별자를 여기서 유도한다. 최적 D는 그 위치에서 진짜와 가짜가 나타나는 비율이다. 어떤 위치에서 진짜가 가짜보다 3배 자주 나오면 최선의 진짜 점수는 3/4=0.75다. 가짜 분포가 진짜 분포와 같아지면(p_g=p_data) 그 비율은 어디서나 1/2이 되고, D는 어디서나 0.5를 낸다. 이것이 균형에서 50대 50인 근거다. 가짜가 진짜와 통계적으로 같아지면 최적의 판별자도 찍기밖에 못 한다. 오른쪽 그림 왼쪽 패널은 두 분포가 떨어져 있어 초록 D 곡선이 위치별로 0에서 1까지 갈리는 경우이고, 오른쪽 패널은 두 분포가 완전히 겹쳐 초록 선이 어디서나 0.5로 평평한 경우다. p16의 항별 설명과 겹치지 않게, 여기서는 종착점만 다룬다.">
   <div class="hd">
     <div class="eb">개념 심화 · §2</div>
     <div class="tt">최적 판별자와 균형점</div>
@@ -726,7 +726,7 @@ g_loss.backward(); opt_G.step()
       </div>
       <div class="card to" style="flex:1;padding:18px 24px">
         <div class="tag" style="color:var(--orange-d)">종착점 · 왜 50:50인가</div>
-        <div class="cd" style="margin-top:8px;font-size:22px">$G$ 가 완벽해져 <b>가짜가 진짜와 통계적으로 같아지면</b>($p_g\!=\!p_{\text{data}}$), 모든 위치에서 비율이 $\tfrac{p}{p+p}=\tfrac12$ 다. 곧 $D^{*}(x)=0.5$. 최고의 판별자조차 <b>어디서나 찍기(50:50)</b>밖에 못 한다. 이 상태가 경쟁의 균형이다.</div>
+        <div class="cd" style="margin-top:8px;font-size:22px">$G$ 가 완벽해져 <b>가짜가 진짜와 통계적으로 같아지면</b>($p_g\!=\!p_{\text{data}}$), 모든 위치에서 비율이 $\tfrac{p}{p+p}=\tfrac12$ 다. 곧 $D^{*}(x)=0.5$. 최적의 판별자조차 <b>어디서나 찍기(50:50)</b>밖에 못 한다. 이 상태가 경쟁의 균형이다.</div>
       </div>
     </div>
 
@@ -1307,12 +1307,12 @@ pred = <span class="f">G</span>(neighbors)&nbsp;&nbsp;<span class="c"># D는 학
 </section>
 
 <!-- ═══════════ 27 · 실측 학습 곡선 ═══════════ -->
-<section class="s" data-label="학습 곡선" data-speaker-notes="앞 장(p32) 불안정 신호와 대비해 이 곡선이 왜 건강한지 구간별로 읽는다. warmup(epoch 0~8, λ=0): 판별자 없이 재구성 손실만 내려가 기본 성능을 확보한다. GAN 시작 직후(epoch 8~12): D가 약한 G를 쉽게 잡아 D 손실이 1.3에서 0.4 근처 최저까지 빠르게 떨어진다. 후반(epoch 12~28): G가 따라잡아 D 손실이 다시 1.15까지 오른다. 이 하락 후 상승이 건강한 줄다리기다. 판정: D 손실이 0에 붙지 않고 0.4~1.3에서 진동하면 안정(신호 ① 아님), 재구성 손실이 계속 내려가면 사실감이 정확도를 해치지 않은 것이다.">
+<section class="s" data-label="학습 곡선" data-speaker-notes="앞 장(p32) 불안정 신호와 대비해 이 곡선이 왜 건강한지 구간별로 읽는다. warmup(epoch 0~8, λ=0): 판별자 없이 재구성 손실만 내려가 기본 성능을 확보한다. GAN 시작 직후(epoch 8~12): D가 약한 G를 쉽게 잡아 D 손실이 1.3에서 0.4 근처 최저까지 빠르게 떨어진다. 후반(epoch 12~28): G가 따라잡아 D 손실이 다시 1.15까지 오른다. 이 하락 후 상승이 건강한 경쟁 균형이다. 판정: D 손실이 0에 붙지 않고 0.4~1.3에서 진동하면 안정(신호 ① 아님), 재구성 손실이 계속 내려가면 사실감이 정확도를 해치지 않은 것이다.">
   <div class="hd">
     <div class="eb">§4 · 실측</div>
     <div class="tt">학습 곡선 해석</div>
   </div>
-  <div class="lead" style="margin-bottom:14px">p32의 불안정 신호와 대비해 이 곡선을 읽는다. <b>D 손실이 한번 내려갔다가 다시 올라가는 모양</b>이 핵심이다. 이 하락 후 상승이 두 신경망이 균형을 이룬 <span class="nv">건강한 줄다리기</span>다.</div>
+  <div class="lead" style="margin-bottom:14px">p32의 불안정 신호와 대비해 이 곡선을 읽는다. <b>D 손실이 한번 내려갔다가 다시 올라가는 모양</b>이 핵심이다. 이 하락 후 상승이 두 신경망이 균형을 이룬 <span class="nv">건강한 경쟁 균형</span>이다.</div>
   <div class="body" style="gap:16px">
     <div class="figbox" style="align-self:center;max-width:1150px">
       <img src="assets/figures/W3_training_curves.png" style="width:100%;display:block" alt="학습 곡선 실측: 왼쪽 재구성 손실, 오른쪽 G·D 적대 손실">
