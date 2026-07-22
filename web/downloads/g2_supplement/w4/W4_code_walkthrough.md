@@ -50,9 +50,12 @@ attention 가중치 행렬(행 합=1)을 직접 꺼내 본다.
 - **바꿔 보기**: `UNet3DMini(base=8)` 또는 `base=12` 로 폭을 바꾸면 파라미터가
   ~83K/~186K 로 변한다. 같은 예산에서 폭 대 학습량의 trade-off 를 볼 수 있다.
 
-## §5 benchmark_models
+## §5 benchmark_models + 우리 방식(GAN)
 
-세 모델을 같은 예산(`budget_s=90`)으로 학습·평가한다. 내부 동작:
+세 비교 구조를 같은 예산(`budget_s=90`)으로 학습·평가한 뒤, §5.1 에서 **우리 방식**
+(2D UNet 생성자 + PatchGAN 판별자)을 같은 90초로 학습해 `results` 에 추가한다. 이것이
+"우리 모델은 왜 비교에 없나"의 실습 답이다. GAN 은 픽셀 SSIM 을 조금 내주는 대신 물성(|Δφ|)
+보존에서 앞서는 경향을 보인다. benchmark_models 내부 동작:
 
 1. 모델별로 시드 재고정 → 같은 데이터 순서
 2. 2D 모델은 `SliceDataset`, 3D 모델은 `Slice3DDataset` (같은 정보)

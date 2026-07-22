@@ -64,16 +64,16 @@ window.COURSE = {
     },
     {
       n:4, status:'now', slug:'w4', available:true,
-      title:'다른 아키텍처 비교',
-      en:'Transformer · 3D · trade-off',
-      summary:'지금까지의 2D UNet 외에, 창 attention 기반 SwinUNetMini 와 3D 합성곱 UNet3DMini 를 같은 보간 문제에 적용한다. attention 수식을 숫자로 직접 계산하고, 같은 데이터·같은 입력 정보·같은 시간 예산의 공정 비교로 파라미터·시간·정확도의 trade-off 를 읽는다. 데이터는 W3와 같은 Bentheimer k=2, 세 모델은 파라미터 ~12만으로 동급.',
-      concepts:['Attention · Q·K·V','창 분할 · Swin','3D Conv','공정 비교 · 정보 누출','파라미터 효율'],
+      title:'딥러닝 아키텍처 비교',
+      en:'Transformer · 3D · diffusion',
+      summary:'지금까지 우리 pix2pix 모델은 손실·입력·GAN(W3)으로 개선해 왔고 구조의 뼈대는 2D 합성곱이었다. 이번 주는 우리 접근이 좋은지 확인하기 위해, 대안 구조(Transformer 계열 Swin·3D CNN·diffusion)를 비교군으로 두고 같은 데이터·같은 입력 정보·같은 예산에서 비교한다. attention 수식을 숫자로 직접 계산하고, 공정 비교로 파라미터·시간·정확도의 trade-off 를 읽는다. 대규모 결과에서 우리 모델(MAPS)이 비교군을 앞서는 것을 확인한다.',
+      concepts:['Attention · Q·K·V','창 분할 · Swin','3D Conv · 정보 누출','diffusion','공정 비교 · 비교군'],
       nonDL:false,
       plan:[
-        'attention 수식(QKᵀ/√d → softmax → V)을 작은 행렬로 직접 계산',
-        'SwinUNetMini · UNet3DMini 구축 (공정한 입력 설계)',
-        'benchmark_models 로 같은 시간 예산 공정 비교',
-        '파라미터·학습량·지표의 trade-off 해석',
+        '개선 축(우리 방법) vs 검증 축(비교군) 구분',
+        'attention 수식(QKᵀ/√d → softmax → V)을 직접 계산',
+        'SwinUNetMini · UNet3DMini 구축 · 공정 입력 설계',
+        '세 비교 구조 + 우리 방식(GAN)을 같은 예산에서 비교',
       ],
       newUtils:['SwinUNetMini','UNet3DMini','benchmark_models'],
       prep:['pip install torch torchvision','W2·W3와 동일 환경'],
@@ -580,15 +580,15 @@ window.COURSE = {
   /* ── Week 4 · 다른 아키텍처 (Swin Transformer · 3D CNN) ─────────── */
   w4: {
     flow: [
-      { a:'강의 + 합성곱의 한계 · attention 원리', src:'슬라이드 1–16' },
-      { a:'강의 + Swin · 3D 구조 · 공정 비교 원칙', src:'슬라이드 17–35' },
+      { a:'맥락 + 합성곱 복습 · attention 원리', src:'슬라이드 1–19' },
+      { a:'3D CNN · diffusion · 공정 비교·결과', src:'슬라이드 20–33' },
       { a:'노트북: attention 계산 · 두 모델 구축', src:'W4_architectures.ipynb §1–4' },
-      { a:'공정 비교 실행 + trade-off 해석', src:'노트북 §5–7' },
+      { a:'공정 비교 + 우리 방식(GAN) + trade-off', src:'노트북 §5–7' },
       { a:'탐구 과제 안내 + W5 예고', src:'handout §5' },
     ],
     groups: {
       g1: {
-        slides:44, cells:26, tryits:5,
+        slides:41, cells:27, tryits:5,
         notebook:'W4_architectures.ipynb',
         tasks:[
           { t:'시간 예산과 순위', req:true,  d:'budget_s=30/90/180 으로 공정 비교를 반복하고, 예산에 따라 세 구조의 지표·순위가 어떻게 변하는지 표로 정리한다. 느린 구조(3D)가 예산 증가의 이득을 더 보는지 확인.' },
@@ -598,7 +598,7 @@ window.COURSE = {
         ],
       },
       g2: {
-        slides:44, cells:26, tryits:5,
+        slides:41, cells:27, tryits:5,
         notebook:'W4_architectures.ipynb',
         tasks:[
           { t:'시간 예산과 순위', req:true,  d:'budget_s=30/90/180 으로 공정 비교를 반복하고, 예산에 따라 세 구조의 지표·순위가 어떻게 변하는지 표로 정리한다. 느린 구조(3D)가 예산 증가의 이득을 더 보는지 확인.' },
@@ -650,7 +650,7 @@ window.COURSE = {
     },
     guide: {
       utilsLabel: 'model_utils.py (+아키텍처)',
-      intro: 'W4의 핵심은 attention 연산을 숫자로 직접 계산해 보고, 창 attention(SwinUNetMini)과 3D 합성곱(UNet3DMini)을 같은 데이터·같은 입력 정보·같은 시간 예산에서 2D UNet과 공정하게 비교하는 것이다. benchmark_models 가 이 비교를 한 줄로 실행한다.',
+      intro: 'W4의 핵심은 우리 pix2pix 접근을 대안 구조(Transformer 계열 Swin·3D CNN·diffusion)와 같은 조건에서 비교하는 것이다. 이 구조들은 채택 대상이 아니라 비교군(baseline)이다. attention 을 숫자로 직접 계산하고, benchmark_models 로 세 비교 구조를 학습한 뒤 우리 방식(2D UNet + GAN)까지 같은 예산으로 더해 비교한다.',
       notebook: {
         file: 'W4_architectures.ipynb',
         cells: [
