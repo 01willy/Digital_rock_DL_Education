@@ -17,11 +17,18 @@ const KIND_META = {
   data:   { c:'orange', t:'데이터' },
   train:  { c:'green',  t:'학습' },
   cross:  { c:'orange', t:'cross-domain' },
+  // W3 kinds
+  loss:   { c:'orange', t:'손실' },
+  // W4 kinds
+  attn:   { c:'orange', t:'Attention' },
+  bench:  { c:'green',  t:'벤치마크' },
 };
 const GROUP_COLOR = {
   '데이터 I/O':'navy', '시각화':'orange', 'Sparse':'orange', '보간':'orange', '평가':'green',
   // W2 groups
   '모델':'navy', '데이터셋':'orange', '학습':'green', '체크포인트':'navy',
+  // W3~W4 groups
+  '손실':'orange', '벤치마크':'green',
 };
 
 /* notebook walkthrough */

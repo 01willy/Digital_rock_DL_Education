@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>W4 · 다른 아키텍처 · Transformer · 3D CNN · Digital Rock</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<style>
+/* ============================================================
+   W4 deck · W3 v2 디자인 언어 (1920×1080)
+   ============================================================ */
+:root{
+  --bg:#f4f1eb; --ink:#1a2333; --sub:#5a6475; --muted:#8a93a3;
+  --navy:#1f3a5f; --navy-2:#475067; --orange:#ea851b; --orange-d:#d4760f;
+  --green:#2e8b57; --red:#c83a3a; --line:#e4ded2; --card:#ffffff;
+  --tintbg:#fbf7f2; --tintline:#f1e5d6;
+  --sans:'Pretendard',system-ui,sans-serif; --mono:'JetBrains Mono','Pretendard',monospace;
+}
+*{box-sizing:border-box}
+deck-stage:not(:defined){visibility:hidden}
+body{margin:0;background:#0c1118;font-family:var(--sans)}
+.katex{font-size:1em}
+
+/* --- 슬라이드 골격: 본문은 푸터 존(하단 92px)을 침범하지 않는다 --- */
+section.s{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  padding:54px 84px 92px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.hd{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:24px;flex:none}
+.eb{font-family:var(--mono);font-size:22px;letter-spacing:.18em;text-transform:uppercase;color:var(--navy);margin-bottom:10px}
+.eb .n{color:var(--orange-d)}
+.tt{font-size:46px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
+.lead{font-size:25px;color:var(--sub);line-height:1.5;max-width:1560px}
+.body{flex:1;min-height:0;display:flex;flex-direction:column}
+.foot{position:absolute;left:84px;right:84px;bottom:22px;display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:16px;letter-spacing:.02em;color:var(--muted);pointer-events:none;z-index:5}
+.foot .b{color:var(--sub);font-weight:500}
+.foot .pg b{color:var(--orange-d)}
+
+/* --- 카드 --- */
+.row{display:flex;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 28px;
+  box-shadow:0 1px 3px rgba(40,34,20,.05)}
+.card.vc,.tint.vc{display:flex;flex-direction:column;justify-content:center}
+.card.vc{min-height:240px}
+.card.tn{border-top:4px solid var(--navy)} .card.to{border-top:4px solid var(--orange)}
+.card.ts{border-top:4px solid var(--navy-2)} .card.tr{border-top:4px solid var(--red)}
+.card.tg{border-top:4px solid var(--green)}
+.tint{background:var(--tintbg);border:1px solid var(--tintline);border-radius:12px;padding:24px 28px}
+.ct{font-size:27px;font-weight:600;margin-bottom:8px}
+.cd{font-size:23px;color:var(--sub);line-height:1.5}
+.cd b,.lead b{color:var(--ink);font-weight:600}
+.cd .hl,.lead .hl{color:var(--orange-d);font-weight:600}
+.cd .nv,.lead .nv{color:var(--navy);font-weight:600}
+.tag{font-family:var(--mono);font-size:21px;color:var(--navy)}
+.arrow{display:flex;align-items:center;font-size:30px;color:var(--muted);flex:none}
+
+/* --- 코드 블록 --- */
+.code{background:#1d2330;border-radius:10px;padding:24px 30px;font-family:var(--mono);
+  font-size:22px;line-height:1.75;color:#e6e9ef}
+.code .k{color:#b3a7ef}.code .c{color:#7d879b}.code .f{color:#f0b775}.code .v{color:#9ecb8f}
+
+/* --- 이미지 프레임 --- */
+.fr{border:1px solid var(--line);border-radius:10px;background:#fff;display:block}
+.cap{font-size:19px;color:var(--muted);line-height:1.45;margin-top:10px}
+.figbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;
+  box-shadow:0 1px 3px rgba(40,34,20,.05)}
+
+/* --- 섹션 divider --- */
+section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
+  padding:0 84px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.dv .num{position:absolute;right:90px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:300px;font-weight:700;line-height:.8;letter-spacing:-.04em;
+  color:transparent;-webkit-text-stroke:3px rgba(230,167,90,.45)}
+.dv .k{font-family:var(--mono);font-size:23px;letter-spacing:.2em;text-transform:uppercase;color:#e6a75a}
+.dv .t{font-size:78px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:22px;max-width:1250px}
+.dv .d{font-size:27px;color:#a9bbd0;margin-top:24px;max-width:1000px;line-height:1.55}
+.dv .foot{color:#6e7e95}.dv .foot .b{color:#9db1cb}
+
+/* --- 수식 박스 --- */
+.eq{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 28px;font-size:25px}
+.eq .lbl{font-family:var(--mono);font-size:18px;color:var(--muted);margin-bottom:8px}
+
+/* --- 표 --- */
+table.tb{border-collapse:collapse;width:100%;font-size:23px}
+.tb th{font-family:var(--mono);font-size:18px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;
+  text-align:left;padding:12px 18px;border-bottom:2px solid var(--line);font-weight:600}
+.tb td{padding:13px 18px;border-bottom:1px solid var(--line)}
+.tb td.m{font-family:var(--mono);font-weight:600;color:var(--navy)}
+</style>
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+<!-- 01 · 표지 -->
+<section data-label="표지" data-speaker-notes="4주차를 시작한다. 지금까지 우리는 한 가지 구조, 2D UNet만 사용했다. 이번 주는 연결 방식이 다른 두 구조, 창 attention 기반의 Swin Transformer와 3D 합성곱을 같은 문제에 적용해 공정하게 비교한다. 목표는 승자를 정하는 것이 아니라, 구조를 바꾸면 무엇이 얻어지고 무엇이 비싸지는지를 읽는 눈을 기르는 것이다." style="background:#f4f1eb;color:#1a2333;font-family:Pretendard,sans-serif;display:flex;">
+  <div style="width:720px;height:100%;background:#1f3a5f;display:flex;align-items:center;justify-content:center;position:relative;">
+    <svg viewBox="0 0 460 460" width="440" height="440" fill="none">
+      <!-- conv: 3×3 격자 -->
+      <g stroke="#8fa7c4" stroke-width="2.5">
+        <rect x="40" y="50" width="120" height="120" rx="8" fill="rgba(234,133,27,.08)"/>
+        <line x1="80" y1="50" x2="80" y2="170"/><line x1="120" y1="50" x2="120" y2="170"/>
+        <line x1="40" y1="90" x2="160" y2="90"/><line x1="40" y1="130" x2="160" y2="130"/>
+      </g>
+      <text x="100" y="200" fill="#8fa7c4" font-family="JetBrains Mono" font-size="17" text-anchor="middle">conv 3×3</text>
+      <!-- attention: 토큰 연결 -->
+      <g>
+        <circle cx="300" cy="70" r="13" fill="#ea851b"/>
+        <circle cx="380" cy="105" r="11" fill="#e2e9f1"/>
+        <circle cx="410" cy="60" r="11" fill="#e2e9f1"/>
+        <circle cx="335" cy="140" r="11" fill="#e2e9f1"/>
+        <line x1="300" y1="70" x2="380" y2="105" stroke="#ea851b" stroke-width="5" opacity=".85"/>
+        <line x1="300" y1="70" x2="410" y2="60" stroke="#ea851b" stroke-width="2.5" opacity=".55"/>
+        <line x1="300" y1="70" x2="335" y2="140" stroke="#ea851b" stroke-width="1.6" opacity=".4"/>
+      </g>
+      <text x="355" y="185" fill="#8fa7c4" font-family="JetBrains Mono" font-size="17" text-anchor="middle">attention</text>
+      <!-- 3D: 큐브 -->
+      <g stroke="#8fa7c4" stroke-width="2.5" fill="rgba(46,139,87,.10)">
+        <path d="M150 300 L270 300 L270 400 L150 400 Z"/>
+        <path d="M150 300 L190 268 L310 268 L270 300 Z"/>
+        <path d="M270 300 L310 268 L310 368 L270 400 Z"/>
+      </g>
+      <text x="228" y="432" fill="#8fa7c4" font-family="JetBrains Mono" font-size="17" text-anchor="middle">conv 3×3×3</text>
+      <!-- 연결선 -->
+      <path d="M180 210 C 230 240, 250 240, 300 210" stroke="#e6a75a" stroke-width="2" stroke-dasharray="6 6"/>
+    </svg>
+    <div style="position:absolute;left:48px;bottom:44px;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.14em;color:#9db1cb">DIGITAL ROCK · 6-WEEK COURSE</div>
+  </div>
+  <div style="flex:1;padding:0 96px;display:flex;flex-direction:column;justify-content:center;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:26px;letter-spacing:.18em;color:#1f3a5f;margin-bottom:26px">DIGITAL ROCK · WEEK 4</div>
+    <div style="font-size:100px;font-weight:600;letter-spacing:-.02em;line-height:1.08">다른 아키텍처<br><span style="color:#1f3a5f;">Transformer · 3D CNN</span></div>
+    <div style="font-size:31px;color:#5a6475;margin-top:34px;line-height:1.5;max-width:900px">같은 문제 · 같은 정보 · 같은 시간 예산.<br>구조를 바꾸면 무엇이 얻어지고, 무엇이 비싸지는가.</div>
+    <div style="display:flex;gap:12px;margin-top:44px">
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:4px;color:#5a6475;font-size:22px">attention 원리</span>
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:4px;color:#5a6475;font-size:22px">Swin · 3D 구조</span>
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:4px;color:#5a6475;font-size:22px">공정 비교</span>
+      <span style="padding:11px 22px;border:1px solid #d6d0c2;border-radius:4px;color:#5a6475;font-size:22px">실습</span>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · 지난 주 요약 -->
+<section class="s" data-label="지난 주 요약" data-speaker-notes="흐름을 되짚는다. W1은 학습 없는 선형 보간, W2는 2D UNet과 L1 학습, W3는 같은 UNet에 판별자를 붙여 손실을 바꿨다. 즉 지금까지의 개선은 모두 손실과 학습 방법의 개선이었고, 구조는 처음부터 끝까지 2D UNet 하나였다. 이번 주는 처음으로 구조 자체를 바꾼다.">
+  <div class="hd">
+    <div class="eb">WEEK 4 · <span class="n">지난 주까지의 위치</span></div>
+    <div class="tt">지금까지 구조는 하나, 2D UNet 이었다</div>
+  </div>
+  <div class="lead">W3까지의 개선은 전부 <b>손실과 학습 방법</b>의 개선이었다. 구조(연결 방식)는 바꾼 적이 없다.</div>
+  <div class="body" style="justify-content:center;gap:22px">
+    <div class="row">
+      <div class="card ts vc" style="flex:1">
+        <div class="tag">W1 · 고전 보간</div>
+        <div class="ct" style="margin-top:6px">선형 보간</div>
+        <div class="cd">이웃 두 장의 평균. 학습 없음.<br>Bentheimer k=2 기준 <b>|Δφ| 11.75%p</b></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="card tn vc" style="flex:1">
+        <div class="tag">W2 · 딥러닝 입문</div>
+        <div class="ct" style="margin-top:6px">2D UNet + L1</div>
+        <div class="cd">이웃 t±k 두 장 → 가운데 t 를 학습.<br>선형 대비 오차 <b>1/6 수준</b></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="card to vc" style="flex:1">
+        <div class="tag">W3 · 적대적 학습</div>
+        <div class="ct" style="margin-top:6px">+ 판별자 (GAN)</div>
+        <div class="cd">구조는 그대로, <b>손실을 교체</b>.<br>회색 번짐 억제, 경계 선명화</div>
+      </div>
+    </div>
+    <div class="tint" style="padding:20px 26px">
+      <div class="cd" style="font-size:24px"><b>이번 주.</b> 손실이 아니라 <span class="hl">구조(architecture)</span>를 바꾼다. 합성곱이 아닌 연결 방식 두 가지(<span class="nv">창 attention · Swin Transformer</span> 와 <span class="nv">3D 합성곱</span>)를 같은 문제에 적용한다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 다른 아키텍처</span><span class="pg"><b>02</b> / 44</span></div>
+</section>
+
+<!-- 03 · 핵심 질문 · 로드맵 -->
+<section class="s" data-label="핵심 질문" data-speaker-notes="이번 주의 질문은 어느 구조가 최고인가가 아니다. 구조마다 무엇을 얻고 무엇을 내주는지, 그리고 그 비교를 공정하게 하려면 무엇을 통제해야 하는지다. 여섯 부분으로 진행한다. 합성곱의 시야를 복습하고, attention의 수식을 숫자로 계산하고, Swin과 3D 구조를 만들고, 공정 비교의 원칙과 대규모 결과를 본 뒤, 직접 실험한다.">
+  <div class="hd">
+    <div class="eb">WEEK 4 · <span class="n">핵심 질문</span></div>
+    <div class="tt">구조를 바꾸면 무엇이 얻어지고, 무엇이 비싸지는가</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:24px">
+    <div class="row">
+      <div class="card tn vc" style="flex:1.2">
+        <div class="cd" style="font-size:24px;line-height:1.65">
+          같은 슬라이스 보간 문제를 <b>연결 방식이 다른 세 구조</b>로 푼다.<br><br>
+          <span class="nv">2D 합성곱</span> · 지역 연산, 위치가 정하는 고정 가중치<br>
+          <span class="hl">창 attention</span> · 내용(유사도)이 정하는 가중치<br>
+          <span style="color:var(--green);font-weight:600">3D 합성곱</span> · 슬라이스 사이(z)까지 함께 합성곱<br><br>
+          세 모델의 파라미터는 <b>약 12만 개로 동급</b>이다. 차이가 나면 그것은 크기가 아니라 <b>구조의 차이</b>다.
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+        <div class="tint" style="padding:20px 26px"><span class="tag">§1</span> <span class="cd" style="font-size:22px">합성곱의 시야 · 지역성과 수용 영역</span></div>
+        <div class="tint" style="padding:20px 26px"><span class="tag">§2</span> <span class="cd" style="font-size:22px">attention 원리 · 수식을 숫자로 계산</span></div>
+        <div class="tint" style="padding:20px 26px"><span class="tag">§3</span> <span class="cd" style="font-size:22px">Swin · 창 분할과 SwinUNetMini</span></div>
+        <div class="tint" style="padding:20px 26px"><span class="tag">§4</span> <span class="cd" style="font-size:22px">3D 합성곱 · 부피 문맥과 공정한 입력</span></div>
+        <div class="tint" style="padding:20px 26px"><span class="tag">§5</span> <span class="cd" style="font-size:22px">공정 비교 · 원칙 · 대규모 결과 · trade-off</span></div>
+        <div class="tint" style="padding:20px 26px"><span class="tag">§6</span> <span class="cd" style="font-size:22px">실습 · 같은 예산으로 세 구조 학습</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 다른 아키텍처</span><span class="pg"><b>03</b> / 44</span></div>
+</section>
+
+<!-- 04 · dv §1 -->
+<section class="dv" data-label="§1 합성곱의 시야" data-speaker-notes="1부에서는 우리가 지금까지 써 온 합성곱이 세상을 어떻게 보는지 복습한다. 지역 연산과 가중치 공유라는 강점이 어디서 오는지, 그리고 그 대가로 무엇을 포기하는지를 정리해야 다른 구조가 왜 필요한지 이해할 수 있다.">
+  <div class="num">01</div>
+  <div class="k">Part 1 · The Local View</div>
+  <div class="t">합성곱의 시야</div>
+  <div class="d">각 위치는 주변 3×3 만 본다. 같은 가중치를 모든 위치에 재사용한다. 이 두 선택이 CNN의 강점이자 한계다.</div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>04</b> / 44</span></div>
+</section>
+
+<!-- 05 · 합성곱 복습 -->
+<section class="s" data-label="합성곱 복습" data-speaker-notes="합성곱의 두 원칙이다. 첫째 지역 연산. 한 위치의 출력은 그 주변 3×3만 본다. 둘째 가중치 공유. 같은 9개 가중치를 이미지 전체에 재사용한다. 덕분에 16채널에서 32채널로 가는 conv의 파라미터가 4천여 개로 적고, 위치가 달라도 같은 패턴을 같은 방식으로 잡는다.">
+  <div class="hd">
+    <div class="eb">§1 · <span class="n">복습</span></div>
+    <div class="tt">합성곱: 지역 연산 + 가중치 공유</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:16px">
+    <div class="figbox" style="align-self:center;max-width:1480px">
+      <img src="assets/figures/W4_conv_locality.png" style="width:100%" alt="3×3 합성곱의 지역 연산과 가중치 공유: 실제 슬라이스 위 커널 창 두 위치와 공유되는 3×3 가중치">
+    </div>
+    <div class="row" style="max-width:1480px;align-self:center">
+      <div class="tint" style="flex:1;padding:16px 22px"><div class="cd" style="font-size:21px"><b>지역 연산.</b> 출력 한 픽셀은 입력의 주변 3×3 만 본다. 멀리 있는 픽셀은 존재하지 않는 것과 같다.</div></div>
+      <div class="tint" style="flex:1;padding:16px 22px"><div class="cd" style="font-size:21px"><b>가중치 공유.</b> 같은 9개 가중치를 전 위치에 재사용한다. 예: conv 16→32채널 = 9×16×32 = <span class="nv">4,608개</span>.</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §1</span><span class="pg"><b>05</b> / 44</span></div>
+</section>
+
+<!-- 06 · 수용 영역 -->
+<section class="s" data-label="수용 영역" data-speaker-notes="지역 연산의 대가는 시야다. 층을 하나 지날 때마다 한 출력 픽셀이 보는 입력 범위, 즉 수용 영역은 2씩만 늘어난다. 3층을 쌓아도 7픽셀이다. 풀링으로 보폭을 두 배로 만들면 성장 속도가 빨라지지만, 결국 멀리 있는 픽셀을 보려면 층을 많이 쌓아야 한다는 사실은 변하지 않는다.">
+  <div class="hd">
+    <div class="eb">§1 · <span class="n">시야의 성장</span></div>
+    <div class="tt">수용 영역: 층을 쌓아야 넓어진다</div>
+  </div>
+  <div class="lead">한 출력 픽셀이 보는 입력 범위(수용 영역)는 3×3 conv 층당 <b>+2</b>. 넓은 시야에는 깊은 네트워크가 필요하다.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1500px">
+      <img src="assets/figures/W4_receptive_field.png" style="width:100%" alt="수용 영역 성장: 3층 3×3 conv의 영향 원뿔과 층수 대비 수용 영역 곡선(풀링 유무)">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">왼쪽: 3층 conv 후 출력 1픽셀이 보는 입력 범위 = 7픽셀. 오른쪽: 층수 대비 수용 영역. 풀링(보폭 2배) 삽입 시 성장이 빨라진다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §1</span><span class="pg"><b>06</b> / 44</span></div>
+</section>
+
+<!-- 07 · CNN의 두 한계 -->
+<section class="s" data-label="CNN의 두 한계" data-speaker-notes="정리하면 합성곱의 한계는 두 가지다. 첫째, 전역 관계를 보려면 층을 깊이 쌓아야 하고 그만큼 정보가 흐려진다. 둘째, 가중치가 내용과 무관하게 고정이라, 이 픽셀과 비슷한 픽셀만 골라 참고하는 동작이 불가능하다. 이 두 한계를 각각 다른 방식으로 넘는 것이 attention과 3D 합성곱이다.">
+  <div class="hd">
+    <div class="eb">§1 · <span class="n">한계</span></div>
+    <div class="tt">두 가지 한계, 두 가지 대안</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:22px">
+    <div class="row">
+      <div class="card tr" style="flex:1;padding:32px 34px">
+        <div class="tag" style="color:var(--red)">한계 1 · 전역 관계의 비용</div>
+        <div class="ct" style="margin-top:8px">멀리 보려면 깊이 쌓아야 한다</div>
+        <div class="cd">수용 영역은 층당 +2. 이미지 반대편의 정보는 수십 층을 거쳐야 도달하고, 거치는 동안 희석된다.</div>
+      </div>
+      <div class="card tr" style="flex:1;padding:32px 34px">
+        <div class="tag" style="color:var(--red)">한계 2 · 내용 무관 고정 가중치</div>
+        <div class="ct" style="margin-top:8px">"비슷한 곳을 골라 보기"가 없다</div>
+        <div class="cd">가중치는 학습 후 고정되고 위치가 정한다. 입력 내용에 따라 참고할 곳을 바꾸는 동작은 구조적으로 불가능하다.</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card to" style="flex:1;padding:30px 34px">
+        <div class="tag" style="color:var(--orange-d)">대안 1 · attention (§2–§3)</div>
+        <div class="cd" style="margin-top:6px">가중치를 <b>내용의 유사도</b>로 실행 시점마다 계산한다. 한 번의 연산으로 (창 안의) 모든 위치를 본다.</div>
+      </div>
+      <div class="card tg" style="flex:1;padding:30px 34px">
+        <div class="tag" style="color:var(--green)">대안 2 · 3D 합성곱 (§4)</div>
+        <div class="cd" style="margin-top:6px">시야를 평면 밖으로 넓힌다. 슬라이스 사이(z 방향)의 연속성을 <b>부피 합성곱</b>으로 직접 본다.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §1</span><span class="pg"><b>07</b> / 44</span></div>
+</section>
+
+<!-- 08 · 오늘의 세 구조 -->
+<section class="s" data-label="오늘의 세 구조" data-speaker-notes="오늘 비교할 세 구조다. W2의 2D UNet 11만 7천, 새로 만들 SwinUNetMini 12만 5천, UNet3DMini 12만 9천 파라미터. 셋 다 약 12만 개로 맞췄다. 입력과 출력 형식도 완전히 같다. 이웃 두 장이 들어가 가운데 한 장이 나온다. 다른 것은 오직 내부의 연결 방식이다.">
+  <div class="hd">
+    <div class="eb">§1 · <span class="n">비교 대상</span></div>
+    <div class="tt">세 구조, 같은 문제, 같은 크기</div>
+  </div>
+  <div class="lead">입력·출력은 동일: 이웃 <b>t±k 두 장</b> → 가운데 <b>t 한 장</b>. 다른 것은 내부 연결 방식뿐이다.</div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <div class="row">
+      <div class="card tn" style="flex:1;padding:30px 32px">
+        <div class="tag">UNetMini · W2</div>
+        <div class="ct" style="margin-top:8px">2D 합성곱</div>
+        <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:var(--navy)">117,217<span style="font-size:22px;color:var(--muted)"> 파라미터</span></div>
+        <div class="cd" style="margin-top:6px">3레벨 인코더·디코더 + skip.<br>지역 연산 · 고정 가중치</div>
+      </div>
+      <div class="card to" style="flex:1;padding:30px 32px">
+        <div class="tag" style="color:var(--orange-d)">SwinUNetMini · 신규</div>
+        <div class="ct" style="margin-top:8px">창 attention</div>
+        <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:var(--orange-d)">124,641<span style="font-size:22px;color:var(--muted)"> 파라미터</span></div>
+        <div class="cd" style="margin-top:6px">같은 U-구조, 합성곱 블록 자리에 Swin 블록.<br>내용 기반 가중치</div>
+      </div>
+      <div class="card tg" style="flex:1;padding:30px 32px">
+        <div class="tag" style="color:var(--green)">UNet3DMini · 신규</div>
+        <div class="ct" style="margin-top:8px">3D 합성곱</div>
+        <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:var(--green)">129,181<span style="font-size:22px;color:var(--muted)"> 파라미터</span></div>
+        <div class="cd" style="margin-top:6px">3×3×3 커널로 슬라이스 사이까지.<br>부피 문맥</div>
+      </div>
+    </div>
+    <div class="tint" style="padding:18px 26px">
+      <div class="cd" style="font-size:22px"><b>크기를 맞춘 이유.</b> 파라미터가 다르면 "구조가 좋아서"인지 "커서"인지 구분할 수 없다. 크기를 고정하면 남는 변수는 <span class="hl">연결 방식</span>뿐이다. (시간 예산은 §5에서 통제한다)</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §1</span><span class="pg"><b>08</b> / 44</span></div>
+</section>
+
+<!-- 09 · dv §2 -->
+<section class="dv" data-label="§2 attention 원리" data-speaker-notes="2부는 이번 주의 수학적 중심이다. attention 수식 한 줄을 기호 하나씩 해체하고, 3×2 크기의 작은 행렬로 전 과정을 손으로 계산한다. 숫자로 한 번 따라가고 나면 attention은 유사도로 가중치를 만들어 내용을 섞는 가중 평균이라는 사실이 분명해진다.">
+  <div class="num">02</div>
+  <div class="k">Part 2 · Content-based Weights</div>
+  <div class="t">Attention 원리</div>
+  <div class="d">수식은 한 줄이다: $\mathrm{softmax}(QK^{\top}/\sqrt{d})\,V$. 이 한 줄을 기호 하나씩, 그리고 실제 숫자로 계산한다.</div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>09</b> / 44</span></div>
+</section>
+
+<!-- 10 · attention 아이디어 -->
+<section class="s" data-label="attention 아이디어" data-speaker-notes="핵심 아이디어부터. 합성곱은 위치가 정한 고정 이웃의 가중 평균이다. attention은 내용이 정한 가중 평균이다. 질의 픽셀과 비슷한 위치일수록 굵은 연결, 즉 큰 가중치를 받는다. 어디를 참고할지가 입력 내용에 따라 실행 시점마다 달라진다는 것이 합성곱과의 본질적 차이다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">아이디어</span></div>
+    <div class="tt">내용이 정하는 가중 평균</div>
+  </div>
+  <div class="lead">합성곱: <b>위치</b>가 정한 고정 이웃을 본다. attention: <b>내용(유사도)</b>이 정한 가중치로 전체를 본다.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1460px">
+      <img src="assets/figures/W4_attention_idea.png" style="width:100%" alt="같은 슬라이스에서 합성곱의 고정 3×3 이웃과 attention의 내용 기반 연결 비교">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1420px;text-align:center">같은 질의 픽셀(주황)에서 합성곱은 고정된 3×3 이웃만 본다(왼쪽). attention은 유사한 구조(공극 경계)로 굵은 연결을 만든다(오른쪽 · 예시용 유사도).</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>10</b> / 44</span></div>
+</section>
+
+<!-- 11 · Q·K·V -->
+<section class="s" data-label="Q·K·V" data-speaker-notes="수식을 기호별로 읽는다. Q는 질의, 내가 무엇을 찾는지다. K는 색인, 각 토큰이 자신을 어떻게 광고하는지다. V는 내용, 실제로 가져올 값이다. 셋 다 같은 입력에서 서로 다른 선형 변환으로 만들어지고, 이 변환 행렬들이 학습된다. QK 전치가 모든 쌍의 유사도, 루트 d로 나눠 안정화, softmax로 확률, V의 가중 평균이 출력이다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">수식 해부</span></div>
+    <div class="tt">Q · K · V: 질의 · 색인 · 내용</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:18px">
+    <div class="eq" style="text-align:center;font-size:30px;padding:20px 30px 14px">
+      <div class="lbl">attention 정의 · 색은 아래 해설과 대응</div>
+      $$\mathrm{Attention}(Q,K,V)\;=\;\mathrm{softmax}\!\left(\frac{\textcolor{#1f3a5f}{Q\,K^{\top}}}{\textcolor{#d4760f}{\sqrt{d}}}\right)\textcolor{#2e8b57}{V}$$
+    </div>
+    <div class="row">
+      <div class="card tn" style="flex:1;padding:18px 24px">
+        <div class="tag">Q · K · V 의 출처</div>
+        <div class="cd" style="font-size:21px;margin-top:6px">같은 입력 $X$ 에서 <b>서로 다른 선형 변환</b>으로 생성:<br>$Q=XW_Q$, $K=XW_K$, $V=XW_V$.<br>학습되는 것은 $W_Q, W_K, W_V$ 다.</div>
+      </div>
+      <div class="card tn" style="flex:1;padding:18px 24px">
+        <div class="tag" style="color:var(--navy)">$Q\,K^{\top}$ · 유사도 점수</div>
+        <div class="cd" style="font-size:21px;margin-top:6px">모든 토큰 쌍의 <b>점곱</b>. "나의 질의(Q)와 너의 색인(K)이 얼마나 맞는가"를 잰다. 결과는 토큰수×토큰수 행렬.</div>
+      </div>
+      <div class="card to" style="flex:1;padding:18px 24px">
+        <div class="tag" style="color:var(--orange-d)">÷√d · 크기 안정화</div>
+        <div class="cd" style="font-size:21px;margin-top:6px">차원 d 가 크면 점곱이 커져 softmax 가 <b>포화</b>된다. √d 로 나눠 분포를 살린다. (다음 장)</div>
+      </div>
+      <div class="card tg" style="flex:1;padding:18px 24px">
+        <div class="tag" style="color:var(--green)">softmax → ×V · 가중 평균</div>
+        <div class="cd" style="font-size:21px;margin-top:6px">행마다 합=1 가중치를 만들고, 그 가중치로 <b>내용(V)의 가중 평균</b>을 낸다. 이것이 새 표현이다.</div>
+      </div>
+    </div>
+    <div class="figbox" style="align-self:center;max-width:1480px;padding:12px">
+      <img src="assets/figures/W4_qkv_diagram.png" style="width:100%;max-height:266px;object-fit:contain" alt="X에서 W_Q, W_K, W_V를 거쳐 Q·K·V가 만들어지고 유사도, 스케일, softmax, 가중 평균으로 이어지는 흐름도">
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>11</b> / 44</span></div>
+</section>
+
+<!-- 12 · 점곱과 √d -->
+<section class="s" data-label="점곱과 √d" data-speaker-notes="루트 d로 나누는 이유를 숫자로 본다. 성분이 평균 0, 분산 1인 두 벡터의 점곱은 차원 d에 비례해 분산이 커진다. d가 64면 점수가 플러스마이너스 8 수준까지 커지고, softmax에 8이 들어가면 가중치가 1.0 근처로 포화된다. 포화되면 기울기가 거의 0이라 학습이 멈춘다. 루트 64, 즉 8로 나누면 점수가 1 수준으로 줄어 여러 토큰을 함께 보는 분포가 유지된다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">스케일</span></div>
+    <div class="tt">√d 나눗셈: softmax 포화를 막는 장치</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <div class="row">
+      <div class="card tn vc" style="flex:1">
+        <div class="tag">왜 점곱이 커지는가</div>
+        <div class="cd" style="margin-top:8px">성분이 평균 0·분산 1인 두 벡터 $q, k$ 의 점곱 $q\cdot k=\sum_{i=1}^{d} q_i k_i$ 는 항 $d$ 개의 합이라 <b>분산이 $d$ 에 비례</b>한다. 표준편차는 $\sqrt{d}$.<br><br>$d=64$ 이면 점수가 ±8 수준. softmax 는 지수 함수라 점수 8은 <b>가중치 1.0 독점</b>을 뜻한다.</div>
+      </div>
+      <div class="card to vc" style="flex:1">
+        <div class="tag" style="color:var(--orange-d)">수치 예시 · d=64</div>
+        <div class="cd" style="margin-top:8px;font-family:var(--mono);font-size:21px;line-height:1.9">
+          점수 [<b>8</b>, 0, −8]<br>
+          → softmax = [<span style="color:var(--red);font-weight:700">1.00</span>, 0.00, 0.00] <span style="color:var(--red)">포화</span><br><br>
+          ÷√64 → [<b>1</b>, 0, −1]<br>
+          → softmax = [<span style="color:var(--green);font-weight:700">0.67</span>, 0.24, 0.09]
+        </div>
+        <div class="cd" style="margin-top:10px;font-size:21px">포화가 풀리면 <b>여러 토큰을 함께 보는</b> 분포가 유지되고, 기울기도 살아 있다.</div>
+      </div>
+    </div>
+    <div class="tint" style="padding:21px 27px">
+      <div class="cd" style="font-size:21px"><b>기억할 것.</b> ÷√d 는 수학적 장식이 아니라 <span class="hl">학습이 되게 만드는 안정화 장치</span>다. W3의 warmup·spectral norm처럼, 안정화 장치는 항상 "왜 필요한가"와 함께 기억한다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>12</b> / 44</span></div>
+</section>
+
+<!-- 13 · softmax 수치 예시 -->
+<section class="s" data-label="softmax 수치 예시" data-speaker-notes="softmax 자체도 숫자로 확인한다. 점수 2.0, 0.5, 마이너스 1.0에 각각 지수를 취하면 7.39, 1.65, 0.37이고 합은 9.41이다. 각 지수값을 합으로 나누면 0.786, 0.175, 0.039로 합이 1인 가중치가 된다. 아래는 방금 본 포화 예시다. 점수 차이가 크면 지수 때문에 순식간에 한 곳으로 몰린다는 것을 같은 그림에서 확인한다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">softmax</span></div>
+    <div class="tt">softmax: 점수를 합=1 가중치로</div>
+  </div>
+  <div class="lead">$\mathrm{softmax}(s_i)=e^{s_i}\big/\sum_j e^{s_j}$. 지수를 취해 전체 합으로 나눈다. 큰 점수는 크게, 그러나 <b>모두 합하면 1</b>.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1440px">
+      <img src="assets/figures/W4_softmax_example.png" style="width:100%" alt="softmax 수치 예시: 점수를 지수화해 합으로 나누는 과정과 스케일에 따른 포화 비교">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">위: [2.0, 0.5, −1.0] → e 지수 [7.39, 1.65, 0.37], 합 9.41 → [0.786, 0.175, 0.039]. 아래: 점수가 크면 포화, ÷√d 후 분포 회복.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>13</b> / 44</span></div>
+</section>
+
+<!-- 14 · attention 전체 수치 예시 -->
+<section class="s" data-label="attention 수치 예시" data-speaker-notes="이제 전체를 잇는다. 토큰 세 개, 차원 2. x1은 1 0, x2는 0 1, x3는 1 1이고 Q와 K는 X 그대로, V만 따로 설정했다. QK 전치를 계산하면 유사도 행렬이 나오고, 루트 2로 나눈 뒤 행마다 softmax를 하면 가중치가 나온다. 셋째 행을 보면 x3는 둘 다와 비슷해서 가중치가 0.25, 0.25, 0.50으로 고르게 퍼졌고, 출력도 두 내용의 중간인 5, 5가 된다. 유사도가 가중치를 만들고 가중치가 내용을 섞는다. 노트북 2절에서 이 계산을 그대로 실행한다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">전 과정 계산</span></div>
+    <div class="tt">attention 수치 예시: 토큰 3개로 전 과정</div>
+  </div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1560px;padding:12px 16px">
+      <img src="assets/figures/W4_attention_numeric.png" style="width:100%" alt="토큰 3개 예시의 attention 단계별 행렬: QK 전치, 스케일, softmax, V 가중 평균">
+    </div>
+    <div class="row" style="align-self:center;max-width:1560px;margin-top:14px;gap:16px">
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>3행 읽기.</b> x₃=[1,1] 은 둘 다와 비슷 → 가중치 [0.25, 0.25, 0.50] 로 분산 → 출력 [5.0, 5.0] = 내용의 중간값.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>확인.</b> 각 행의 가중치 합 = 1. 출력은 항상 V 행들의 <span class="nv">볼록 결합(가중 평균)</span>이다. 없는 값을 만들어내지 않는다.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>실습 연결.</b> 노트북 §2 에서 같은 숫자를 <span class="hl">직접 실행</span>하고, §2 Try-it 에서 √d 를 빼고 차이를 관찰한다.</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>14</b> / 44</span></div>
+</section>
+
+<!-- 15 · multi-head -->
+<section class="s" data-label="multi-head" data-speaker-notes="실제 모델은 attention을 머리 여러 개로 나눠 병렬로 계산한다. 채널 32를 8씩 4개 head로 나누고, head마다 별도의 Q K V 변환을 둔다. 어떤 head는 공극 경계의 유사도를, 다른 head는 입자 내부의 유사도를 보는 식으로 서로 다른 관점이 학습된다. 각 head의 출력을 이어 붙여 선형 변환하면 끝이다. 우리 SwinUNetMini는 4 head를 쓴다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">multi-head</span></div>
+    <div class="tt">multi-head: 여러 관점의 유사도를 병렬로</div>
+  </div>
+  <div class="lead">채널을 head 로 나눠 <b>서로 다른 유사도 기준</b>을 병렬 학습한다. SwinUNetMini: 채널 32 = <b>4 head × 8차원</b>.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1460px">
+      <img src="assets/figures/W4_multihead.png" style="width:100%" alt="채널 분할, head별 attention, 결합의 multi-head 구조">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">head 마다 별도의 $W_Q, W_K, W_V$ 를 두어 같은 토큰들에 대해 다른 가중치 분포를 만든다. 출력은 이어 붙여(concat) 선형 변환.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>15</b> / 44</span></div>
+</section>
+
+<!-- 16 · N² 비용 -->
+<section class="s" data-label="attention의 비용" data-speaker-notes="attention의 약점은 비용이다. 모든 쌍의 유사도를 재므로 연산이 토큰 수의 제곱으로 는다. 256 곱하기 256 픽셀을 전부 토큰으로 쓰면 43억 쌍이라 불가능하다. 4×4 패치 임베딩으로 토큰을 4096개로 줄이면 1700만 쌍, 여기에 8×8 창 분할까지 하면 26만 쌍으로 준다. 이 두 단계가 3부에서 볼 Swin의 핵심 설계다.">
+  <div class="hd">
+    <div class="eb">§2 · <span class="n">비용</span></div>
+    <div class="tt">비용은 N²: 전부 볼 수는 없다</div>
+  </div>
+  <div class="lead">유사도 행렬은 토큰수×토큰수. <b>N=65,536</b>(픽셀 전부)이면 <b>4.3×10⁹ 쌍</b>. 그대로는 불가능하다.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1480px">
+      <img src="assets/figures/W4_cost_scaling.png" style="width:100%" alt="토큰 수에 따른 attention 쌍 수 증가와 패치 임베딩·창 분할에 의한 감소">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1420px;text-align:center">해법 미리보기: ① 패치 임베딩(픽셀→토큰 요약, ÷256) ② 창 분할(창 안에서만 attention, ÷64). 둘을 합치면 §3의 Swin 이 된다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §2</span><span class="pg"><b>16</b> / 44</span></div>
+</section>
+
+<!-- 17 · dv §3 -->
+<section class="dv" data-label="§3 Swin" data-speaker-notes="3부에서는 2부의 부품들을 실제 모델로 조립한다. 패치 임베딩으로 토큰을 만들고, 창 분할로 비용을 억제하고, 창 이동으로 경계를 연결한다. 마지막에 이 모든 것을 UNet 골격에 넣은 SwinUNetMini를 완성한다.">
+  <div class="num">03</div>
+  <div class="k">Part 3 · Windowed Attention</div>
+  <div class="t">Swin Transformer</div>
+  <div class="d">패치 임베딩 → 창 분할 → 창 이동. 세 가지 설계로 attention 을 이미지 크기에서 감당 가능하게 만든다.</div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>17</b> / 44</span></div>
+</section>
+
+<!-- 18 · 패치 임베딩 -->
+<section class="s" data-label="패치 임베딩" data-speaker-notes="첫 단계는 토큰 만들기다. 4×4 픽셀 조각마다 stride 4 합성곱 한 번으로 요약 벡터 하나를 만든다. 256×256 픽셀이 64×64, 총 4096개의 토큰이 된다. 각 토큰은 위치가 아니라 그 조각의 내용을 담은 벡터라는 점이 중요하다. 이후의 attention은 전부 이 토큰들 위에서 동작한다.">
+  <div class="hd">
+    <div class="eb">§3 · <span class="n">1단계</span></div>
+    <div class="tt">패치 임베딩: 픽셀을 토큰으로</div>
+  </div>
+  <div class="lead">4×4 픽셀 → 토큰 1개 (conv stride 4). 256² 픽셀이 <b>64×64 = 4,096 토큰</b>이 된다 (쌍 수 ÷256).</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1480px">
+      <img src="assets/figures/W4_patch_embed.png" style="width:100%;max-height:600px;object-fit:contain" alt="실제 슬라이스가 4×4 패치 단위로 64×64 토큰 격자가 되는 과정">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">토큰 = 4×4 조각의 요약 벡터(채널 32). 세부 픽셀 정보 일부를 내주고 토큰 수를 얻는 거래다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §3</span><span class="pg"><b>18</b> / 44</span></div>
+</section>
+
+<!-- 19 · 창 분할 -->
+<section class="s" data-label="창 분할" data-speaker-notes="둘째 단계, 창 분할이다. 64×64 토큰 격자를 8×8 창 64개로 나누고, attention은 각 창 안의 64개 토큰끼리만 계산한다. 유사도 행렬이 창마다 64×64로 작아져서 전체 쌍 수가 26만으로, 창 없이 할 때의 64분의 1이 된다. 대가는 명확하다. 창 밖과는 연결이 없다.">
+  <div class="hd">
+    <div class="eb">§3 · <span class="n">2단계</span></div>
+    <div class="tt">창 분할: attention 을 창 안에 가둔다</div>
+  </div>
+  <div class="lead">8×8 창 64개 · 창 안에서만 attention → <b>64 × 64² = 262,144 쌍</b> (전체 대비 ÷64). 대가: <b>창 밖과 연결 없음</b>.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1480px">
+      <img src="assets/figures/W4_window_partition.png" style="width:100%" alt="토큰 격자의 8×8 창 경계와 창 내부 attention 행렬">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">한 창(강조)의 토큰 64개끼리만 유사도를 계산한다. 오른쪽: 그 창의 64×64 attention 행렬 (예시용 유사도 기반 가중치).</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §3</span><span class="pg"><b>19</b> / 44</span></div>
+</section>
+
+<!-- 20 · 창 이동 -->
+<section class="s" data-label="창 이동" data-speaker-notes="창의 부작용을 해결하는 것이 셋째 단계, 창 이동이다. 경계를 사이에 둔 두 토큰은 서로 이웃인데도 다른 창이라 만날 수 없다. 다음 블록에서 창 전체를 절반, 즉 4토큰만큼 밀면 그 두 토큰이 같은 창에 들어온다. 고정 창 블록과 이동 창 블록을 번갈아 쌓으면 몇 층 만에 정보가 격자 전체로 퍼진다. 구현은 torch.roll 한 줄이다.">
+  <div class="hd">
+    <div class="eb">§3 · <span class="n">3단계</span></div>
+    <div class="tt">창 이동: 경계를 넘는 연결</div>
+  </div>
+  <div class="lead">다음 블록에서 창을 절반(4토큰) 이동 → 경계에 걸렸던 이웃이 <b>같은 창</b>에 들어온다. 구현은 <span class="nv">torch.roll</span> 한 줄.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1480px">
+      <img src="assets/figures/W4_shifted_window.png" style="width:100%" alt="고정 창에서 못 만나던 경계 이웃 토큰이 이동 창에서 같은 창에 들어오는 과정">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">고정 창(W-MSA)과 이동 창(SW-MSA)을 번갈아 쌓으면 창 경계를 넘어 정보가 전달된다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §3</span><span class="pg"><b>20</b> / 44</span></div>
+</section>
+
+<!-- 21 · Swin 블록 -->
+<section class="s" data-label="Swin 블록" data-speaker-notes="부품을 블록으로 조립한다. LayerNorm 후 창 attention, 다시 LayerNorm 후 2배 확장 MLP. 각 단계에 잔차 연결이 붙는다. 이 블록 하나가 conv 블록 하나에 해당하는 Swin의 기본 단위이고, 항상 고정 창 블록과 이동 창 블록이 쌍으로 다닌다. 우리 모델은 이 쌍을 세 곳에 배치한다.">
+  <div class="hd">
+    <div class="eb">§3 · <span class="n">블록</span></div>
+    <div class="tt">Swin 블록: LN → 창 attention → MLP</div>
+  </div>
+  <div class="body" style="justify-content:center">
+    <div class="row" style="align-items:stretch">
+      <div class="figbox" style="flex:1.05;display:flex;align-items:center;justify-content:center">
+        <img src="assets/figures/W4_swin_block.png" style="width:100%;max-height:660px;object-fit:contain" alt="Swin 블록 내부 구조와 고정·이동 창 블록 쌍">
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
+        <div class="card tn" style="padding:20px 26px">
+          <div class="tag">잔차 연결 ×2</div>
+          <div class="cd" style="font-size:22px;margin-top:6px">attention 결과와 MLP 결과를 <b>입력에 더한다</b>. 블록이 "수정량"만 학습하므로 깊게 쌓아도 안정적이다.</div>
+        </div>
+        <div class="card to" style="padding:20px 26px">
+          <div class="tag" style="color:var(--orange-d)">LayerNorm (사전 정규화)</div>
+          <div class="cd" style="font-size:22px;margin-top:6px">각 연산 앞에서 토큰 벡터를 정규화한다. √d 나눗셈과 같은 계열의 <b>안정화 장치</b>다.</div>
+        </div>
+        <div class="card tg" style="padding:20px 26px">
+          <div class="tag" style="color:var(--green)">블록 쌍 = 고정 창 + 이동 창</div>
+          <div class="cd" style="font-size:22px;margin-top:6px">W-MSA 블록 뒤에 SW-MSA 블록. <b>항상 쌍으로</b> 배치해 창 경계 연결을 보장한다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §3</span><span class="pg"><b>21</b> / 44</span></div>
+</section>
+
+<!-- 22 · SwinUNetMini -->
+<section class="s" data-label="SwinUNetMini" data-speaker-notes="완성된 SwinUNetMini다. UNet과 같은 U-구조에서 합성곱 블록 자리만 Swin 블록 쌍으로 바뀌었다. 주목할 부분은 최상단 skip이다. 처음 설계에는 없었는데, 그 버전은 90초 학습에서 전부 solid를 출력하는 자명해에 갇혔다. 공극률만큼의 오차 26.7 퍼센트포인트가 나온다. 풀 해상도 stem skip을 더하자 1.7 수준으로 내려왔다. 픽셀 세부를 토큰에서 다시 만들 필요가 없어졌기 때문이다. 구조의 작은 설계 하나가 학습 성패를 갈랐다.">
+  <div class="hd">
+    <div class="eb">§3 · <span class="n">조립 완료</span></div>
+    <div class="tt">SwinUNetMini: U-구조에 Swin 블록</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:16px">
+    <div class="figbox" style="align-self:center;max-width:1560px;padding:12px 16px">
+      <img src="assets/figures/W4_swinunet_arch.png" style="width:100%;max-height:520px;object-fit:contain" alt="SwinUNetMini 전체 구조: 패치 임베딩, Swin 블록 쌍, skip, 업샘플, 최상단 stem skip">
+    </div>
+    <div class="tint" style="padding:16px 24px;border-color:#f0d9b8">
+      <div class="cd" style="font-size:21px"><b>설계 디테일이 성패를 가른 사례.</b> 최상단(full-res) skip 이 없던 첫 버전은 90초 학습에서 <span style="color:var(--red);font-weight:600">"전부 solid" 자명해</span>에 갇혔다(|Δφ| ≈ 공극률 26.7%p). 픽셀 세부를 1/4 해상도 토큰에서 되만들어야 했기 때문이다. stem skip 추가 후 <span class="nv">|Δφ| 2%p 수준</span>으로 정상 학습됐다. 실습 §3에서 확인한다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §3</span><span class="pg"><b>22</b> / 44</span></div>
+</section>
+
+<!-- 23 · dv §4 -->
+<section class="dv" data-label="§4 3D 합성곱" data-speaker-notes="4부는 두 번째 대안, 3D 합성곱이다. 시야를 평면 밖으로 넓혀 슬라이스 사이의 연속성을 직접 본다. 다만 여기서는 모델보다 실험 설계가 더 중요한 주제다. 3D 모델에 무엇을 입력하는가에 따라 비교가 공정해지기도, 무의미해지기도 한다.">
+  <div class="num">04</div>
+  <div class="k">Part 4 · Volumetric Context</div>
+  <div class="t">3D 합성곱</div>
+  <div class="d">공극은 z 방향으로 이어진 3차원 구조다. 3×3×3 커널은 그 연속성을 직접 본다. 문제는 무엇을 입력하는가다.</div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>23</b> / 44</span></div>
+</section>
+
+<!-- 24 · 2D vs 3D 합성곱 -->
+<section class="s" data-label="2D vs 3D 합성곱" data-speaker-notes="2D와 3D 합성곱의 차이는 커널의 차원이다. 3×3이 9개 가중치, 3×3×3은 27개다. 같은 채널 수라면 파라미터가 정확히 3배이고, 연산은 깊이 방향으로도 슬라이딩하는 만큼 더 늘어난다. 시야를 얻는 대신 비용을 낸다는 것이 이 구조의 거래 조건이다.">
+  <div class="hd">
+    <div class="eb">§4 · <span class="n">연산</span></div>
+    <div class="tt">2D vs 3D: 커널이 한 차원 늘어난다</div>
+  </div>
+  <div class="lead">3×3 = 9 가중치 → 3×3×3 = <b>27 가중치</b> (같은 채널 기준 파라미터 3배). 연산은 깊이 방향 슬라이딩만큼 추가.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1460px">
+      <img src="assets/figures/W4_conv2d_vs_3d.png" style="width:100%" alt="2D 3×3 커널과 3D 3×3×3 커널의 비교와 파라미터 수">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1400px;text-align:center">예: Conv2d(16→32) 4,608개 vs Conv3d(16→32) 13,824개. 시야(z 방향)를 얻는 대신 크기·연산을 낸다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §4</span><span class="pg"><b>24</b> / 44</span></div>
+</section>
+
+<!-- 25 · 부피 문맥 -->
+<section class="s" data-label="부피 문맥" data-speaker-notes="왜 z 방향 시야가 가치 있는가. 실제 슬라이스 다섯 장을 연달아 보면 공극 하나가 슬라이스를 따라 조금씩 모양을 바꾸며 이어진다. 공극은 본질적으로 3차원 구조다. 2D 모델은 이 연속성을 입력 두 장으로 간접적으로만 본다. 3D 합성곱은 커널 자체가 z를 포함하므로 이 연속성을 연산 단위에서 직접 본다.">
+  <div class="hd">
+    <div class="eb">§4 · <span class="n">동기</span></div>
+    <div class="tt">공극은 z 방향으로 이어진 구조다</div>
+  </div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1520px">
+      <img src="assets/figures/W4_volume_context.png" style="width:100%" alt="연속 슬라이스 다섯 장에서 한 공극이 이어지며 변하는 모습">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1420px;text-align:center">같은 공극(주황 원)이 z=126→130에서 연속적으로 변한다. 2D 모델은 이 연속성을 이웃 두 장으로만 추정하고, 3D 커널은 직접 본다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §4</span><span class="pg"><b>25</b> / 44</span></div>
+</section>
+
+<!-- 26 · 공정한 입력 -->
+<section class="s" data-label="공정한 입력" data-speaker-notes="이제 이번 주에서 가장 중요한 설계 원칙이다. 3D 모델은 부피를 입력받는다. 그 부피에 무엇을 채우는가. 우리 문제에서 실제로 알고 있는 것은 이웃 t 플러스마이너스 k 두 장뿐이다. 그래서 깊이 2k 더하기 1 부피에서 맨 앞과 맨 뒤 면만 채우고 가운데는 전부 0으로 두고, 어디가 채워졌는지 마스크 채널로 알려 준다. 이렇게 해야 2D 모델과 같은 정보 조건이 된다.">
+  <div class="hd">
+    <div class="eb">§4 · <span class="n">실험 설계</span></div>
+    <div class="tt">공정한 입력: 2D와 같은 정보만 넣는다</div>
+  </div>
+  <div class="lead">입력 부피(깊이 2k+1)에는 <b>이웃 t±k 두 장</b>만 채운다. 나머지 면은 0 + 채움 마스크 채널. 3D 라는 형식만 다를 뿐 <b>정보는 2D와 동일</b>하다.</div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1400px">
+      <img src="assets/figures/W4_fair_input.png" style="width:100%" alt="깊이 5 입력 부피: 이웃 두 면만 채워지고 나머지는 0, 마스크 채널 포함">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1420px;text-align:center">k=2 예시. 채널 0: 이웃 슬라이스 2면 + 빈 면 3면 · 채널 1: 채움 위치 마스크 [1,0,0,0,1]. 출력은 가운데 t 한 장.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §4</span><span class="pg"><b>26</b> / 44</span></div>
+</section>
+
+<!-- 27 · 정보 누출 -->
+<section class="s" data-label="정보 누출" data-speaker-notes="왜 이렇게까지 엄격해야 하는가. 대규모 실험의 실제 사례다. 같은 3D 모델, 같은 데이터, 같은 1시간 학습에서 입력 설계만 다르게 했다. 예측 대상 바로 옆 t 플러스마이너스 1 슬라이스가 입력에 포함된 누출 설계는 SSIM 0.953, 이웃이 t 플러스마이너스 3부터인 공정 설계는 0.823이다. 0.13의 차이는 3D 구조의 실력이 아니라 입력에 새어 들어간 정답이다. 높은 숫자를 보면 먼저 입력을 의심해야 한다.">
+  <div class="hd">
+    <div class="eb">§4 · <span class="n">경고 사례</span></div>
+    <div class="tt">정보 누출: 잘못된 입력이 만드는 착시</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:16px">
+    <div class="figbox" style="align-self:center;max-width:1400px">
+      <img src="assets/figures/W4_leakage.png" style="width:100%;max-height:560px;object-fit:contain" alt="누출 설계와 공정 설계의 입력 구성과 SSIM 비교: 0.953 대 0.823">
+    </div>
+    <div class="tint" style="padding:16px 24px;max-width:1400px;align-self:center">
+      <div class="cd" style="font-size:21px"><b>읽는 법.</b> +0.13 은 구조의 성능이 아니라 <span style="color:var(--red);font-weight:600">입력에 새어 들어간 정답 정보</span>다. 실전 배포 상황에는 t±1 이 존재하지 않으므로 누출 설계의 숫자는 재현되지 않는다. <span class="nv">지표를 보기 전에 입력에 무엇이 들어갔는지 먼저 확인한다.</span></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §4</span><span class="pg"><b>27</b> / 44</span></div>
+</section>
+
+<!-- 28 · UNet3DMini -->
+<section class="s" data-label="UNet3DMini" data-speaker-notes="UNet3DMini의 전체 구조다. 3×3×3 conv 블록을 3레벨로 쌓고, 풀링은 가로세로만 절반으로 줄이고 깊이는 유지한다. 깊이 5는 그대로 두어야 층을 거치며 이웃 정보가 3×3×3 커널을 타고 가운데 면으로 전파된다. 출력에서 가운데 슬라이스만 읽는다. 파라미터 12만 9천으로 세 모델 동급이지만, 한 스텝의 연산은 가장 무겁다. 이 비용이 5부의 시간 예산 비교에서 그대로 드러난다.">
+  <div class="hd">
+    <div class="eb">§4 · <span class="n">조립 완료</span></div>
+    <div class="tt">UNet3DMini: 깊이를 유지하는 3D U-구조</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:16px">
+    <div class="figbox" style="align-self:center;max-width:1560px;padding:12px 16px">
+      <img src="assets/figures/W4_unet3d_arch.png" style="width:100%;max-height:520px;object-fit:contain" alt="UNet3DMini 구조: 3D conv 블록, 깊이 유지 풀링, skip, 가운데 슬라이스 출력">
+    </div>
+    <div class="row" style="max-width:1560px;align-self:center;gap:16px">
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>깊이 방향 풀링 없음.</b> pool (1,2,2). 깊이 5를 유지해야 3×3×3 커널이 이웃 정보를 가운데로 <span class="nv">층마다 한 칸씩</span> 전파한다.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>출력 = 가운데 면.</b> 부피를 처리하고 예측 대상인 가운데 슬라이스 한 장만 읽는다 (loss 도 그 면에만).</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>비용.</b> 129,181 파라미터로 동급이지만 한 스텝 연산은 <span class="hl">세 모델 중 최대</span>다. 같은 시간 예산에서 학습량이 가장 적다 (§5).</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §4</span><span class="pg"><b>28</b> / 44</span></div>
+</section>
+
+<!-- 29 · dv §5 -->
+<section class="dv" data-label="§5 공정 비교" data-speaker-notes="5부는 비교의 방법론과 결과다. 무엇을 통제해야 구조의 효과만 남는지 세 원칙으로 정리하고, 대규모 실험 결과에서 세 구조의 trade-off를 읽는다.">
+  <div class="num">05</div>
+  <div class="k">Part 5 · Fair Comparison</div>
+  <div class="t">공정 비교</div>
+  <div class="d">같은 데이터 · 같은 입력 정보 · 같은 시간 예산. 세 가지를 통제해야 "구조의 효과"만 남는다.</div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>29</b> / 44</span></div>
+</section>
+
+<!-- 30 · 비교 원칙 -->
+<section class="s" data-label="비교 원칙" data-speaker-notes="공정 비교의 세 원칙이다. 첫째 같은 데이터. 둘째 같은 입력 정보, 4부의 공정 입력이 여기 해당한다. 셋째 같은 시간 예산. 파라미터를 맞췄더라도 구조마다 한 스텝 비용이 달라서, 시간까지 같아야 같은 컴퓨터로 같은 시간을 쓸 때 어느 구조가 유리한가라는 실전 질문에 답할 수 있다. 그리고 파라미터 수가 성능의 대리 지표가 아니라는 것, 이것이 이번 주 내내 반복될 함정이다.">
+  <div class="hd">
+    <div class="eb">§5 · <span class="n">원칙</span></div>
+    <div class="tt">통제할 것 세 가지, 믿지 말 것 한 가지</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <div class="row">
+      <div class="card tn vc" style="flex:1">
+        <div class="tag">원칙 1 · 같은 데이터</div>
+        <div class="cd" style="margin-top:8px">같은 volume, 같은 (t−k, t, t+k) triplet, 같은 평가 슬라이스. 데이터가 다르면 비교가 아니라 별개의 실험이다.</div>
+      </div>
+      <div class="card tn vc" style="flex:1">
+        <div class="tag">원칙 2 · 같은 입력 정보</div>
+        <div class="cd" style="margin-top:8px">모든 모델의 입력은 이웃 t±k 두 장뿐. 형식(2D/3D)은 달라도 <b>정보량은 동일</b>하다 (§4 공정 입력·누출 점검).</div>
+      </div>
+      <div class="card tn vc" style="flex:1">
+        <div class="tag">원칙 3 · 같은 시간 예산</div>
+        <div class="cd" style="margin-top:8px">wall-clock 예산 고정. 빠른 구조는 그 시간에 epoch 을 더 돈다. <b>속도도 구조의 실력</b>이므로 예산으로 비교한다.</div>
+      </div>
+    </div>
+    <div class="card tr" style="padding:20px 28px">
+      <div class="tag" style="color:var(--red)">믿지 말 것 · 파라미터 수</div>
+      <div class="cd" style="margin-top:6px;font-size:22px">파라미터 수는 성능의 대리 지표가 아니다. §5 결과에서 <b>1.1M 짜리 attention 모델이 24.5M 모델에 근접</b>하는 사례를 본다. 크기·시간·정확도는 <span class="hl">따로 읽어야 하는 세 축</span>이다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §5</span><span class="pg"><b>30</b> / 44</span></div>
+</section>
+
+<!-- 31 · 대규모 실험 설정 -->
+<section class="s" data-label="대규모 실험 설정" data-speaker-notes="실습 전에 대규모 참고 실험의 결과를 본다. 설정은 이렇다. 1000세제곱 사암 데이터, 이웃 거리 조건 동일, 모든 모델이 같은 입력 정보를 받고, 시간 예산을 통일해 학습했으며, 같은 평가 프로토콜로 측정했다. 우리 미니 실습과 원칙이 같고 규모만 크다. 표의 모델들은 각각 잘 조정된 크기를 쓰므로 파라미터는 다르다. 그래서 파라미터 축이 함께 표시된다.">
+  <div class="hd">
+    <div class="eb">§5 · <span class="n">대규모 참고 실험</span></div>
+    <div class="tt">설정: 원칙 3개를 대규모에 적용</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <table class="tb" style="max-width:1560px">
+      <tr><th style="width:240px">항목</th><th>설정</th><th style="width:520px">실습(§6)과의 관계</th></tr>
+      <tr><td>데이터</td><td class="m">사암 micro-CT 1000³ voxel</td><td class="cd" style="font-size:21px">실습은 같은 문제의 256³ 축소판</td></tr>
+      <tr><td>입력 정보</td><td>모든 모델 동일 (이웃 슬라이스만 · 누출 없음)</td><td class="cd" style="font-size:21px">원칙 2 · §4 공정 입력</td></tr>
+      <tr><td>시간 예산</td><td>GPU 1시간 내외로 통일 (wall-clock)</td><td class="cd" style="font-size:21px">원칙 3 · 실습은 CPU 90초</td></tr>
+      <tr><td>평가</td><td>같은 테스트 영역 · 같은 지표 (SSIM · |Δφ|)</td><td class="cd" style="font-size:21px">실습과 같은 지표</td></tr>
+      <tr><td>모델 크기</td><td>구조별 표준 크기 (1.1M ~ 24.5M · 파라미터 상이)</td><td class="cd" style="font-size:21px">실습은 크기를 12만으로 통일</td></tr>
+    </table>
+    <div class="tint" style="max-width:1560px;padding:16px 24px">
+      <div class="cd" style="font-size:21px"><b>읽기 전 주의.</b> 이 표의 숫자는 위 설정에서만 유효하다. 프로토콜(데이터·예산·평가)이 다른 숫자와 섞어 비교하면 안 된다. W3의 "정직한 평가"와 같은 원칙이다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §5</span><span class="pg"><b>31</b> / 44</span></div>
+</section>
+
+<!-- 32 · 대규모 결과 표 -->
+<section class="s" data-label="대규모 결과" data-speaker-notes="결과 표다. 2D UNet이 SSIM 0.932, 공극률 오차 0.27 퍼센트포인트로 가장 좋다. SwinUNet은 파라미터가 22분의 1인데 SSIM 0.926으로 바짝 붙는다. 3D UNet은 공정 입력 조건에서 0.914, 0.40으로 뒤진다. 마지막 행이 다음 주의 예고다. 구조를 바꾸는 대신 같은 2D UNet의 예측을 세 축에서 융합하면 0.935, 0.12로 모든 단일 구조를 넘는다. 구조 교체보다 사용 방법의 개선이 더 컸다는 것이 이 표의 결론이다.">
+  <div class="hd">
+    <div class="eb">§5 · <span class="n">결과</span></div>
+    <div class="tt">대규모 결과: 순위와 격차</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:18px">
+    <table class="tb" style="max-width:1560px">
+      <tr><th>모델 (구조)</th><th style="width:200px">파라미터</th><th style="width:190px">SSIM ↑</th><th style="width:210px">|Δφ| (%p) ↓</th><th>비고</th></tr>
+      <tr><td><b>2D UNet</b> · L1 (W2 구조의 대형판)</td><td class="m">24.5M</td><td class="m">0.932</td><td class="m">0.27</td><td class="cd" style="font-size:20px">단일 구조 중 최고</td></tr>
+      <tr><td><b>SwinUNet</b> · 창 attention</td><td class="m" style="color:var(--orange-d)">1.1M</td><td class="m">0.926</td><td class="m">0.34</td><td class="cd" style="font-size:20px">파라미터 <b>1/22</b> 로 근접</td></tr>
+      <tr><td><b>3D UNet</b> · 부피 합성곱 (공정 입력)</td><td class="m">3.15M</td><td class="m">0.914</td><td class="m">0.40</td><td class="cd" style="font-size:20px">파라미터 동급 대형판(22.4M)도 유사</td></tr>
+      <tr style="background:#fbf3e7"><td><b>2D UNet + 3축 융합</b> <span class="hl">(W5 예고)</span></td><td class="m">24.5M</td><td class="m" style="color:var(--orange-d)">0.935</td><td class="m" style="color:var(--orange-d)">0.12</td><td class="cd" style="font-size:20px">구조 교체 없이 <b>사용법 개선</b></td></tr>
+    </table>
+    <div class="row" style="max-width:1560px;gap:16px">
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>순위.</b> 이 문제·이 예산에서는 <span class="nv">2D 합성곱 &gt; attention &gt; 3D 합성곱</span>. 미니 실습(§6)에서도 같은 경향이 나온다.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>파라미터 함정 확인.</b> 1.1M SwinUNet ≈ 24.5M UNet. 크기가 아니라 <span class="hl">구조와 데이터의 궁합</span>이 성능을 정한다.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>다음 주 훅.</b> 최고 성적은 새 구조가 아니라 <span class="nv">같은 구조의 다른 사용법</span>(3축 융합)이다. W5 주제다.</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §5</span><span class="pg"><b>32</b> / 44</span></div>
+</section>
+
+<!-- 33 · trade-off 산점도 -->
+<section class="s" data-label="trade-off" data-speaker-notes="같은 표를 산점도로 본다. 가로축이 파라미터 수 로그 스케일, 왼쪽 세로축이 공극률 오차, 오른쪽이 SSIM이다. 오른쪽 아래로 갈수록 좋은 왼쪽 패널에서 SwinUNet의 위치가 흥미롭다. 크기는 가장 작은데 성능은 중상위권이다. 파라미터 효율이라는 축에서는 attention이 승자라는 뜻이다. 어떤 축을 우선할지는 배포 환경의 제약이 정한다.">
+  <div class="hd">
+    <div class="eb">§5 · <span class="n">trade-off</span></div>
+    <div class="tt">크기 대 성능: 축을 나눠 읽는다</div>
+  </div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1500px">
+      <img src="assets/figures/W4_tradeoff_scatter.png" style="width:100%" alt="파라미터 수 대비 공극률 오차와 SSIM 산점도">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1420px;text-align:center">왼쪽: |Δφ| (낮을수록 좋음) · 오른쪽: SSIM (높을수록 좋음). SwinUNet 은 크기 최소·성능 중상위로 <b>파라미터 효율</b> 축의 강자다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §5</span><span class="pg"><b>33</b> / 44</span></div>
+</section>
+
+<!-- 34 · 속도·연산량 -->
+<section class="s" data-label="속도·연산량" data-speaker-notes="세 번째 축, 속도다. 슬라이스 한 장을 복원하는 시간이 2D UNet 15.5밀리초, SwinUNet 12.9, 3D는 작은 판이 46.7, 파라미터 동급 대형판은 143밀리초다. 파라미터가 비슷해도 3D는 깊이 방향 연산이 더해져 슬라이스당 약 9배 느리고, 이는 연산량 비 9.5배와 일치한다. 정확도가 뒤지는데 비용은 큰 셈이라, 이 문제에서 3D의 실전 매력은 낮다.">
+  <div class="hd">
+    <div class="eb">§5 · <span class="n">속도</span></div>
+    <div class="tt">속도와 연산량: 3D의 숨은 비용</div>
+  </div>
+  <div class="body" style="justify-content:center">
+    <div class="figbox" style="align-self:center;max-width:1480px">
+      <img src="assets/figures/W4_speed_flops.png" style="width:100%" alt="슬라이스당 추론 시간과 연산량 비교: 2D, Swin, 3D 소형과 대형">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1420px;text-align:center">파라미터 동급(24.5M vs 22.4M)이어도 3D 는 슬라이스당 <b>약 9배</b> 느리다 (연산량 비 ×9.5와 일치). 속도는 파라미터가 아니라 <b>연산 구조</b>가 정한다.</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §5</span><span class="pg"><b>34</b> / 44</span></div>
+</section>
+
+<!-- 35 · 해석 -->
+<section class="s" data-label="해석" data-speaker-notes="왜 이 순위인가. 첫째, 우리 데이터의 성질이다. 암석 슬라이스의 구조는 지역적 연속성이 강해서, 합성곱의 지역성 가정이 문제와 잘 맞는다. 이것을 귀납 편향이 맞는다고 말한다. 둘째, attention은 가정이 약한 만큼 데이터와 시간이 더 필요하다. 대규모로 갈수록 유리해지는 이유다. 셋째, 3D는 부피 문맥의 이득이 비용 증가를 넘지 못했다. 결론은 최고의 구조는 없고, 문제·데이터·예산에 따른 최적 구조가 있다는 것이다.">
+  <div class="hd">
+    <div class="eb">§5 · <span class="n">해석</span></div>
+    <div class="tt">왜 이 순위인가: 귀납 편향과 비용</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <div class="row">
+      <div class="card tn vc" style="flex:1">
+        <div class="tag">2D 합성곱이 강한 이유</div>
+        <div class="cd" style="margin-top:8px">암석 단면은 <b>지역적 연속성</b>이 강한 데이터다. "가까운 픽셀이 관련 깊다"는 합성곱의 내장 가정(<span class="nv">귀납 편향</span>)이 문제와 정확히 맞는다. 가정이 맞으면 적은 데이터·시간으로 빨리 배운다.</div>
+      </div>
+      <div class="card to vc" style="flex:1">
+        <div class="tag" style="color:var(--orange-d)">attention 의 조건</div>
+        <div class="cd" style="margin-top:8px">가정이 약한 만큼 <b>유연하지만 배가 고프다</b>. 데이터·시간이 더 필요하다. 파라미터 효율은 최고이므로, 규모가 커지거나 전역 관계가 중요한 문제로 갈수록 유리해진다.</div>
+      </div>
+      <div class="card tg vc" style="flex:1">
+        <div class="tag" style="color:var(--green)">3D 의 대차대조</div>
+        <div class="cd" style="margin-top:8px">부피 문맥은 실제 이득이지만, 이 문제에서는 <b>연산 비용 증가가 이득을 상회</b>했다. 같은 예산에서 학습량이 줄고, 추론도 ~9배 느리다. 문맥이 더 결정적인 문제라면 결론이 달라질 수 있다.</div>
+      </div>
+    </div>
+    <div class="tint" style="padding:18px 26px">
+      <div class="cd" style="font-size:22px"><b>이번 주의 결론.</b> "최고의 구조"는 없다. <span class="hl">문제·데이터·예산이 정하는 최적 구조</span>가 있을 뿐이다. 비교는 반드시 세 원칙 위에서, 지표는 축(정확도·크기·속도)을 나눠 읽는다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §5</span><span class="pg"><b>35</b> / 44</span></div>
+</section>
+
+<!-- 36 · dv §6 -->
+<section class="dv" data-label="§6 실습" data-speaker-notes="마지막 6부, 실습이다. 방금 본 공정 비교를 노트북에서 직접 재현한다. 데이터는 W3와 같은 Bentheimer, k는 2, 세 모델은 파라미터 12만으로 동급, 예산은 모델당 90초다.">
+  <div class="num">06</div>
+  <div class="k">Part 6 · Hands-on</div>
+  <div class="t">실습</div>
+  <div class="d">benchmark_models 한 줄로 세 구조를 같은 예산에서 학습하고, attention 수식을 직접 계산한다.</div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>36</b> / 44</span></div>
+</section>
+
+<!-- 37 · 실습 개요 -->
+<section class="s" data-label="실습 개요" data-speaker-notes="실습의 핵심 함수는 benchmark_models다. 볼륨과 k, 예산을 주면 세 모델을 순서대로 같은 조건에서 학습하고 평가해 표로 돌려 준다. 내부적으로 모델마다 시드를 다시 고정하고, 3D 모델에는 공정 입력 데이터셋을 쓰고, 시간이 예산을 넘으면 즉시 멈춘다. optimizer는 구조별 표준 설정이다. 합성곱 계열은 Adam, transformer는 AdamW에 gradient clipping. 같은 설정이 모든 구조에 안정적이지는 않기 때문이다.">
+  <div class="hd">
+    <div class="eb">§6 · <span class="n">도구</span></div>
+    <div class="tt">benchmark_models: 공정 비교 한 줄</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:18px">
+    <div class="row" style="align-items:stretch;min-height:560px">
+      <div class="code" style="flex:1.15;font-size:23px;padding:36px 40px;line-height:2.0">
+<span class="c"># 세 구조 · 같은 데이터 · 같은 정보 · 같은 90초</span><br>
+results = <span class="f">benchmark_models</span>(vol, k=<span class="v">2</span>, budget_s=<span class="v">90</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device=DEVICE, seed=<span class="v">0</span>)<br>
+<span class="c"># results[이름] = params · epochs · |Δφ| · SSIM</span><br>
+<span class="c">#                · history(시간축 손실) · recon</span><br><br>
+<span class="c"># 다른 모델·크기로 바꿔서도 실행 가능</span><br>
+<span class="f">benchmark_models</span>(vol, k=<span class="v">2</span>, budget_s=<span class="v">90</span>,<br>
+&nbsp;&nbsp;models={<span class="v">'SwinUNet w=4'</span>: <span class="f">SwinUNetMini</span>(window_size=<span class="v">4</span>)})
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:14px">
+        <div class="tint vc" style="flex:1;padding:21px 26px"><div class="cd" style="font-size:22px"><b>내부 동작 1.</b> 모델마다 시드 재고정 → 같은 데이터 순서.</div></div>
+        <div class="tint vc" style="flex:1;padding:21px 26px"><div class="cd" style="font-size:22px"><b>내부 동작 2.</b> 3D 모델은 자동으로 <span class="nv">공정 입력</span>(Slice3DDataset) 사용.</div></div>
+        <div class="tint vc" style="flex:1;padding:21px 26px"><div class="cd" style="font-size:22px"><b>내부 동작 3.</b> wall-clock 이 예산 도달 시 즉시 중단 → epoch 수는 모델마다 다른 것이 <b>정상</b>.</div></div>
+        <div class="tint vc" style="flex:1;padding:21px 26px"><div class="cd" style="font-size:22px"><b>내부 동작 4.</b> optimizer 는 구조별 표준(합성곱 Adam · transformer AdamW+clip). 같은 lr 이 모두에게 안정적이지 않다.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §6</span><span class="pg"><b>37</b> / 44</span></div>
+</section>
+
+<!-- 38 · 노트북 흐름 -->
+<section class="s" data-label="노트북 흐름" data-speaker-notes="노트북 흐름이다. 2절에서 오늘 슬라이드의 attention 수치 예시를 그대로 실행하고, 3절과 4절에서 두 새 모델을 만들어 shape와 파라미터를 확인하고, 5절에서 공정 비교를 돌린 뒤, 6절에서 복원 결과와 trade-off를 시각화한다. 7절 심화는 창 크기 실험이다. 새로 쓰는 함수는 여덟 개다.">
+  <div class="hd">
+    <div class="eb">§6 · <span class="n">노트북</span></div>
+    <div class="tt">W4_architectures.ipynb 흐름</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:18px">
+    <div class="row">
+      <div style="flex:1.1;display:flex;flex-direction:column;gap:11px">
+        <div class="tint" style="padding:17px 24px"><span class="tag">§1</span> <span class="cd" style="font-size:21px">데이터 로드 + 선형 baseline (기준선)</span></div>
+        <div class="tint" style="padding:17px 24px"><span class="tag">§2</span> <span class="cd" style="font-size:21px">attention 수치 계산 · √d 포화 · 창 분할 시각화</span></div>
+        <div class="tint" style="padding:17px 24px"><span class="tag">§3</span> <span class="cd" style="font-size:21px">SwinUNetMini 구축 · attention map 꺼내 보기</span></div>
+        <div class="tint" style="padding:17px 24px"><span class="tag">§4</span> <span class="cd" style="font-size:21px">UNet3DMini 구축 · 공정 입력 눈으로 확인</span></div>
+        <div class="tint" style="padding:17px 24px"><span class="tag">§5</span> <span class="cd" style="font-size:21px">benchmark_models 공정 비교 + 시간축 학습 곡선</span></div>
+        <div class="tint" style="padding:17px 24px"><span class="tag">§6</span> <span class="cd" style="font-size:21px">복원 비교 (확대 포함) + trade-off 정리</span></div>
+        <div class="tint" style="padding:17px 24px"><span class="tag">§7</span> <span class="cd" style="font-size:21px">심화: 창 크기 4 vs 8 같은 예산 재실험</span></div>
+      </div>
+      <div class="card tn" style="flex:1;padding:22px 28px">
+        <div class="tag">새 함수 (model_utils.py)</div>
+        <table class="tb" style="margin-top:10px;font-size:20px">
+          <tr><td class="m" style="font-size:19px">window_partition</td><td class="cd" style="font-size:19px">토큰 격자 → 창 단위 분할</td></tr>
+          <tr><td class="m" style="font-size:19px">WindowAttentionMini</td><td class="cd" style="font-size:19px">창 attention (map 반환 가능)</td></tr>
+          <tr><td class="m" style="font-size:19px">SwinBlockMini</td><td class="cd" style="font-size:19px">LN→W-MSA→MLP + 잔차</td></tr>
+          <tr><td class="m" style="font-size:19px">SwinUNetMini</td><td class="cd" style="font-size:19px">창 attention U-구조 (~125K)</td></tr>
+          <tr><td class="m" style="font-size:19px">UNet3DMini</td><td class="cd" style="font-size:19px">3D 합성곱 U-구조 (~129K)</td></tr>
+          <tr><td class="m" style="font-size:19px">Slice3DDataset</td><td class="cd" style="font-size:19px">공정 입력 3D 데이터셋</td></tr>
+          <tr><td class="m" style="font-size:19px">evaluate_model_3d</td><td class="cd" style="font-size:19px">3D 평가 (지표는 2D와 동일)</td></tr>
+          <tr><td class="m" style="font-size:19px">benchmark_models</td><td class="cd" style="font-size:19px">공정 비교 루프</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §6</span><span class="pg"><b>38</b> / 44</span></div>
+</section>
+
+<!-- 39 · 실습 결과 -->
+<section class="s" data-label="실습 결과" data-speaker-notes="미니 실습의 한 실행 예시다. 선형 보간의 공극률 오차 11.75 퍼센트포인트에 비해 세 딥러닝 모델은 모두 2 안팎으로 크게 앞선다. 그 안에서 2D UNet이 1.94에 SSIM 0.585로 가장 좋고, 3D가 근소하게 뒤따르고, Swin이 그다음이다. 대규모 실험과 같은 경향이다. 확대 패널을 보면 선형은 얇은 목을 끊어 먹는 반면 학습 모델들은 유지한다. budget 기반 학습이라 실행마다 수치가 조금씩 달라진다는 점도 함께 일러 준다.">
+  <div class="hd">
+    <div class="eb">§6 · <span class="n">실측</span></div>
+    <div class="tt">실습 결과: 90초 공정 비교 (실행 예시)</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:14px">
+    <div class="figbox" style="align-self:center;max-width:1560px;padding:12px 16px">
+      <img src="assets/figures/W4_mini_results.png" style="width:100%;max-height:600px;object-fit:contain" alt="원본, 선형, 세 모델의 복원 결과와 64×64 확대 비교, 각 모델의 |Δφ|와 SSIM">
+    </div>
+    <div class="cap" style="align-self:center;max-width:1480px;text-align:center">Bentheimer 256³ · k=2 · CPU 90초/모델 · seed 0 의 한 실행. 선형 11.75%p → 딥러닝 3종 1.94~2.37%p. 확대: 선형은 얇은 목이 끊기고, 학습 모델은 유지한다. (예산 기반 학습이라 실행마다 수치가 조금 달라진다)</div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §6</span><span class="pg"><b>39</b> / 44</span></div>
+</section>
+
+<!-- 40 · 학습 곡선 -->
+<section class="s" data-label="학습 곡선" data-speaker-notes="같은 실행의 학습 곡선이다. 가로축이 epoch이 아니라 경과 시간이라는 점이 핵심이다. 같은 90초 동안 2D UNet은 75 epoch, Swin은 38, 3D는 13 epoch을 소화했다. 점 간격이 곧 한 epoch의 비용이다. 3D는 점 하나하나가 크게 내려가지만 점이 적다. 스텝당 배우는 양은 많은데 스텝이 비싸다는 뜻이다. 구조의 속도 차이가 학습량 차이로, 학습량 차이가 최종 지표로 이어지는 인과를 곡선 하나에서 읽을 수 있다.">
+  <div class="hd">
+    <div class="eb">§6 · <span class="n">실측</span></div>
+    <div class="tt">시간축 학습 곡선: 속도가 학습량을 정한다</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:14px">
+    <div class="figbox" style="align-self:center;max-width:1520px">
+      <img src="assets/figures/W4_mini_curves.png" style="width:100%;max-height:620px;object-fit:contain" alt="경과 시간 축의 세 모델 학습 곡선과 90초 동안 소화한 epoch 수">
+    </div>
+    <div class="row" style="max-width:1520px;align-self:center;gap:16px">
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>점 간격 = epoch 비용.</b> 같은 90초에 <span class="nv">75 vs 38 vs 13</span> epoch. 구조가 학습량을 정한다.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>3D 의 특징.</b> epoch 당 손실 하강 폭은 가장 큼 (부피 문맥의 이득). 그러나 <span class="hl">스텝이 비싸</span> 총량에서 밀린다.</div></div>
+      <div class="tint" style="flex:1;padding:14px 22px"><div class="cd" style="font-size:20px"><b>Try-it.</b> budget_s 를 30·90·180 으로 바꾸면 느린 구조가 따라붙는지 확인할 수 있다 (탐구 과제 1).</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §6</span><span class="pg"><b>40</b> / 44</span></div>
+</section>
+
+<!-- 41 · 탐구 과제 -->
+<section class="s" data-label="탐구 과제" data-speaker-notes="탐구 과제 네 개다. 필수 둘. 시간 예산을 30, 90, 180초로 바꿔 순위 변화를 보는 것과, 창 크기 4, 8, 16의 trade-off. 선택 둘. 크기를 바꿔 파라미터 대 성능 곡선을 그리는 것, 그리고 심화 과제로 일부러 정보 누출 데이터셋을 만들어 지표가 얼마나 부풀는지 재 보는 것이다. 누출 과제는 4부의 경고를 몸으로 확인하는 과제라 특히 권한다.">
+  <div class="hd">
+    <div class="eb">§6 · <span class="n">과제</span></div>
+    <div class="tt">탐구 과제 (핸드아웃 §5)</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <div class="row">
+      <div class="card to" style="flex:1;padding:32px 36px">
+        <div class="tag" style="color:var(--orange-d)">과제 1 · 필수</div>
+        <div class="ct" style="margin-top:6px;font-size:25px">시간 예산과 순위</div>
+        <div class="cd" style="font-size:21px">budget_s = 30 / 90 / 180 반복 → 예산에 따라 세 구조의 지표·순위가 어떻게 변하는가. 느린 구조(3D)가 이득을 더 보는가.</div>
+      </div>
+      <div class="card to" style="flex:1;padding:32px 36px">
+        <div class="tag" style="color:var(--orange-d)">과제 2 · 필수</div>
+        <div class="ct" style="margin-top:6px;font-size:25px">창 크기 trade-off</div>
+        <div class="cd" style="font-size:21px">window_size = 4 / 8 / 16 에서 epoch 수·|Δφ|·SSIM 비교 → "보는 범위 ↔ 계산 비용" 관점으로 해석.</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card ts" style="flex:1;padding:32px 36px">
+        <div class="tag">과제 3 · 선택</div>
+        <div class="ct" style="margin-top:6px;font-size:25px">파라미터-성능 곡선</div>
+        <div class="cd" style="font-size:21px">세 구조의 base 를 각각 바꿔 "파라미터 vs 지표" 곡선을 그린다 → 같은 크기에서 구조 간 격차가 유지되는가.</div>
+      </div>
+      <div class="card tr" style="flex:1;padding:32px 36px">
+        <div class="tag" style="color:var(--red)">과제 4 · 선택 · 심화</div>
+        <div class="ct" style="margin-top:6px;font-size:25px">정보 누출 실험</div>
+        <div class="cd" style="font-size:21px">Slice3DDataset 을 복사해 t±1 까지 채우는 <b>잘못된 버전</b>을 만들어 학습 → 지표가 얼마나 부풀는지 측정하고, 왜 실력이 아닌지 설명.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §6</span><span class="pg"><b>41</b> / 44</span></div>
+</section>
+
+<!-- 42 · 자기 점검 -->
+<section class="s" data-label="자기 점검" data-speaker-notes="자기 점검 여섯 문항이다. 전부 오늘 다룬 내용 안에서 답할 수 있다. 특히 3번 루트 d와 5번 정보 누출은 면접 단골 질문이기도 하다.">
+  <div class="hd">
+    <div class="eb">§6 · <span class="n">자기 점검</span></div>
+    <div class="tt">여섯 질문에 답할 수 있는가</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:13px">
+    <div class="tint" style="padding:21px 27px"><span class="tag">Q1</span> <span class="cd" style="font-size:22px">합성곱과 attention 의 가중치는 각각 무엇이 정하는가? 한 문장으로.</span></div>
+    <div class="tint" style="padding:21px 27px"><span class="tag">Q2</span> <span class="cd" style="font-size:22px">Q·K·V 의 역할을 나누어 설명하고, $\mathrm{softmax}(QK^{\top}/\sqrt{d})V$ 를 말로 풀어 보라.</span></div>
+    <div class="tint" style="padding:21px 27px"><span class="tag">Q3</span> <span class="cd" style="font-size:22px">$\sqrt{d}$ 로 나누지 않으면 무엇이 잘못되는가? "포화"와 "기울기"로 답하라.</span></div>
+    <div class="tint" style="padding:21px 27px"><span class="tag">Q4</span> <span class="cd" style="font-size:22px">창 분할이 줄이는 것과 잃는 것은? 창 이동은 무엇을 복구하는가?</span></div>
+    <div class="tint" style="padding:21px 27px"><span class="tag">Q5</span> <span class="cd" style="font-size:22px">3D 모델 입력에 t±1 슬라이스를 넣으면 안 되는 이유는? SSIM 0.953 vs 0.823 사례로.</span></div>
+    <div class="tint" style="padding:21px 27px"><span class="tag">Q6</span> <span class="cd" style="font-size:22px">"파라미터 수가 비슷하니 공정한 비교다"라는 주장의 빈틈 두 가지는?</span></div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4 · §6</span><span class="pg"><b>42</b> / 44</span></div>
+</section>
+
+<!-- 43 · 핵심 요약 -->
+<section class="s" data-label="핵심 요약" data-speaker-notes="요약이다. 합성곱은 위치 기반 고정 가중치, attention은 내용 기반 동적 가중치, 3D는 부피 시야. 각자 얻는 것과 내주는 것이 있고, 이 문제 이 규모에서는 2D 합성곱의 귀납 편향이 이겼다. 그리고 어떤 비교든 세 원칙, 같은 데이터, 같은 입력 정보, 같은 시간 예산 위에서만 의미가 있다.">
+  <div class="hd">
+    <div class="eb">WEEK 4 · <span class="n">핵심 요약</span></div>
+    <div class="tt">구조는 거래다: 얻는 것과 내주는 것</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:18px">
+    <table class="tb" style="max-width:1560px">
+      <tr><th style="width:250px">구조</th><th>가중치·시야</th><th>얻는 것</th><th>내주는 것</th></tr>
+      <tr><td class="m">2D UNet (W2)</td><td class="cd" style="font-size:21px">위치 기반 고정 · 지역</td><td class="cd" style="font-size:21px">적은 데이터·시간에 안정 (귀납 편향 적합)</td><td class="cd" style="font-size:21px">전역 관계는 깊이로만</td></tr>
+      <tr><td class="m">SwinUNet</td><td class="cd" style="font-size:21px">내용 기반 동적 · 창 단위</td><td class="cd" style="font-size:21px">파라미터 효율 · 유연한 연결</td><td class="cd" style="font-size:21px">데이터·시간 요구량 ↑</td></tr>
+      <tr><td class="m">UNet3D</td><td class="cd" style="font-size:21px">위치 기반 고정 · 부피</td><td class="cd" style="font-size:21px">z 연속성을 연산 단위에서 직접</td><td class="cd" style="font-size:21px">스텝 비용 ↑ → 같은 예산 학습량 ↓</td></tr>
+    </table>
+    <div class="row" style="max-width:1560px;gap:16px">
+      <div class="card tn" style="flex:1;padding:26px 30px"><div class="cd" style="font-size:22px"><b>공정 비교 3원칙.</b> 같은 데이터 · 같은 입력 정보 · 같은 시간 예산. 하나라도 무너지면 숫자는 구조가 아니라 <span class="hl">설계 차이</span>를 잰다.</div></div>
+      <div class="card tn" style="flex:1;padding:26px 30px"><div class="cd" style="font-size:22px"><b>지표 읽기.</b> 정확도·크기·속도는 <span class="nv">서로 다른 세 축</span>이다. 파라미터 수와 높은 지표는 모두 그 자체로는 증거가 아니다 (누출 점검 先).</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>43</b> / 44</span></div>
+</section>
+
+<!-- 44 · W5 예고 -->
+<section class="s" data-label="W5 예고" data-speaker-notes="다음 주 예고다. 오늘 결과 표에서 최고 성적은 새 구조가 아니라 같은 2D UNet의 예측을 세 직교축에서 융합한 것이었다. 다음 주는 이렇게 구조를 바꾸지 않고 성능을 끌어올리는 기법들을 다룬다. 3축 융합, 여러 k 동시 학습, 증강과 후처리다. 오늘 학습한 세 모델의 결과 표를 저장해 두면 다음 주 개선 폭을 직접 비교할 수 있다.">
+  <div class="hd">
+    <div class="eb">WEEK 5 · <span class="n">예고</span></div>
+    <div class="tt">다음 주: 구조를 바꾸지 않고 이기는 법</div>
+  </div>
+  <div class="body" style="justify-content:center;gap:20px">
+    <div class="card tn" style="padding:24px 30px">
+      <div class="cd" style="font-size:23px"><b>오늘의 복선.</b> §5 결과 표의 1위는 새 구조가 아니라 <span class="hl">같은 2D UNet + 3축 융합</span>(SSIM 0.935 · |Δφ| 0.12%p)이었다. 구조 교체보다 <b>사용 방법의 개선</b>이 더 컸다.</div>
+    </div>
+    <div class="row">
+      <div class="card to vc" style="flex:1">
+        <div class="tag" style="color:var(--orange-d)">W5 주제 1</div>
+        <div class="ct" style="margin-top:6px">3축 융합 (tri-axis)</div>
+        <div class="cd" style="font-size:21px">x·y·z 세 방향의 예측을 융합해 단일 축의 한계를 보완한다.</div>
+      </div>
+      <div class="card to vc" style="flex:1">
+        <div class="tag" style="color:var(--orange-d)">W5 주제 2</div>
+        <div class="ct" style="margin-top:6px">multi-k 학습</div>
+        <div class="cd" style="font-size:21px">여러 이웃 거리를 함께 학습해 일반화를 넓힌다.</div>
+      </div>
+      <div class="card to vc" style="flex:1">
+        <div class="tag" style="color:var(--orange-d)">W5 주제 3</div>
+        <div class="ct" style="margin-top:6px">증강 · 후처리</div>
+        <div class="cd" style="font-size:21px">데이터 증강과 형태학적 후처리의 효과를 정량 평가한다.</div>
+      </div>
+    </div>
+    <div class="tint" style="padding:21px 27px">
+      <div class="cd" style="font-size:21px"><b>준비.</b> 오늘 노트북의 results 표(특히 2D UNet 의 |Δφ|·SSIM)를 기록해 둘 것. W5 에서 개선 폭의 기준선이 된다.</div>
+    </div>
+  </div>
+  <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>44</b> / 44</span></div>
+</section>
+
+</deck-stage>
+<script src="deck/deck-stage.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+  function _rm(){ if (window.renderMathInElement) renderMathInElement(document.body,
+    {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  let _n=0; const _iv=setInterval(()=>{ _rm(); if(++_n>=10) clearInterval(_iv); },200);
+  window.addEventListener('load',()=>{ _rm(); setTimeout(_rm,300); setTimeout(_rm,900); });
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+{
+  "week": "W4",
+  "updated": "2026-07-22",
+  "style": {
+    "tokens": "design/brand_tokens.json",
+    "palette": [
+      "#1F3A5F",
+      "#EA851B",
+      "#2E8B57",
+      "#C83A3A",
+      "#1A2333",
+      "#5A6475",
+      "#8A93A3",
+      "#E4DED2"
+    ],
+    "dpi": 140,
+    "backend": "Agg",
+    "font": "Pretendard",
+    "no_figure_title": true,
+    "output_dir": "web/assets/figures/"
+  },
+  "figures": [
+    {
+      "name": "W4_leakage",
+      "script": "_w4_build/fig_leakage.py",
+      "size_in": [
+        11,
+        5.0
+      ],
+      "message": "정보 누출이 만드는 착시: 입력 설계 차이가 SSIM +0.130의 착시를 만든다",
+      "layout": "2열 x 2행. 상단: 슬라이스 입력 설계 모식도(7칸, t 중심). 좌=누출 설계(t±1 입력, RED), 우=공정 설계(t±3 입력, NAVY). 하단: SSIM 막대(누출 0.953 RED, 공정 0.823 NAVY), y축 0.6-1.0",
+      "numbers": {
+        "ssim_leak": 0.953,
+        "ssim_fair": 0.823,
+        "diff": 0.13
+      },
+      "caption": "같은 3D 모델 · 같은 데이터(사암 1000³) · 같은 1시간 학습"
+    },
+    {
+      "name": "W4_tradeoff_scatter",
+      "script": "_w4_build/fig_tradeoff.py",
+      "size_in": [
+        12,
+        5.2
+      ],
+      "message": "구조별 trade-off: 파라미터 수와 성능은 비례하지 않는다",
+      "layout": "2패널, x=파라미터 수(M, log). 좌 y=|Δφ|(%p, 낮을수록 좋음), 우 y=SSIM(높을수록 좋음)",
+      "numbers": {
+        "params_M": {
+          "2D UNet": 24.5,
+          "SwinUNet": 1.1,
+          "3D UNet 小": 3.15,
+          "3D UNet 大": 22.4
+        },
+        "dphi_pp": {
+          "2D UNet": 0.265,
+          "SwinUNet": 0.343,
+          "3D UNet 小": 0.402,
+          "3D UNet 大": "~0.40"
+        },
+        "ssim": {
+          "2D UNet": 0.9322,
+          "SwinUNet": 0.9259,
+          "3D UNet 小": 0.9135,
+          "3D UNet 大": "~0.914"
+        }
+      },
+      "caption": "사암 1000³ · 같은 시간 예산 · 같은 평가 프로토콜"
+    },
+    {
+      "name": "W4_speed_flops",
+      "script": "_w4_build/fig_speed.py",
+      "size_in": [
+        11,
+        4.8
+      ],
+      "message": "속도와 연산량: 파라미터 동급이어도 3D는 깊이 방향 연산 때문에 느리다",
+      "layout": "좌: 수평 막대 ms/슬라이스(256³ 부피 기준). 우: GFLOP/슬라이스(1000² 기준) 2개 막대 + x9.5 주석",
+      "numbers": {
+        "ms_per_slice": {
+          "2D UNet": 15.5,
+          "SwinUNet": 12.9,
+          "3D UNet 小": 46.7,
+          "3D UNet 大": 143
+        },
+        "gflop_per_slice": {
+          "2D UNet": 8549,
+          "3D UNet 大": 81190
+        },
+        "flops_ratio": 9.5,
+        "wallclock_ratio": "~3x"
+      },
+      "note": "파라미터가 비슷해도(24.5M vs 22.4M) 3D는 깊이 방향 연산이 더해져 느리다. wall-clock 기준 약 3배"
+    },
+    {
+      "name": "W4_conv_locality",
+      "script": "_w4_build/fig_conv_locality.py",
+      "size_in": [
+        11,
+        4.6
+      ],
+      "message": "3x3 합성곱의 지역성과 가중치 공유",
+      "layout": "3열. 좌=Bentheimer 32x32 실제 crop(gray_r) + ORANGE 3x3 창 2곳(위치 A/B). 중=1/16 [1 2 1; 2 4 2; 1 2 1] 스무딩 커널의 valid conv 출력 30x30 + 대응 출력 셀 강조, 창→셀 ORANGE 화살표(ConnectionPatch). 우=3x3 가중치 그리드(NAVY 음영, 정수 표기 x 1/16). 하단 캡션 2개: 지역 연산 / 가중치 재사용."
+    },
+    {
+      "name": "W4_receptive_field",
+      "script": "_w4_build/fig_receptive_field.py",
+      "size_in": [
+        11,
+        4.6
+      ],
+      "message": "수용 영역 성장: 3x3 conv n층 → RF 2n+1, 풀링은 보폭 2배",
+      "layout": "2열. 좌=단면 다이어그램(입력 15픽셀 + conv 3층), 한 출력 픽셀의 영향 원뿔 ORANGE 강조(1→3→5→7). 우=성장 곡선: NAVY RF=2n+1(n=1..8), GREEN 2층 뒤 2x2 풀링(보폭 2) 1회 [3,5,10,14,18,22,26,30], 풀링 삽입 점선 + 기울기 주석(층당 +2 / +4). 하단 캡션: 멀리 있는 픽셀을 보려면 층을 많이 쌓아야 한다."
+    }
+  ]
+}

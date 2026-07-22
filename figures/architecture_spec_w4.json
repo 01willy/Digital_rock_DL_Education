@@ -1,0 +1,32 @@
+{
+  "_note": "W4 아키텍처 다이어그램 3종 스펙. 스타일 기준 = W3_architecture.png (round box, NAVY=norm/conv, ORANGE=attention/Swin, dashed GREEN=skip/residual, SUB 화살표). 렌더: matplotlib Agg, facecolor white, dpi 140, 한글 Pretendard.",
+  "figures": {
+    "W4_swin_block": {
+      "file": "web/assets/figures/W4_swin_block.png",
+      "size_in": [6.5, 5.2],
+      "message": "Swin 블록 내부 구조(잔차 2회)와 고정 창 · 이동 창 블록 쌍",
+      "left_column": ["입력 (B,H,W,C)", "LayerNorm", "W-MSA 창 attention", "⊕ 잔차 1", "LayerNorm", "MLP 2×확장 GELU", "⊕ 잔차 2", "출력 (B,H,W,C)"],
+      "residual": "dashed GREEN side arcs (입력→⊕1, ⊕1 이후→⊕2)",
+      "right_column": ["블록 쌍 = 기본 단위", "Swin 블록 1 · 고정 창 W-MSA", "Swin 블록 2 · 이동 창 SW-MSA", "창 절반 이동(roll)으로 창 경계를 넘는 연결"],
+      "colors": {"norm_mlp": "NAVY", "attention": "ORANGE", "residual": "GREEN dashed"}
+    },
+    "W4_swinunet_arch": {
+      "file": "web/assets/figures/W4_swinunet_arch.png",
+      "size_in": [12.5, 5.2],
+      "message": "SwinUNetMini U-구조: 패치 임베딩 → Swin×2 → down → Swin×2 → up + skip → Swin×2 → up×2 ×2 → head",
+      "top_row": ["입력 (2,256,256)", "패치 임베딩 conv 4×4 s4", "Swin 블록×2 (64×64×32)", "skip 결합 conv 1×1", "Swin 블록×2 (64×64×32)", "up ×2 (128×128×16)", "up ×2 (256×256×8)", "head conv", "출력 (1,256,256) sigmoid"],
+      "bottom_row": ["Swin 블록×2 (32×32×64)"],
+      "edges": ["down conv 2×2 s2 (대각 하강)", "up ×2 transpose conv (대각 상승)", "skip dashed GREEN arc (64×64×32)"],
+      "annotation": "파라미터 123,913개 (2D UNet 117,217개와 동급)"
+    },
+    "W4_unet3d_arch": {
+      "file": "web/assets/figures/W4_unet3d_arch.png",
+      "size_in": [12.5, 5.0],
+      "message": "UNet3DMini 3레벨 U-구조: 깊이 유지 pooling(1,2,2), 3×3×3 합성곱, 가운데 슬라이스 선택",
+      "encoder": ["입력 (2,5,H,W): ch0=이웃 t±2, ch1=마스크", "ConvBlock3D×2 (10ch, D=5, H×W)", "MaxPool3d(1,2,2)", "(20ch, D=5, H/2)", "(40ch, D=5, H/4)"],
+      "decoder": ["ConvTranspose3d(1,2,2) + skip concat", "(20ch, D=5, H/2)", "(10ch, D=5, H×W)", "out conv 1×1×1 + sigmoid (1,5,H,W)", "가운데 슬라이스 선택 D//2 → (1,H,W)"],
+      "note": "3×3×3 합성곱이 층을 거치며 이웃 슬라이스 정보를 가운데로 전파 · 파라미터 129,181개"
+    }
+  },
+  "verified_params": {"SwinUNetMini": 123913, "UNet3DMini": 129181, "UNetMini_base16": 117217}
+}
