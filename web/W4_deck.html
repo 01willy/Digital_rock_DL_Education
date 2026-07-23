@@ -232,7 +232,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
 </section>
 
 <!-- 07 · 합성곱 복습 -->
-<section class="s" data-label="합성곱 동작" data-speaker-notes="합성곱의 두 원칙이다. 첫째 지역 연산. 한 위치의 출력은 그 주변, 예를 들어 3x3만 본다. 둘째 가중치 공유. 같은 9개 가중치를 이미지 전체에 재사용한다. 그림에서 위치 A와 위치 B는 서로 다른 곳이지만 완전히 같은 커널이 적용된다. 참고로 우리 망은 padding을 써서 출력 크기를 입력과 같게 유지한다. 그래서 32x32 입력이면 출력도 32x32다.">
+<section class="s" data-label="합성곱 동작" data-speaker-notes="합성곱의 두 원칙이다. 첫째 지역 연산. 출력 픽셀 하나는 입력의 주변 3x3 창만 읽어 가중합으로 만들어진다. 그림의 주황 네모가 바로 이 대응이다. 왼쪽 큰 네모는 입력에서 커널이 읽는 3x3 창이고, 오른쪽 작은 네모는 그 창이 만드는 출력 픽셀 하나다. 창이 픽셀로 줄어드는 것이지 맵이 줄어드는 게 아니다. 맵은 padding 덕분에 양쪽 다 32x32로 같다. 둘째 가중치 공유. 위치 A와 B는 다른 곳이지만 완전히 같은 9개 가중치가 적용된다. 참고로 그림은 3x3 창이 보이도록 실제 입력 256x256 중 32x32만 확대한 것이다.">
   <div class="hd">
     <div class="kick"><b>복습</b></div>
     <div class="tt">합성곱: 지역 연산 + 가중치 공유</div>
@@ -240,8 +240,8 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   <div class="body mid">
     <div class="figbox" style="max-width:1360px"><img src="assets/figures/W4_conv_locality.png" style="width:100%;max-height:360px;object-fit:contain" alt="3×3 합성곱의 지역 연산과 가중치 공유, padding으로 32×32 유지"></div>
     <div class="row">
-      <div class="note" style="flex:1"><div class="cd" style="font-size:21px"><b>지역 연산.</b> 출력 한 픽셀은 입력의 주변 3×3 만 본다. 멀리 있는 픽셀은 이 단계에서 보이지 않는다.</div></div>
-      <div class="note" style="flex:1"><div class="cd" style="font-size:21px"><b>가중치 공유.</b> 같은 9개 가중치를 전 위치에 재사용한다. 우리 망은 <span class="nv">padding</span>으로 크기를 보존(32×32 → 32×32).</div></div>
+      <div class="note" style="flex:1"><div class="cd" style="font-size:21px"><b>지역 연산.</b> 출력 <b>1픽셀</b> = 입력 <b>3×3 창</b>의 가중합. 주황 네모는 창→픽셀 대응이며, 맵 크기는 동일하다.</div></div>
+      <div class="note" style="flex:1"><div class="cd" style="font-size:21px"><b>가중치 공유.</b> 같은 9개 가중치를 전 위치에 재사용. 그림은 실제 입력 <span class="nv">256×256</span> 중 32×32 확대(시각화용)다.</div></div>
     </div>
 
     <div class="note"><div class="cd" style="font-size:20px"><b>배경.</b> 합성곱 신경망은 1989년 LeCun 의 손글씨 인식(LeNet)에서 시작해, 2012년 AlexNet 이 대규모 이미지 인식에서 성능을 입증하며 딥러닝 부흥을 이끌었다. 지역성·가중치 공유라는 사전지식이 적은 데이터로도 잘 학습되게 한 핵심이다.</div></div>
