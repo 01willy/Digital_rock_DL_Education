@@ -96,11 +96,11 @@
       "name": "W4_conv_locality",
       "script": "_w4_build/fig_conv_locality.py",
       "size_in": [
-        11,
+        13,
         4.6
       ],
-      "message": "3x3 합성곱의 지역성과 가중치 공유",
-      "layout": "3열. 좌=Bentheimer 32x32 실제 crop(gray_r) + ORANGE 3x3 창 2곳(위치 A/B). 중=1/16 [1 2 1; 2 4 2; 1 2 1] 스무딩 커널의 valid conv 출력 30x30 + 대응 출력 셀 강조, 창→셀 ORANGE 화살표(ConnectionPatch). 우=3x3 가중치 그리드(NAVY 음영, 정수 표기 x 1/16). 하단 캡션 2개: 지역 연산 / 가중치 재사용."
+      "message": "3x3 합성곱의 지역성과 가중치 공유 — 입력 256x256 전체 → 출력 256x256 전체(same padding), 확대는 창→픽셀 대응 설명용",
+      "layout": "4열 gridspec width_ratios [1.15, 1.0, 1.15, 0.8]. P1=Bentheimer 전체 슬라이스 vol[128] 256x256(gray_r) + ORANGE 32x32 확대 영역 네모(rows/cols 96:128). P2=32x32 확대 + ORANGE 3x3 창 2곳(위치 A/B). P3=전체 256x256 출력(convolve2d same) + 같은 확대 영역 네모 + A/B 1x1 출력 픽셀 마커, 하단 노트 '맵 크기 = 입력과 동일 256x256 (same padding)'. P4=3x3 커널 그리드(1/16 [1 2 1; 2 4 2; 1 2 1], NAVY 음영) + 캡션 '예시 커널 = 가우시안 블러 / 실제 CNN 커널 값은 학습으로 결정' + '위치 A·B 모두 같은 커널 적용'. 화살표: P1 확대영역→P2(확대), P2 창→P3 출력픽셀, 동일 ORANGE 스타일. 하단 캡션: 전체 흐름 256→커널 슬라이딩→256."
     },
     {
       "name": "W4_receptive_field",
