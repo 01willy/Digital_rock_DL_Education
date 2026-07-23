@@ -588,7 +588,7 @@ window.COURSE = {
     ],
     groups: {
       g1: {
-        slides:44, cells:30, tryits:5,
+        slides:47, cells:30, tryits:5,
         notebook:'W4_architectures.ipynb',
         tasks:[
           { t:'시간 예산과 순위', req:true,  d:'budget_s=30/90/180 으로 공정 비교를 반복하고, 예산에 따라 세 구조의 지표·순위가 어떻게 변하는지 표로 정리한다. 느린 구조(3D)가 예산 증가의 이득을 더 보는지 확인.' },
@@ -598,7 +598,7 @@ window.COURSE = {
         ],
       },
       g2: {
-        slides:44, cells:30, tryits:5,
+        slides:47, cells:30, tryits:5,
         notebook:'W4_architectures.ipynb',
         tasks:[
           { t:'시간 예산과 순위', req:true,  d:'budget_s=30/90/180 으로 공정 비교를 반복하고, 예산에 따라 세 구조의 지표·순위가 어떻게 변하는지 표로 정리한다. 느린 구조(3D)가 예산 증가의 이득을 더 보는지 확인.' },

@@ -152,7 +152,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     </div>
     <div class="note"><div class="cd">개선 축 = <b>학습 방법·입력</b>의 개선 · 구조(연결 방식) 불변 → 이 구분이 이번 주의 출발점.</div></div>
 
-    <div class="row" style="gap:16px"><div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>W2 효과.</b> 2D UNet + L1: 선형 보간 대비 공극률 오차 약 <span class="nv">1/6</span>.</div></div><div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>W3 효과.</b> 판별자(GAN) 추가: 경계 회색 번짐 억제 · 물성(공극률·S₂) 보존 개선.</div></div></div>
+    <div class="row" style="gap:16px"><div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>W2 효과.</b> 2D UNet + L1: 선형 보간 대비 공극률 오차 약 <span class="nv">1/6</span>.</div></div><div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>W3 효과.</b> 판별자(GAN) 추가: 경계 회색 번짐 억제 · 물성(공극률·S₂=두 점 상관 함수, W3) 보존 개선.</div></div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4 딥러닝 아키텍처 비교</span><span class="pg"><b>02</b> / 47</span></div>
 </section>
@@ -181,7 +181,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body" style="padding-top:40px">
     <div class="row">
-      <div class="card" style="flex:1"><div class="lbl">비교군 1</div><div class="ct">Transformer (Swin)</div><div class="cd">내용의 유사도로 연결을 만드는 <b>attention</b> 기반</div></div>
+      <div class="card" style="flex:1"><div class="lbl">비교군 1</div><div class="ct">Transformer (Swin)</div><div class="cd">내용의 유사도로 연결하는 <b>attention</b> 기반 (Swin = 이미지용 변형, 2부에서 설명)</div></div>
       <div class="card" style="flex:1"><div class="lbl">비교군 2</div><div class="ct">3D CNN</div><div class="cd">슬라이스 사이(z)까지 <b>부피 합성곱</b></div></div>
       <div class="card" style="flex:1"><div class="lbl">비교군 3</div><div class="ct">diffusion</div><div class="cd">노이즈에서 <b>반복 복원</b>하는 생성 모델</div></div>
     </div>
@@ -233,10 +233,10 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     <div class="row">
       <div class="card" style="flex:1"><div class="lbl">임베딩 (embedding)</div><div class="cd" style="font-size:21px">대상을 <b>숫자 벡터</b>로 표현. 신경망은 숫자만 다루므로 픽셀 조각·단어 등을 벡터로 변환 (예: 4×4 조각 → 32개 숫자).</div></div>
       <div class="card" style="flex:1"><div class="lbl">파라미터 = 가중치</div><div class="cd" style="font-size:21px">신경망이 <b>학습으로 조정하는 숫자들</b>. 커널 값·선형 변환의 원소 전부 포함 (예: UNetMini ≈ 12만 개).</div></div>
-      <div class="card" style="flex:1"><div class="lbl">학습 = 경사하강</div><div class="cd" style="font-size:21px">오차 점수(<b>손실 함수</b>)를 정의 → 오차가 줄어드는 방향(미분)으로 가중치를 조금씩 갱신: $w \leftarrow w - \eta\,\partial L/\partial w$.</div></div>
+      <div class="card" style="flex:1"><div class="lbl">학습 = 경사하강</div><div class="cd" style="font-size:21px">오차 점수(<b>손실 함수</b>)를 정의 → 오차가 줄어드는 방향(미분)으로 가중치를 조금씩 갱신: $w \leftarrow w - \eta\,\partial L/\partial w$ ($\eta$ = 학습률, 한 걸음 크기).</div></div>
     </div>
     <div class="row">
-      <div class="card plain" style="flex:1"><div class="lbl">CNN (W2)</div><div class="cd" style="font-size:20px">작은 커널을 미끄러뜨리는 <b>지역 연산</b> 신경망.</div></div>
+      <div class="card plain" style="flex:1"><div class="lbl">CNN (W2)</div><div class="cd" style="font-size:20px">작은 커널(3×3 가중치 격자)을 미끄러뜨리는 <b>지역 연산</b> 신경망.</div></div>
       <div class="card plain" style="flex:1"><div class="lbl">UNet (W2)</div><div class="cd" style="font-size:20px">인코더·디코더 + skip 연결의 <b>복원용 CNN</b>.</div></div>
       <div class="card plain" style="flex:1"><div class="lbl">pix2pix (W2·W3)</div><div class="cd" style="font-size:20px">이미지→이미지 변환용 <b>조건부 GAN</b> 틀 (우리 모델의 기반).</div></div>
       <div class="card plain" style="flex:1"><div class="lbl">GAN (W3)</div><div class="cd" style="font-size:20px">생성자 vs 판별자의 <b>경쟁 학습</b>으로 품질 향상.</div></div>
@@ -311,19 +311,20 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
         <span><b style="color:var(--navy)">K</b> = 커널(학습되는 3×3 가중치)</span>
         <span><b>(i, j)</b> = 출력 위치</span>
         <span><b>(a, b)</b> = 커널 내 좌표(−1~1)</span>
+        <span><b>ΣΣ</b> = 창 안 9개 값 전부 더함</span>
       </div>
     </div>
     <div class="row">
-      <div class="card" style="flex:1"><div class="lbl">왜 완전연결이 아닌가</div><div class="cd" style="margin-top:2px">이미지 전체를 완전연결로 처리 시 파라미터 <b>(H·W)² ≈ 40억</b>(256² 기준) 폭발 + 한 위치에서 배운 패턴의 <b>타 위치 전이 불가.</b></div></div>
+      <div class="card" style="flex:1"><div class="lbl">왜 완전연결이 아닌가</div><div class="cd" style="margin-top:2px">완전연결 = <b>모든 입력 픽셀을 모든 출력 픽셀에 각각 연결</b>(픽셀 수 × 픽셀 수 개의 가중치). 256² 기준 <b>(H·W)² ≈ 43억 개</b> 폭발 + 한 위치에서 배운 패턴의 <b>타 위치 전이 불가.</b></div></div>
       <div class="card acc" style="flex:1"><div class="lbl a">가중치 공유 = 평행이동 등변성</div><div class="cd" style="margin-top:2px">커널이 위치와 무관하게 동일 → 입력 이동 시 출력도 동일하게 이동:<br>$\;\mathrm{conv}(\mathrm{shift}(X))=\mathrm{shift}(\mathrm{conv}(X))$</div></div>
     </div>
     <div class="note"><div class="cd" style="font-size:20px"><b>도입 배경.</b> "같은 패턴이 어디에나 등장"이라는 이미지의 사전지식을 <span class="nv">구조에 내장</span> → 파라미터 절감 + 위치 무관 일반화. 이것이 CNN의 <span class="hl">귀납 편향</span>.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>배경.</b> 초기 완전연결 신경망의 파라미터 폭발·과적합 문제 → 가중치 공유가 구조적으로 해결. 동일 필터의 전 위치 재사용 설계 = CNN 을 이미지 표준 도구로 만든 전환점.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>배경.</b> 초기 완전연결 신경망의 파라미터 폭발·과적합(훈련 데이터만 외워 새 데이터에 약해짐) 문제 → 가중치 공유가 구조적으로 해결. 동일 필터의 전 위치 재사용 설계 = CNN 을 이미지 표준 도구로 만든 전환점.</div></div>
 
     <div class="row" style="gap:16px">
       <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>수치 예시.</b> 입력 3×3 조각 [[0,0,1],[0,1,1],[1,1,1]] × 커널(1,2,1/2,4,2/1,2,1)÷16 → (0+0+1+0+4+2+1+2+1)/16 = <b>0.69</b>. 이 한 값이 출력 픽셀 하나.</div></div>
-      <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>파라미터 비교.</b> 256² 이미지: 완전연결 1층 ≈ <b>43억 개</b> vs 3×3 conv(채널 16) ≈ <b>1,168개</b>. 약 370만 배 차이.</div></div>
+      <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>파라미터 비교.</b> 완전연결 1층 ≈ <b>43억 개</b> vs 3×3 conv(8→16채널: 3·3·8·16+16) = <b>1,168개</b>. 약 370만 배 차이.</div></div>
       <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>등변성의 가치.</b> 공극이 화면 왼쪽에 있든 오른쪽에 있든 <b>같은 커널이 같은 방식으로 인식</b> → 한 곳에서 배운 패턴이 전 위치에 즉시 적용(위치별 재학습 불필요).</div></div>
     </div>
   </div>
@@ -344,10 +345,10 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     </div>
     <div class="row">
       <div class="card" style="flex:1"><div class="lbl">③ 적은 비용</div><div class="cd">가중치 <b>9개</b> (5×5=25개 · 7×7=49개 대비 경량).</div></div>
-      <div class="card acc" style="flex:1"><div class="lbl a">④ 쌓으면 넓어진다</div><div class="cd">3×3 <b>두 층 = 5×5 한 층의 시야</b> · 파라미터 18 vs 25 · 층 사이 비선형 삽입 → 표현력↑.</div></div>
+      <div class="card acc" style="flex:1"><div class="lbl a">④ 쌓으면 넓어진다</div><div class="cd">3×3 <b>두 층 = 5×5 한 층의 시야</b> · 파라미터 18 vs 25 · 층 사이 비선형(ReLU 처럼 꺾어 주는 함수) 삽입 → 표현력↑.</div></div>
     </div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>다른 크기의 실제 사용.</b> 1×1 = 채널 혼합용(ResNet·GoogLeNet) · 5×5/7×7/11×11 = 초기 대형 커널(AlexNet 1층 11×11, 지금은 드묾) · 짝수 2×2 = 주로 풀링·업샘플링 용도. 3×3 적층은 VGG(2014) 이후 사실상 표준.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>다른 크기의 실제 사용.</b> 1×1 = 채널 혼합용(ResNet·GoogLeNet) · 5×5/7×7/11×11 = 초기 대형 커널(AlexNet 1층 11×11, 지금은 드묾) · 짝수 2×2 = 주로 풀링·업샘플링(확대) 용도. 3×3 적층은 VGG(2014) 이후 사실상 표준.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>11</b> / 47</span></div>
 </section>
@@ -363,7 +364,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     <div class="figbox" style="max-width:1360px"><img src="assets/figures/W4_receptive_field.png" style="width:100%;max-height:420px;object-fit:contain" alt="3층 3×3 conv의 수용 영역과 층수 대비 성장 곡선"></div>
     <div class="note" style="align-self:center;max-width:1440px"><div class="cd" style="font-size:20px"><b>한계.</b> 이미지 반대편 관계 인식 = 수십 층 필요 + 전달 중 정보 희석 → attention 의 해결 지점.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>수식.</b> 3×3 conv L 층의 수용 영역 = $1+2L$ 픽셀 → 원거리 인식에 다층 필요. 대안: dilated conv(2016)·pooling 으로 시야 확대 가속, attention 은 층 적재 없이 한 번에 전역 참조.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>수식.</b> 3×3 conv L 층의 수용 영역 = $1+2L$ 픽셀 → 원거리 인식에 다층 필요. 대안: dilated conv(커널 사이를 띄워 넓게 보는 방식, 2016)·pooling 으로 시야 확대 가속, attention 은 층 적재 없이 한 번에 전역 참조.</div></div>
 
     <div class="note"><div class="cd" style="font-size:20px"><b>풀링 후 보폭 2배의 이유.</b> 2×2 풀링 후에는 픽셀 1개 = 원본 2픽셀. 같은 3×3 창도 원본 기준 2배 넓은 범위를 봄 → 계단을 두 칸씩 오르는 것과 동일한 효과.</div></div>
 
@@ -405,12 +406,12 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body" style="padding-top:24px">
     <div class="row">
-      <div class="card" style="flex:1"><div class="lbl">1 · 딱딱한 검색</div><div class="cd" style="margin-top:2px">사전 = 색인 K + 내용 V 의 쌍. 질의 q 에 가장 맞는 하나 선택:<br>$\mathrm{out}=V[\arg\max_i \mathrm{sim}(q,k_i)]$<br><b>문제: 경직된 선택 + argmax 미분 불가.</b></div></div>
+      <div class="card" style="flex:1"><div class="lbl">1 · 딱딱한 검색</div><div class="cd" style="margin-top:2px">사전 = 색인 K + 내용 V 의 쌍. 질의 q 에 가장 맞는 하나 선택:<br>$\mathrm{out}=V[\arg\max_i \mathrm{sim}(q,k_i)]$<br><b>문제: 경직된 선택 + argmax(최고 점수 하나만 고르기) 미분 불가.</b></div></div>
       <div class="arrow">→</div>
       <div class="card acc" style="flex:1"><div class="lbl a">2 · 부드러운 검색</div><div class="cd" style="margin-top:2px">단일 선택 대신 <b>가중 평균</b>:<br>$\mathrm{out}=\sum_i w_i\,v_i,\quad \sum_i w_i=1$<br>$w_i$ = 유사도에 비례하는 가중치.</div></div>
     </div>
     <div class="row">
-      <div class="card plain" style="flex:1"><div class="lbl">3 · 유사도 = 점곱</div><div class="cd" style="margin-top:2px">$\mathrm{sim}(q,k_i)=q\cdot k_i$ (방향 정렬도). 저비용 · 미분 가능.</div></div>
+      <div class="card plain" style="flex:1"><div class="lbl">3 · 유사도 = 점곱</div><div class="cd" style="margin-top:2px">점곱 = <b>같은 자리 숫자끼리 곱해 모두 더한 값</b>. 예: [1,0]·[1,1] = 1×1+0×1 = 1. 방향이 비슷할수록 큼 · 저비용 · 미분 가능.</div></div>
       <div class="card plain" style="flex:1"><div class="lbl">4 · 정규화 = softmax</div><div class="cd" style="margin-top:2px">양수 · 합1 · 미분 가능한 도구 필요 → <b>softmax</b> (바로 다음 두 장에서 상세).</div></div>
       <div class="card plain" style="flex:1"><div class="lbl">5 · 스케일 ÷√d</div><div class="cd" style="margin-top:2px">점수가 저절로 커지는 문제 통제 (softmax 설명 뒤에 상세).</div></div>
     </div>
@@ -434,13 +435,13 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body" style="padding-top:16px">
     <div class="row">
-      <div class="card" style="flex:1"><div class="lbl">① 양수화</div><div class="cd" style="margin-top:2px">$e^{s}>0$: 항상 양수인 단조 함수 → 확률의 양수 조건 충족.</div></div>
-      <div class="card" style="flex:1"><div class="lbl">② 부드러운 argmax</div><div class="cd" style="margin-top:2px">$\mathrm{softmax}(s/T)$: $T\!\to\!0$ = <b>argmax(1곳에 몰림)</b>, $T\!\to\!\infty$ = <b>균등 분포</b>. exp 가 그 사이를 잇는 조절 손잡이.</div></div>
-      <div class="card acc" style="flex:1"><div class="lbl a">③ 최대 엔트로피 (심화)</div><div class="cd" style="margin-top:2px">기대 점수 고정 시 <b>엔트로피 최대</b>(최소 가정) 분포 = $p_i\propto e^{s_i}$ (통계물리의 볼츠만 분포와 동일 형태).</div></div>
+      <div class="card" style="flex:1"><div class="lbl">① 양수화</div><div class="cd" style="margin-top:2px">$e^{s}>0$: 항상 양수 + 단조(입력이 크면 출력도 큼) → 확률의 양수 조건 충족.</div></div>
+      <div class="card" style="flex:1"><div class="lbl">② 부드러운 argmax</div><div class="cd" style="margin-top:2px">$\mathrm{softmax}(s/T)$ ($s$=점수들, $T$=온도·뾰족함 조절값): $T\!\to\!0$ = <b>argmax(1곳에 몰림)</b>, $T\!\to\!\infty$ = <b>균등 분포</b>. exp 가 그 사이를 잇는 조절 손잡이.</div></div>
+      <div class="card acc" style="flex:1"><div class="lbl a">③ 최대 엔트로피 (심화)</div><div class="cd" style="margin-top:2px">기대 점수 고정 시 <b>엔트로피(분포의 고른 정도) 최대</b> = 최소 가정 분포 = $p_i\propto e^{s_i}$ (통계물리의 볼츠만 분포와 동일 형태).</div></div>
     </div>
     <div class="figbox" style="max-width:1500px"><img src="assets/figures/W4_softmax_temperature.png" style="width:100%;max-height:480px;object-fit:contain" alt="온도 T에 따라 softmax가 균등에서 argmax로 뾰족해지는 과정"></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>T 가 attention 에서 갖는 의미.</b> 온도 T = "가중치를 얼마나 뾰족하게/고르게 만들까"의 다이얼. T 가 너무 낮으면(점수가 너무 크면) 한 곳만 보고(포화·학습 정지), 너무 높으면 아무나 고르게 봐서 검색의 의미가 사라짐. attention 은 T 를 손으로 조절하지 않는다 → 대신 <span class="nv">÷√d 가 점수 크기를 적정 범위로 유지</span>해 사실상 온도를 자동으로 맞춘다(두 장 뒤).</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>T 가 attention 에서 갖는 의미.</b> 온도 T = "가중치를 얼마나 뾰족하게/고르게 만들까"의 다이얼. T 가 너무 낮으면(점수가 너무 크면) 한 곳만 보게 되고(<b>포화</b>: 가중치가 한 곳에 몰려 기울기 0), 학습 정지, 너무 높으면 아무나 고르게 봐서 검색의 의미가 사라짐. attention 은 T 를 손으로 조절하지 않는다 → 대신 <span class="nv">÷√d 가 점수 크기를 적정 범위로 유지</span>해 사실상 온도를 자동으로 맞춘다(두 장 뒤).</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>16</b> / 47</span></div>
 </section>
@@ -460,6 +461,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
         <span><b style="color:var(--navy)">y</b> = 정답(맞으면 1)</span>
         <span><b>δ<sub>ij</sub></b> = i=j 일 때 1, 아니면 0</span>
         <span><b>∂</b> = 변화율(미분)</span>
+        <span><b>L</b> = 손실(정답 확률이 낮을수록 큰 오차 점수)</span>
       </div>
     </div>
     <div class="row">
@@ -498,7 +500,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     </div>
     <div class="note"><div class="cd" style="font-size:20px">√d 나눗셈 = <span class="hl">차원 증가에도 학습을 유지하는 안정화 장치</span>. 노트북 2절: $\mathrm{Var}[q\cdot k] \propto d$ 실측 확인.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>수치 예시.</b> d=64 → 표준편차 √64=8 → 점수 대략 ±8 범위 → 8로 나눠 ±1 수준. 노트북 실측: d=4·16·64·256 에서 Var[q·k] ≈ 4·16·64·256.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>수치 예시.</b> d=64 → 표준편차 √64=8 → 점수 대략 ±8 범위 → 8로 나눠 ±1 수준. 노트북 실측: d = 4, 16, 64, 256 각각에서 Var[q·k] ≈ d 확인.</div></div>
 
     <div class="note"><div class="cd" style="font-size:20px"><b>온도 관점의 요약.</b> ÷√d = softmax 의 <span class="nv">온도를 적정하게 유지하는 자동 다이얼</span>. 차원이 얼마가 되든 점수 분포가 ±1 수준으로 유지 → 앞 장 그림의 "적당히 뾰족한" 중간 상태를 항상 확보.</div></div>
   </div>
@@ -517,9 +519,9 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
       <div class="card" style="flex:1"><div class="lbl">Key · 색인</div><div class="ct">어떻게 걸리는가</div><div class="cd">각 위치가 <b>자신을 알리는</b> 표식. Q와의 대조로 유사도 측정.</div></div>
       <div class="card" style="flex:1"><div class="lbl">Value · 내용</div><div class="ct">무엇을 가져오는가</div><div class="cd">실제로 가져올 <b>내용물</b>. 유사도가 높은 위치일수록 큰 비중.</div></div>
     </div>
-    <div class="note"><div class="cd"><b>세 역할 분리의 이유.</b> 찾는 기준(Q) · 검색 표식(K) · 실제 내용(V)은 서로 다른 정보 → 셋 다 <span class="nv">같은 입력</span>에서 서로 다른 <b>학습된 선형 변환</b>($W_Q, W_K, W_V$)으로 생성.</div></div>
+    <div class="note"><div class="cd"><b>세 역할 분리의 이유.</b> 찾는 기준(Q) · 검색 표식(K) · 실제 내용(V)은 서로 다른 정보 → 셋 다 <span class="nv">같은 입력</span>에서 서로 다른 <b>학습된 선형 변환</b>($W_Q, W_K, W_V$ · 선형 변환 = 행렬 곱 한 번으로 숫자들을 섞는 연산)으로 생성.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>배경.</b> attention 의 기원 = 2014년 기계번역(Bahdanau et al.): 문장 전체의 벡터 압축 대신, 번역 단어마다 원문의 관련 부분 선택 참조. 2017년 Transformer(<i>Attention is All You Need</i>)가 self-attention 으로 일반화.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>배경.</b> attention 의 기원 = 2014년 기계번역(Bahdanau et al.): 문장 전체의 벡터 압축 대신, 번역 단어마다 원문의 관련 부분 선택 참조. 2017년 Transformer(<i>Attention is All You Need</i>)가 self-attention(Q·K·V 를 모두 같은 입력에서 만드는 방식 · 다음 장 예시가 그 경우)으로 일반화.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>19</b> / 47</span></div>
 </section>
@@ -558,7 +560,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   <div class="hd">
     <div class="kick"><b>multi-head</b></div>
     <div class="tt">multi-head: 여러 관점을 병렬로</div>
-    <div class="lede">채널을 head 로 분할해 <b>서로 다른 유사도 기준</b>을 병렬 학습. 비교용 SwinUNet: 채널 32 = <b>4 head × 8차원</b>.</div>
+    <div class="lede">토큰 벡터의 차원(=채널) 32를 head 4개로 8차원씩 분할해 <b>서로 다른 유사도 기준</b>을 병렬 학습. 비교용 SwinUNet(뒤에서 조립할 모델)의 설정.</div>
   </div>
   <div class="body mid">
     <div class="figbox" style="max-width:1440px"><img src="assets/figures/W4_multihead.png" style="width:100%" alt="채널 분할, head별 attention, 결합"></div>
@@ -572,7 +574,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   <div class="hd">
     <div class="kick"><b>비용</b></div>
     <div class="tt acc">attention 의 비용: N² 스케일</div>
-    <div class="lede">유사도 행렬 = 토큰수×토큰수. <b>N=65,536</b>(픽셀 전부) 시 <b>4.3×10⁹ 쌍</b> → 그대로는 계산 불가.</div>
+    <div class="lede">유사도 행렬(토큰수×토큰수 크기의 숫자표). <b>N=65,536</b>(픽셀 전부) 시 <b>4.3×10⁹ 쌍</b> → 그대로는 계산 불가.</div>
   </div>
   <div class="body mid">
     <div class="figbox" style="max-width:1460px"><img src="assets/figures/W4_cost_scaling.png" style="width:100%" alt="토큰 수에 따른 쌍 수 증가와 패치 임베딩·창 분할의 감소"></div>
@@ -611,11 +613,11 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     <div class="row" style="gap:20px">
       <div style="flex:1;display:flex;flex-direction:column;gap:12px">
         <div class="figbox"><img src="assets/figures/W4_window_partition.png" style="width:100%;max-height:450px;object-fit:contain" alt="8×8 창 분할과 창 내부 attention"></div>
-        <div class="note"><div class="cd" style="font-size:20px"><b>창 분할.</b> 창 내부만 attention → 쌍 수 ÷64 · 대가 = <b>창 밖 연결 차단</b>.</div></div>
+        <div class="note"><div class="cd" style="font-size:20px"><b>창 분할.</b> 창 내부만 attention → 쌍 수 ÷64 · 대가 = <b>창 밖 연결 차단</b>. 그림의 숫자표: 진한 칸 = 큰 가중치(그 행 토큰이 그 열 토큰을 많이 참조).</div></div>
       </div>
       <div style="flex:1;display:flex;flex-direction:column;gap:12px">
         <div class="figbox"><img src="assets/figures/W4_shifted_window.png" style="width:100%;max-height:450px;object-fit:contain" alt="창을 절반 이동해 경계 이웃을 연결"></div>
-        <div class="note"><div class="cd" style="font-size:20px"><b>창 이동.</b> 다음 블록에서 창 절반 이동(<span class="nv">torch.roll</span>) → 경계 이웃이 같은 창으로 · 고정/이동 교대 적재로 경계 통과.</div></div>
+        <div class="note"><div class="cd" style="font-size:20px"><b>창 이동.</b> 다음 attention 층(블록)에서 창 절반 이동(<span class="nv">torch.roll</span>) → 경계 이웃이 같은 창으로 · 고정/이동 교대 적재로 경계 통과.</div></div>
       </div>
     </div>
 
@@ -632,11 +634,11 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body mid">
     <div class="figbox" style="max-width:1560px;padding:12px 16px"><img src="assets/figures/W4_swinunet_arch.png" style="width:100%;max-height:520px;object-fit:contain" alt="SwinUNet 전체 구조와 최상단 stem skip"></div>
-    <div class="note" style="align-self:center;max-width:1440px"><div class="cd" style="font-size:20px"><b>설계 디테일의 영향 사례.</b> 최상단 full-res skip 부재 버전: 90초 학습 시 <span style="color:var(--neg);font-weight:600">"전부 solid" 자명해</span>에 고착(|Δφ| ≈ 26.7%p) → stem skip 추가 후 <span class="nv">|Δφ| 2%p 수준</span> 정상 학습 (실습에서 재현).</div></div>
+    <div class="note" style="align-self:center;max-width:1440px"><div class="cd" style="font-size:20px"><b>설계 디테일의 영향 사례.</b> stem skip(그림 맨 위 초록 점선: 입력을 원본 해상도에서 conv 한 번만 거쳐 출력 직전에 이어붙이는 연결) 부재 버전: 90초 학습 시 <span style="color:var(--neg);font-weight:600">"전부 solid"만 내는 지름길 해</span>에 고착(|Δφ| ≈ 26.7%p) → 추가 후 <span class="nv">|Δφ| 2%p 수준</span> 정상 학습 (노트북에 사례 기록).</div></div>
 
     <div class="note"><div class="cd" style="font-size:20px"><b>이름 관계 정리.</b> <b>Transformer</b> = attention 을 주 연산으로 쓰는 구조 계열(2017) → <b>Swin Transformer</b> = 이미지용 Transformer(창 attention, 2021) → <b>SwinUNet</b> = UNet 골격(인코더·디코더·skip)에서 합성곱 블록만 Swin 블록으로 교체. 즉 SwinUNet 은 "UNet 모양의 Transformer" · 일반 UNet 과의 차이 = 블록 종류뿐.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>skip 연결의 동작 (그림의 초록 점선).</b> 인코더 층의 출력(예: 64×64×32)을 보관 → 디코더가 같은 크기(64×64)에 도달하면 <b>채널 방향으로 이어붙임</b>(32+32=64채널) → 다음 블록이 "요약에서 온 정보"와 "세부에서 온 정보"를 함께 섞어 사용. 원본 스케치를 옆에 두고 그리는 방식이며, 기울기도 이 지름길로 직접 흘러 깊은 망 학습이 안정된다.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>그림 용어.</b> transpose conv = 크기를 2배로 키우는 학습형 확대 합성곱 · sigmoid = 출력을 0~1(공극 확률)로 누르는 함수.<br><b>skip 연결의 동작 (그림의 초록 점선).</b> 인코더 층의 출력(예: 64×64×32)을 보관 → 디코더가 같은 크기(64×64)에 도달하면 <b>채널 방향으로 이어붙임</b>(32+32=64채널) → 다음 블록이 "요약에서 온 정보"와 "세부에서 온 정보"를 함께 섞어 사용. 원본 스케치를 옆에 두고 그리는 방식이며, 기울기도 이 지름길로 직접 흘러 깊은 망 학습이 안정된다.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>25</b> / 47</span></div>
 </section>
@@ -659,7 +661,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body mid">
     <div class="figbox" style="max-width:1440px"><img src="assets/figures/W4_conv2d_vs_3d.png" style="width:100%" alt="2D 3×3 커널과 3D 3×3×3 커널의 비교"></div>
-    <div class="cap" style="max-width:1400px">예: Conv2d(16→32) 4,608개 vs Conv3d(16→32) 13,824개. z 방향 연속성 확보의 대가 = 크기·연산 증가.</div>
+    <div class="cap" style="max-width:1400px">예: 채널 16→32 층 기준, 2D 4,608개 vs 3D 13,824개(3배). z 방향 연속성 확보의 대가 = 크기·연산 증가.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>27</b> / 47</span></div>
 </section>
@@ -688,7 +690,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     <div class="figbox" style="max-width:1360px"><img src="assets/figures/W4_leakage.png" style="width:100%;max-height:520px;object-fit:contain" alt="누출 설계와 공정 설계의 입력과 SSIM 비교"></div>
     <div class="note" style="align-self:center;max-width:1400px"><div class="cd" style="font-size:20px"><b>착시.</b> t±1 포함 누출 설계 SSIM 0.953 vs 공정 설계 0.823. <span style="color:var(--neg);font-weight:600">+0.13 = 구조 성능이 아닌 유입된 정답 정보</span> (실전에는 t±1 부재). <span class="nv">지표 확인 전 입력 점검 필수.</span></div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>우리 2D(2.5D)와의 공정 조건.</b> ① 같은 정보: 3D 입력에도 이웃 t±k 두 장만(위 설계) ② 같은 데이터·평가 영역·지표 ③ 같은 예산(미니 90초 / 대규모 배포-동등) ④ 3D 는 실제 배포 방식(sliding window) 그대로 평가 → 형식 차이만 남기고 조건 통일.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>우리 2D(2.5D = 이웃 슬라이스를 추가 채널로 받는 2D 모델)와의 공정 조건.</b> ① 같은 정보: 3D 입력에도 이웃 t±k 두 장만 ② 같은 데이터·평가 영역·지표 ③ 같은 예산(미니 90초 / 대규모는 같은 추론 예산 · 뒤에서 설명) ④ 3D 는 부피를 창 단위로 잘라 차례로 훑는 실제 배포 방식(sliding window)으로 평가 → 형식 차이만 남기고 조건 통일.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>29</b> / 47</span></div>
 </section>
@@ -719,7 +721,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body mid">
     <div class="figbox" style="max-width:1440px"><img src="assets/figures/W4_diffusion_concept.png" style="width:100%;max-height:430px;object-fit:contain" alt="diffusion 반복 복원 개념과 비용"></div>
-    <div class="note" style="align-self:center;max-width:1400px"><div class="cd" style="font-size:20px"><b>주력이 아닌 이유.</b> 우리 예산(약 24 GPU-h)에서 미수렴(같은 문제를 diffusion 으로 푼 기존 발표 연구는 약 12배 연산 사용) + 추론 <span class="hl">~15× 저속</span> → <span class="nv">off-Pareto</span>(성능·비용 어느 축에서도 이득 없는 위치). 원리적 불가가 아닌 이 예산 내 경쟁력 부족 → 뒤 결과 표에 비교군으로 포함.</div></div>
+    <div class="note" style="align-self:center;max-width:1400px"><div class="cd" style="font-size:20px"><b>주력이 아닌 이유.</b> 우리 예산(약 24 GPU-h = GPU 1대로 24시간 계산량)에서 미수렴(같은 문제를 diffusion 으로 푼 기존 발표 연구는 약 12배 연산 사용) + 추론 <span class="hl">~15× 저속</span> → <span class="nv">off-Pareto</span>(성능·비용 어느 축에서도 이득 없는 위치). 원리적 불가가 아닌 이 예산 내 경쟁력 부족 → 뒤 결과 표에 비교군으로 포함.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>31</b> / 47</span></div>
 </section>
@@ -745,7 +747,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
       <div class="card" style="flex:1"><div class="lbl">② 같은 입력 정보</div><div class="cd">모든 모델 = 이웃 t±k 두 장만 입력 · 형식(2D/3D) 무관하게 <b>정보량 동일</b>.</div></div>
       <div class="card" style="flex:1"><div class="lbl">③ 같은 예산</div><div class="cd">파라미터 통일(구조 효과 분리) 또는 시간 통일(실전 조건).</div></div>
     </div>
-    <div class="card acc" style="border-left-width:4px"><div class="lbl a">주의 · 파라미터 수 ≠ 성능</div><div class="cd" style="margin-top:4px">파라미터 수 ≠ 성능의 대리 지표. <b>1.1M SwinUNet 의 24.5M 모델 근접</b> 사례(뒤 결과). 크기 · 시간 · 정확도 = <span class="hl">독립적으로 읽어야 할 세 축</span>.</div></div>
+    <div class="card acc" style="border-left-width:4px"><div class="lbl a">주의 · 파라미터 수 ≠ 성능</div><div class="cd" style="margin-top:4px">파라미터 수 ≠ 성능의 대리 지표. <b>1.1M(=110만 파라미터) SwinUNet 의 24.5M 모델 근접</b> 사례(뒤 결과). 크기 · 시간 · 정확도 = <span class="hl">독립적으로 읽어야 할 세 축</span>.</div></div>
     <div class="figbox" style="max-width:1560px;align-self:stretch"><img src="assets/figures/W4_fair_protocol.png" style="width:100%;max-height:400px;object-fit:contain" alt="공정 비교 프로토콜: 통제 조건과 비교 조건, 파라미터 고정 vs 연산·시간 고정"></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>33</b> / 47</span></div>
@@ -764,9 +766,9 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
       <div class="card acc" style="flex:1"><div class="lbl a">대규모 표 (아래)</div><div class="ct">시간 예산 고정 (크기 상이)</div><div class="cd">각 구조 = <b>표준 최적 크기</b> 유지 + 학습 시간 통일 · 실전 조건 · 질문: "같은 시간·컴퓨터에서 유리한 구조는?"</div></div>
     </div>
     <div class="note"><div class="cd" style="font-size:20px">상이한 구조의 파라미터 강제 통일은 대규모에선 인위적 → <span class="nv">미니 = 구조 분리, 대규모 = 실전 비교</span>로 목적 구분.</div></div>
-    <div class="card" style="border-left-color:var(--rule)"><div class="lbl">근거 · 컴퓨팅 분야의 표준</div><div class="cd" style="margin-top:2px;font-size:21px">아키텍처 비교의 표준 = <b>동일 연산 예산(compute-matched)</b>. 신경망 비교 연구는 파라미터 수·FLOPs·실제 경과 시간(wall-clock) 중 하나를 고정해 "같은 자원에서 유리한 구조"를 측정. 우리 논문: ① 구조·파라미터 동일 대조(2D UNet, 우리 기법 효과 분리) ② 수렴 기준 학습 + <span class="nv">배포-동등 추론 예산</span>(축당 1회 forward · 동일 GPU) ③ 3D 는 파라미터-동급 대형판까지 추가 확인.</div></div>
+    <div class="card" style="border-left-color:var(--rule)"><div class="lbl">근거 · 컴퓨팅 분야의 표준</div><div class="cd" style="margin-top:2px;font-size:21px">아키텍처 비교의 표준 = <b>동일 연산 예산(compute-matched)</b>. 신경망 비교 연구는 파라미터 수·FLOPs·실제 경과 시간(wall-clock) 중 하나를 고정해 "같은 자원에서 유리한 구조"를 측정. 우리 논문: ① 구조·파라미터 동일 대조(2D UNet, 우리 기법 효과 분리) ② 수렴 기준 학습 + <span class="nv">배포-동등 추론 예산</span>(축당 1회 forward=신경망 1회 실행 · 동일 GPU) ③ 3D 는 파라미터-동급 대형판까지 추가 확인.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>파라미터 비통일이 공정한가.</b> 딥러닝 논문의 일반 기준 = 같은 데이터에서 <b>수렴까지 학습</b> + <b>연산 예산(compute) 통제</b> + 크기(파라미터)는 표로 공개. 구조마다 최적 크기가 달라 파라미터 강제 통일은 오히려 특정 구조에 불리 → 필수 아님. 우리는 여기에 SwinUNet 자체 하이퍼파라미터 탐색(최적 구성 부여) + 3D 파라미터-동급 대형판(22.4M) 확인까지 더해 표준 이상으로 통제.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>파라미터 비통일이 공정한가.</b> 딥러닝 논문의 일반 기준 = 같은 데이터에서 <b>수렴까지 학습</b> + <b>연산 예산(compute) 통제</b> + 크기(파라미터)는 표로 공개. 구조마다 최적 크기가 달라 파라미터 강제 통일은 오히려 특정 구조에 불리 → 필수 아님. 우리는 여기에 SwinUNet 자체 하이퍼파라미터(학습 전에 사람이 정하는 설정값) 탐색으로 최적 구성 부여 + 3D 파라미터-동급 대형판(22.4M) 확인까지 더해 표준 이상으로 통제.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>34</b> / 47</span></div>
 </section>
@@ -776,7 +778,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   <div class="hd">
     <div class="kick"><b>결과 · 우리 위치</b></div>
     <div class="tt">대규모 결과: 우리 모델이 비교군을 앞선다</div>
-    <div class="lede">배포-동등 프로토콜 · 사암 1000³ · 맨 위 = <span class="hl">우리 모델(MAPS = pix2pix + GAN + 다축 융합)</span>.</div>
+    <div class="lede">배포-동등 프로토콜 · 사암 1000³ · 맨 위 = <span class="hl">우리 모델(MAPS = pix2pix + GAN + 다축 융합·세 축 예측 결합(W5 상세))</span>.</div>
   </div>
   <div class="body" style="padding-top:40px">
     <table class="tb" style="max-width:1620px;align-self:center">
@@ -785,7 +787,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
       <tr><td>2D UNet · L1</td><td class="m">비교군</td><td class="m">24.5M</td><td class="m">0.932</td><td class="m">0.265</td><td class="cd" style="font-size:19px">우리 모델의 뼈대(GAN 이전)</td></tr>
       <tr><td>SwinUNet (Transformer)</td><td class="m">비교군</td><td class="m" style="color:var(--accent-2)">1.10M</td><td class="m">0.926</td><td class="m">0.343</td><td class="cd" style="font-size:19px">파라미터 <b>1/22</b> 로 근접</td></tr>
       <tr><td>3D UNet (공정 입력)</td><td class="m">비교군</td><td class="m">3.15M</td><td class="m">0.914</td><td class="m">0.402</td><td class="cd" style="font-size:19px">부피 문맥, 스텝 비용 큼</td></tr>
-      <tr><td>diffusion (잠재)</td><td class="m">비교군</td><td class="m">17.2M</td><td class="m" style="color:var(--neg)">0.510</td><td class="m" style="color:var(--neg)">14.8</td><td class="cd" style="font-size:19px">우리 예산 미수렴(~1/12 연산) · off-Pareto</td></tr>
+      <tr><td>diffusion (잠재 = 축소된 표현 공간에서 동작)</td><td class="m">비교군</td><td class="m">17.2M</td><td class="m" style="color:var(--neg)">0.510</td><td class="m" style="color:var(--neg)">14.8</td><td class="cd" style="font-size:19px">우리 예산 미수렴(~1/12 연산) · off-Pareto</td></tr>
     </table>
     <div class="note" style="align-self:center;max-width:1620px"><div class="cd" style="font-size:20px"><b>핵심.</b> 우리 pix2pix 접근 = <span class="nv">비교군 전체를 동일 조건에서 상회</span>. 2D UNet = 우리 모델의 GAN 이전 뼈대.</div></div>
   </div>
@@ -814,7 +816,7 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body mid">
     <div class="figbox" style="max-width:1440px"><img src="assets/figures/W4_speed_flops.png" style="width:100%;max-height:430px;object-fit:contain" alt="슬라이스당 추론 시간과 연산량 비교"></div>
-    <div class="cap" style="max-width:1420px">파라미터 동급(24.5M vs 22.4M)에도 3D = 슬라이스당 <b>약 9배</b> 저속(연산량 비 ×9.5와 일치) → 속도의 결정 요인 = 파라미터가 아닌 <b>연산 구조</b>.</div>
+    <div class="cap" style="max-width:1420px">파라미터 동급(24.5M vs 22.4M)에도 3D = 슬라이스당 <b>약 9배</b> 저속(연산량 비 ×9.5와 일치 · 1 GFLOP = 10억 FLOP) → 속도의 결정 요인 = 파라미터가 아닌 <b>연산 구조</b>.</div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>37</b> / 47</span></div>
 </section>
@@ -828,12 +830,12 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
   </div>
   <div class="body" style="padding-top:40px">
     <div class="row">
-      <div class="card" style="flex:1"><div class="lbl">① 키워도 안 나아졌다</div><div class="cd">하이퍼파라미터 탐색에서 더 큰 SwinUNet 구성 시험 → <b>악화 또는 정체</b>. 이 데이터 규모 = 작은 창 attention 으로 충분.</div></div>
+      <div class="card" style="flex:1"><div class="lbl">① 키워도 안 나아졌다</div><div class="cd">하이퍼파라미터(학습 설정값) 탐색에서 더 큰 SwinUNet 구성 시험 → <b>악화 또는 정체</b>. 이 데이터 규모 = 작은 창 attention 으로 충분.</div></div>
       <div class="card" style="flex:1"><div class="lbl">② 키우면 비용도 는다</div><div class="cd">파라미터↑ = 연산량·학습 시간↑ → <b>동일 예산</b> 내 확장은 학습량 감소와 등가 → 이득 상쇄.</div></div>
     </div>
     <div class="card acc" style="border-left-width:4px"><div class="lbl a">논문의 비교 방식</div><div class="cd" style="margin-top:4px">비교 기준 = 배포-동등(동일 시간·연산 예산). 결론: 단순 확장으로는 역전 불가, <span class="nv">공정한 예산에서 우리 접근이 우위</span>. 성능의 결정 요인 = 크기가 아닌 구조·데이터 궁합.</div></div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>실측 근거.</b> SwinUNet base 96→128 등 확장 구성 = 물성 오차 증가(0.0056~0.0076) 또는 정체 → 이 데이터 규모에서 작은 창 attention 으로 충분.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>실측 근거.</b> SwinUNet base(기본 채널 수) 96→128 등 확장 구성 = 물성 오차 증가(0.56~0.76%p) 또는 정체 → 이 데이터 규모에서 작은 창 attention 으로 충분.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>38</b> / 47</span></div>
 </section>
@@ -848,9 +850,9 @@ section.dv{background:var(--navy);color:#fff;font-family:var(--sans);
     <div class="row">
       <div class="card" style="flex:1"><div class="lbl">2D 합성곱이 강한 이유</div><div class="cd">암석 단면 = <b>지역 연속성</b>이 강한 데이터 → "인접 픽셀 = 높은 관련"이라는 합성곱의 <span class="nv">귀납 편향</span>과 정확히 일치 → 적은 데이터·시간으로 빠른 학습.</div></div>
       <div class="card" style="flex:1"><div class="lbl">attention 의 조건</div><div class="cd">약한 가정 = <b>유연성 + 높은 데이터·시간 요구</b>. 파라미터 효율 최고 → 규모 확대 시 유리.</div></div>
-      <div class="card" style="flex:1"><div class="lbl">3D 의 대차대조</div><div class="cd">부피 문맥 = 실제 이득 · 그러나 <b>연산 비용 &gt; 이득</b> → 동일 예산 내 학습량↓.</div></div>
+      <div class="card" style="flex:1"><div class="lbl">3D 의 득실</div><div class="cd">부피 문맥 = 실제 이득 · 그러나 <b>연산 비용 &gt; 이득</b> → 동일 예산 내 학습량↓.</div></div>
     </div>
-    <div class="card acc" style="border-left-width:4px"><div class="cd" style="font-size:22px"><b>정리.</b> 보편적 "최고 구조"는 부재. <span class="hl">문제·데이터·예산이 최적 구조를 결정</span>. 우리 모델 = 이 데이터에 적합한 <span class="nv">합성곱 뼈대 + GAN·다축 융합</span>으로 최우수 달성.</div></div>
+    <div class="card acc" style="border-left-width:4px"><div class="cd" style="font-size:22px"><b>정리.</b> 보편적 "최고 구조"는 부재. <span class="hl">문제·데이터·예산이 최적 구조를 결정</span>. 우리 모델 = 이 데이터에 적합한 <span class="nv">합성곱 뼈대 + GAN</span>(+ W5에서 다축 융합 추가)으로 최우수 달성.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>39</b> / 47</span></div>
 </section>
@@ -878,19 +880,19 @@ results = <span class="f">benchmark_models</span>(<br>
 &nbsp;&nbsp;vol, k=<span class="v">2</span>, budget_s=<span class="v">90</span>,<br>
 &nbsp;&nbsp;device=DEVICE, seed=<span class="v">0</span>)<br>
 <span class="c"># → params·epochs·|Δφ|·SSIM·history</span><br><br>
-<span class="c"># 우리 방식(GAN)도 같은 예산으로 추가</span><br>
-G, D, hist = <span class="f">train_gan</span>(<br>
-&nbsp;&nbsp;vol, k=<span class="v">2</span>, preset=<span class="v">'fast'</span>, device=DEVICE)
+<span class="c"># 우리 방식(GAN)도 같은 예산으로 추가 (노트북 §5.1 정의)</span><br>
+results[<span class="v">'우리 방식(GAN)'</span>] = <span class="f">train_gan_90s</span>(<br>
+&nbsp;&nbsp;vol, k=<span class="v">2</span>, budget_s=<span class="v">90</span>, device=DEVICE)
       </div>
       <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
-        <div class="note"><div class="cd" style="font-size:21px"><b>동작 1.</b> 모델별 시드 재고정 → 동일 데이터 순서.</div></div>
+        <div class="note"><div class="cd" style="font-size:21px"><b>동작 1.</b> 모델별 시드(난수 시작값) 재고정 → 모든 모델이 같은 데이터 순서.</div></div>
         <div class="note"><div class="cd" style="font-size:21px"><b>동작 2.</b> 3D 모델은 자동으로 <span class="nv">공정 입력</span>(Slice3DDataset).</div></div>
-        <div class="note"><div class="cd" style="font-size:21px"><b>동작 3.</b> 예산 도달 시 즉시 중단 → 모델별 epoch 수 상이(정상).</div></div>
-        <div class="note"><div class="cd" style="font-size:21px"><b>동작 4.</b> optimizer = 구조별 표준(합성곱 Adam · transformer AdamW+clip).</div></div>
+        <div class="note"><div class="cd" style="font-size:21px"><b>동작 3.</b> 예산 도달 시 즉시 중단 → 모델별 epoch(전체 데이터 1회 학습 단위) 수 상이(정상).</div></div>
+        <div class="note"><div class="cd" style="font-size:21px"><b>동작 4.</b> 최적화기(optimizer, 경사하강의 세부 방식) = 구조별 표준 설정 자동 적용.</div></div>
       </div>
     </div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>반환.</b> results[이름] = params · epochs · |Δφ| · SSIM · history(시간축 손실) · recon → 표·그림 전부 이 사전에서 생성.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>반환.</b> results[이름] = params · epochs · |Δφ| · SSIM · history(시간축 손실) · recon(복원 결과 이미지) → 표·그림 전부 이 사전에서 생성.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>41</b> / 47</span></div>
 </section>
@@ -938,7 +940,7 @@ G, D, hist = <span class="f">train_gan</span>(<br>
     <div class="figbox" style="max-width:1600px;padding:12px 16px"><img src="assets/figures/W4_mini_results.png" style="width:100%;max-height:600px;object-fit:contain" alt="원본·선형·3구조·우리방식(GAN) 복원 비교와 지표"></div>
     <div class="cap" style="max-width:1560px">Bentheimer 256³ · k=2 · CPU 90초/모델. <b>우리 방식(GAN) |Δφ| 0.37%p 최저</b>, 2D UNet SSIM 최고. GAN 은 픽셀 SSIM 을 조금 내주고 물성을 얻는다. (실행마다 변동)</div>
 
-    <div class="note"><div class="cd" style="font-size:20px"><b>순위의 이유.</b> Swin(transformer 계열) 최하위 = 약한 귀납 편향 → 90초·단일 도메인의 <b>데이터·시간 부족</b> + 스텝당 연산 과다(같은 90초에 epoch 절반). diffusion 은 반복 샘플링 비용 때문에 미니 실습에서 제외(대규모 표에서 비교, off-Pareto). GAN 은 픽셀 SSIM 일부를 내주고 <b>물성(|Δφ|) 보존</b>을 얻는 절충.</div></div>
+    <div class="note"><div class="cd" style="font-size:20px"><b>순위의 이유.</b> Swin(transformer 계열) 최하위 = 약한 귀납 편향 → 90초·단일 도메인(암석 한 종류)의 <b>데이터·시간 부족</b> + 스텝(가중치 1회 갱신)당 연산 과다(같은 90초에 epoch 절반). diffusion 은 반복 샘플링 비용 때문에 미니 실습에서 제외(대규모 표에서 비교, off-Pareto). GAN 은 픽셀 SSIM 일부를 내주고 <b>물성(|Δφ|) 보존</b>을 얻는 절충.</div></div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>43</b> / 47</span></div>
 </section>
@@ -952,8 +954,8 @@ G, D, hist = <span class="f">train_gan</span>(<br>
   <div class="body mid">
     <div class="figbox" style="max-width:1520px"><img src="assets/figures/W4_mini_curves.png" style="width:100%;max-height:580px;object-fit:contain" alt="경과 시간 축의 학습 곡선과 90초 소화 epoch 수"></div>
     <div class="row" style="gap:16px">
-      <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>점 간격 = epoch 비용.</b> 동일 90초 내 <span class="nv">82 vs 44 vs 15</span> epoch → 학습량의 결정 요인 = 구조.</div></div>
-      <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>3D 특징.</b> epoch 당 하강 폭 최대(부피 문맥 이득) · 단 <span class="hl">스텝 비용 과다</span> → 총 학습량 열세.</div></div>
+      <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>같은 90초의 학습량.</b> <span class="nv">82 vs 44 vs 15</span> epoch → 학습량의 결정 요인 = 구조(스텝 비용).</div></div>
+      <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>3D 특징.</b> epoch 당 하강 폭 최대(부피 문맥 이득) · 단 <span class="hl">스텝 비용 과다</span> → 총 학습량 열세. <b>GAN 곡선이 높은 이유</b> = L1 외 적대 손실을 함께 최적화하기 때문. L1 값만으로 품질 판단 불가(물성은 앞 장).</div></div>
       <div class="note" style="flex:1"><div class="cd" style="font-size:20px"><b>Try-it.</b> budget_s = 30·90·180 변경 → 느린 구조의 추격 여부 확인.</div></div>
     </div>
   </div>
@@ -973,7 +975,7 @@ G, D, hist = <span class="f">train_gan</span>(<br>
     </div>
     <div class="row">
       <div class="card plain" style="flex:1"><div class="lbl">과제 3 · 선택</div><div class="ct" style="font-size:24px">파라미터-성능 곡선</div><div class="cd" style="font-size:21px">구조별 base 변경 → "파라미터 vs 지표" 곡선 작성 · 동일 크기에서의 격차 유지 여부 확인.</div></div>
-      <div class="card" style="flex:1;border-left-color:var(--neg)"><div class="lbl" style="color:var(--neg)">과제 4 · 선택 · 심화</div><div class="ct" style="font-size:24px">정보 누출 실험</div><div class="cd" style="font-size:21px">Slice3DDataset 복사 후 t±1 포함 <b>누출 버전</b> 제작 → 지표 부풀림 측정 + 실력이 아닌 이유 설명.</div></div>
+      <div class="card" style="flex:1;border-left-color:var(--neg)"><div class="lbl" style="color:var(--neg)">과제 4 · 선택 · 심화</div><div class="ct" style="font-size:24px">정보 누출 실험</div><div class="cd" style="font-size:21px">Slice3DDataset 복사 후 정답의 바로 옆 슬라이스(t±1)까지 입력에 넣는 <b>누출 버전</b> 제작 → 지표 부풀림 측정 + 실력이 아닌 이유 설명.</div></div>
     </div>
 
     <div class="note"><div class="cd" style="font-size:20px"><b>관찰 포인트.</b> |Δφ|·SSIM + epoch 수(학습량) + 시간축 곡선 동시 기록 · 해석 축 = "구조의 귀납 편향 ↔ 데이터·예산" · 지표 확인 전 입력(누출) 점검.</div></div>
@@ -996,7 +998,7 @@ G, D, hist = <span class="f">train_gan</span>(<br>
     <div class="row">
       <div class="card" style="flex:1"><div class="lbl">diffusion</div><div class="cd" style="font-size:20px">노이즈로부터 반복 복원 · 이 문제·예산에서는 <b>off-Pareto</b>(비용 과다).</div></div>
       <div class="card" style="flex:1"><div class="lbl">공정 비교</div><div class="cd" style="font-size:20px">동일 데이터·입력·예산 · <b>파라미터 수 ≠ 성능</b> · 미니(구조 분리) vs 대규모(실전).</div></div>
-      <div class="card acc" style="flex:1"><div class="lbl a">우리 위치</div><div class="cd" style="font-size:20px"><b>우리 pix2pix 접근(MAPS) = 비교군 전체 상회.</b> 합성곱 뼈대 + GAN + 다축 융합.</div></div>
+      <div class="card acc" style="flex:1"><div class="lbl a">우리 위치</div><div class="cd" style="font-size:20px"><b>우리 pix2pix 접근(MAPS) = 비교군 전체 상회.</b> 합성곱 뼈대 + GAN (+ 다축 융합 · W5 상세).</div></div>
     </div>
   </div>
   <div class="foot"><span class="b">Digital Rock · W4</span><span class="pg"><b>46</b> / 47</span></div>
