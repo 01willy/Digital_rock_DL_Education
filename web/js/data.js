@@ -580,15 +580,15 @@ window.COURSE = {
   /* ── Week 4 · 다른 아키텍처 (Swin Transformer · 3D CNN) ─────────── */
   w4: {
     flow: [
-      { a:'맥락 + 합성곱 복습 · attention 원리', src:'슬라이드 1–19' },
-      { a:'3D CNN · diffusion · 공정 비교·결과', src:'슬라이드 20–33' },
+      { a:'맥락 + 합성곱 · attention 유도 (§1–§2)', src:'슬라이드 1–22' },
+      { a:'3D CNN · diffusion · 공정 비교·결과', src:'슬라이드 23–36' },
       { a:'노트북: attention 계산 · 두 모델 구축', src:'W4_architectures.ipynb §1–4' },
       { a:'공정 비교 + 우리 방식(GAN) + trade-off', src:'노트북 §5–7' },
       { a:'탐구 과제 안내 + W5 예고', src:'handout §5' },
     ],
     groups: {
       g1: {
-        slides:41, cells:27, tryits:5,
+        slides:44, cells:30, tryits:5,
         notebook:'W4_architectures.ipynb',
         tasks:[
           { t:'시간 예산과 순위', req:true,  d:'budget_s=30/90/180 으로 공정 비교를 반복하고, 예산에 따라 세 구조의 지표·순위가 어떻게 변하는지 표로 정리한다. 느린 구조(3D)가 예산 증가의 이득을 더 보는지 확인.' },
@@ -598,7 +598,7 @@ window.COURSE = {
         ],
       },
       g2: {
-        slides:41, cells:27, tryits:5,
+        slides:44, cells:30, tryits:5,
         notebook:'W4_architectures.ipynb',
         tasks:[
           { t:'시간 예산과 순위', req:true,  d:'budget_s=30/90/180 으로 공정 비교를 반복하고, 예산에 따라 세 구조의 지표·순위가 어떻게 변하는지 표로 정리한다. 느린 구조(3D)가 예산 증가의 이득을 더 보는지 확인.' },
